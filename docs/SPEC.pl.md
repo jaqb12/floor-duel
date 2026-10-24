@@ -26,7 +26,8 @@ Działa też na jednym ekranie (patrz 7.4 — ukrywanie odpowiedzi).
 - Użytkownik wskazuje **folder główny** (np. `D:\FloorDuel\Kategorie`).
 - **Każdy bezpośredni podfolder = kategoria.** Nazwa kategorii = nazwa podfolderu.
 - **Poziomy trudności** (dodane na prośbę użytkownika, 2026-10-24): podfolder, który nie ma bezpośrednio żadnego zdjęcia, ale ma podfoldery, to **poziom** (np. `Kategorie\Łatwe\Zwierzęta\`); jego podfoldery są kategoriami tego poziomu. Głębiej nie szukamy. Oba układy można mieszać — kategoria bez poziomu działa jak dotąd.
-  - Kolejność poziomów: łatwe → normalne/średnie → trudne → eksperckie (rozpoznawane po początku nazwy, bez względu na wielkość liter, po polsku lub angielsku: `łatw`/`easy`, `norm`/`medium`/`śred`, `trud`/`hard`, `eksp`/`exp`); inne nazwy poziomów na końcu, alfabetycznie. Kategorie bez poziomu na początku listy.
+  - Znane poziomy, w tej kolejności, rozpoznawane po początku nazwy folderu, bez względu na wielkość liter, po polsku lub angielsku: **łatwe** (`łatw`, `easy`), **normalne** (`norm`), **średnie** (`śred`, `medium`), **trudne** (`trud`, `hard`, `difficult`), **eksperckie** (`eksp`, `exp`). Inne nazwy poziomów na końcu, alfabetycznie. Kategorie bez poziomu na początku listy.
+  - Panel pokazuje znany poziom w języku interfejsu (folder `Łatwe` → „Easy” po angielsku, folder `Easy` → „Łatwe” po polsku); inne nazwy poziomów bez zmian. Poziom to treść, więc nie wpływa na tożsamość kategorii.
   - Nazwa kategorii to nazwa jej folderu (graczom nie pokazujemy poziomu). Gdy ta sama nazwa występuje w kilku miejscach, kategorie z poziomem dostają dopisek „Nazwa (Poziom)”.
   - Panel operatora pokazuje kategorie pogrupowane według poziomów (nagłówki na liście, grupy w listach wyboru).
 - **Zdjęcia = pliki bezpośrednio w folderze kategorii** (bez rekurencji). Obsługiwane rozszerzenia (bez względu na wielkość liter): `jpg, jpeg, png, webp, gif, bmp, avif, svg`.

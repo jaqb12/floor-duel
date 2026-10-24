@@ -108,9 +108,11 @@ Goal: confirm that the key APIs work when `app/index.html` is opened by double-c
 - [x] `logic.js` returns problems as `{ key, params }` instead of Polish sentences; `settings.language`; English level names (`easy`, `medium`, `hard`).
 - [x] Panel and players screen fully translated; language selector in the top bar, changes apply immediately in both windows.
 - [x] Tests: the same keys/placeholders/plural forms in every language, `t()`, `detectLanguage`, translations of logic problems.
-- [x] Samples: `samples/categories-en` (English names) and `samples/categories-pl` (Polish names, moved from `samples/Kategorie`).
+- [x] Samples: `samples/categories-en` (English names) and `samples/categories-pl` (Polish names, moved from `samples/Kategorie`), split into difficulty levels (`Easy` / `Hard`, `Łatwe` / `Trudne`).
+- [x] Known difficulty levels shown in the UI language (`levelId` in `logic.js`, `levels.*` in `i18n.js`); `.gitignore` also covers `/Categories/`.
 - [x] Documentation in English (`README.md`, `docs/*.md`, `CLAUDE.md`); Polish copies next to it (`*.pl.md`).
 - [ ] Manual: switch the language during a duel → the panel and the TV change texts; F5 → the language is remembered.
+- [ ] Manual: `samples/categories-en` and `samples/categories-pl` → categories grouped under Easy/Hard (Łatwe/Trudne); after a language switch the level headers change language.
 
 ---
 
@@ -180,3 +182,6 @@ Goal: confirm that the key APIs work when `app/index.html` is opened by double-c
 | 2026-10-24 | The language selector sits in the top bar, language names in their own language (“English”, “Polski”) | Easy to find for someone who doesn't know the current language |
 | 2026-10-24 | English documentation is the source of truth, Polish copies `*.pl.md` are translations | Public repository on GitHub; the user wanted to keep the Polish documentation |
 | 2026-10-24 | Samples: `samples/categories-en` and `samples/categories-pl` (the same images, names in two languages) | The images have no text, so only file names differ; Polish samples still test diacritics |
+| 2026-10-24 | Known difficulty levels (easy, normal, medium, hard, expert) are recognized in English and Polish and shown in the UI language; unknown level names are shown as they are | The user's level folders are Polish (`Łatwe`, `Trudne`); this keeps them working in the English UI without renaming folders. Categories and answers stay untranslated (content) |
+| 2026-10-24 | “Normal” and “Medium” are separate levels (normal before medium) | `Normalne` and `Średnie` are different words; showing both as one label would rename the user's folder |
+| 2026-10-24 | The duplicate-name suffix uses the level folder name (“Flags (Hard)”), not the translated label | The category name identifies the player's category in storage, so it must not change with the language |

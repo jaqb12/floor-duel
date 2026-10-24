@@ -138,6 +138,12 @@
       'categories.heic': '⚠ {n}× HEIC — convert to JPG',
       'categories.skipped': 'other files skipped: {n}',
 
+      'levels.easy': 'Easy',
+      'levels.normal': 'Normal',
+      'levels.medium': 'Medium',
+      'levels.hard': 'Hard',
+      'levels.expert': 'Expert',
+
       'folder.finishDuelFirst': 'Finish or cancel the duel first.',
       'folder.notFound': 'The folder doesn’t exist — was it moved or deleted? Choose it again.',
       'folder.notAllowed': 'No permission to read the folder.',
@@ -293,6 +299,12 @@
       'categories.low': '⚠ mniej niż {min} — zdjęcia mogą się powtarzać',
       'categories.heic': '⚠ {n}× HEIC — przekonwertuj na JPG',
       'categories.skipped': 'pominięte inne pliki: {n}',
+
+      'levels.easy': 'Łatwe',
+      'levels.normal': 'Normalne',
+      'levels.medium': 'Średnie',
+      'levels.hard': 'Trudne',
+      'levels.expert': 'Eksperckie',
 
       'folder.finishDuelFirst': 'Najpierw zakończ albo unieważnij pojedynek.',
       'folder.notFound': 'Folder nie istnieje — został przeniesiony lub usunięty? Wybierz go ponownie.',

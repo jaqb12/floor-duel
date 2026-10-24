@@ -108,9 +108,11 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 - [x] `logic.js` zwraca problemy jako `{ key, params }` zamiast polskich zdań; `settings.language`; angielskie nazwy poziomów (`easy`, `medium`, `hard`).
 - [x] Panel i ekran graczy w pełni przetłumaczone; wybór języka na górnym pasku, zmiana działa od razu w obu oknach.
 - [x] Testy: te same klucze/placeholdery/formy liczby mnogiej w każdym języku, `t()`, `detectLanguage`, tłumaczenia problemów z logiki.
-- [x] Próbki: `samples/categories-en` (angielskie nazwy) i `samples/categories-pl` (polskie, przeniesione z `samples/Kategorie`).
+- [x] Próbki: `samples/categories-en` (angielskie nazwy) i `samples/categories-pl` (polskie, przeniesione z `samples/Kategorie`), podzielone na poziomy trudności (`Easy` / `Hard`, `Łatwe` / `Trudne`).
+- [x] Znane poziomy trudności pokazywane w języku interfejsu (`levelId` w `logic.js`, `levels.*` w `i18n.js`); `.gitignore` obejmuje też `/Categories/`.
 - [x] Dokumentacja po angielsku (`README.md`, `docs/*.md`, `CLAUDE.md`); polskie kopie obok (`*.pl.md`).
 - [ ] Ręcznie: zmiana języka w trakcie pojedynku → panel i TV zmieniają teksty; F5 → język zapamiętany.
+- [ ] Ręcznie: `samples/categories-pl` i `samples/categories-en` → kategorie pogrupowane w Łatwe/Trudne (Easy/Hard); po zmianie języka nagłówki poziomów zmieniają język.
 
 ---
 
@@ -180,3 +182,6 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Wybór języka na górnym pasku, nazwy języków w ich własnym języku („English”, „Polski”) | Łatwo znaleźć komuś, kto nie zna bieżącego języka |
 | 2026-10-24 | Dokumentacja angielska jest źródłem prawdy, polskie kopie `*.pl.md` są tłumaczeniem | Publiczne repozytorium na GitHubie; użytkownik chciał zachować polską dokumentację |
 | 2026-10-24 | Próbki: `samples/categories-en` i `samples/categories-pl` (te same obrazki, nazwy w dwóch językach) | Obrazki nie mają tekstu, różnią się tylko nazwy plików; polskie próbki dalej testują znaki diakrytyczne |
+| 2026-10-24 | Znane poziomy trudności (łatwe, normalne, średnie, trudne, eksperckie) rozpoznawane po polsku i angielsku i pokazywane w języku interfejsu; nieznane nazwy poziomów bez zmian | Foldery poziomów użytkownika są po polsku (`Łatwe`, `Trudne`); działają w angielskim interfejsie bez zmiany nazw folderów. Kategorie i odpowiedzi nie są tłumaczone (treść) |
+| 2026-10-24 | „Normalne” i „Średnie” to osobne poziomy (normalne przed średnimi) | To różne słowa; wspólna etykieta zmieniałaby nazwę folderu użytkownika |
+| 2026-10-24 | Dopisek przy powtórzonej nazwie używa nazwy folderu poziomu („Flagi (Trudne)”), nie przetłumaczonej etykiety | Nazwa kategorii identyfikuje kategorię gracza w pamięci, więc nie może zmieniać się z językiem |

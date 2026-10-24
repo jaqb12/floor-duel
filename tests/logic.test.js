@@ -140,6 +140,19 @@
     eq(r.map(c => c.level), ['ŁATWE', 'Normalne', 'Średnie', 'trudny', 'Eksperckie', 'Expert', 'Bonus', 'Własne']);
   });
 
+  test('levelId: known levels in English or Polish, other names null', () => {
+    eq(['Łatwe', 'easy', 'Normalne', 'Średnie', 'Medium', 'TRUDNY', 'Hard', 'Difficult', 'Eksperckie', 'Expert', 'Bonus', null]
+      .map(L.levelId), ['easy', 'easy', 'normal', 'medium', 'medium', 'hard', 'hard', 'hard', 'expert', 'expert', null, null]);
+    const r = L.resolveCategories([folder('Flagi', ['a.jpg']), folder('Trudne', [], [folder('Samoloty', ['b.jpg'])])]);
+    eq(r.map(c => c.levelId), [null, 'hard']);
+  });
+
+  test('i18n: every known level has a label', () => {
+    for (const id of ['easy', 'normal', 'medium', 'hard', 'expert']) {
+      for (const lang of Object.keys(I.MESSAGES)) ok(I.MESSAGES[lang]['levels.' + id], lang + ' ' + id);
+    }
+  });
+
   test('resolveCategories: English level names are ordered too', () => {
     const levels = ['Expert', 'hard', 'Medium', 'Easy'];
     const r = L.resolveCategories(levels.map(l => folder(l, [], [folder('K ' + l, ['a.jpg'])])));

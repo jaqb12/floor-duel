@@ -2,7 +2,7 @@
 // level whose subfolders are categories. Images are the files directly inside a category.
 //
 // Library = { rootName, source: 'handle' | 'files', categories: [Category] }
-// Category = { name, level, heic, skipped, images: [{ key, fileName, answer, getFile() }] }
+// Category = { name, level, levelId, heic, skipped, images: [{ key, fileName, answer, getFile() }] }
 (function () {
   'use strict';
   window.Floor = window.Floor || {};
@@ -12,11 +12,12 @@
 
   // `folders` as for L.resolveCategories; getFile(folder, fileName) -> Promise<File>.
   function makeCategories(folders, getFile) {
-    return L.resolveCategories(folders).map(({ name, level, fileNames, folder }) => {
+    return L.resolveCategories(folders).map(({ name, level, levelId, fileNames, folder }) => {
       const { images, heic, skipped } = L.classifyFiles(fileNames);
       return {
         name,
         level,
+        levelId,
         heic,
         skipped,
         images: images.map(fileName => ({

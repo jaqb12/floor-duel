@@ -73,9 +73,9 @@ Categories\
   Flags\          ← a category without a level works too
 ```
 
-A folder with no photos but with subfolders is a level. Levels are ordered easy → normal/medium → hard → expert (Polish names work too; other names go last). If the same category name appears in two levels, the panel adds the level in brackets, e.g. “Flags (Hard)”.
+A folder with no photos but with subfolders is a level. Name level folders in English or Polish — **Easy / Łatwe, Normal / Normalne, Medium / Średnie, Hard / Trudne, Expert / Eksperckie** (only the start of the name counts, case doesn't matter). The panel orders them from easy to expert and shows them in the panel's language, whatever the folder is called. Other level names also work: they are shown as they are and go last. If the same category name appears in two levels, the panel adds the level folder in brackets, e.g. “Flags (Hard)”.
 
-Sample categories for trying the app: `samples/categories-en` (English names) and `samples/categories-pl` (Polish names).
+Sample categories for trying the app, already split into levels: `samples/categories-en` (`Easy\Colors`, `Easy\Fruits`, `Hard\Shapes`) and `samples/categories-pl` (the same with Polish names).
 
 ## 2. Start
 

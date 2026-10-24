@@ -53,9 +53,9 @@ Kategorie\
   Flagi\          ← kategoria bez poziomu też działa
 ```
 
-Folder bez zdjęć, za to z podfolderami, to poziom. Poziomy układają się w kolejności: łatwe → normalne/średnie → trudne → eksperckie (działają też nazwy angielskie: Easy, Medium, Hard, Expert; inne nazwy na końcu). Jeśli ta sama nazwa kategorii jest w dwóch poziomach, panel dopisze poziom w nawiasie, np. „Flagi (Trudne)”.
+Folder bez zdjęć, za to z podfolderami, to poziom. Foldery poziomów nazwij po polsku albo po angielsku — **Łatwe / Easy, Normalne / Normal, Średnie / Medium, Trudne / Hard, Eksperckie / Expert** (liczy się początek nazwy, wielkość liter bez znaczenia). Panel układa je od łatwych do eksperckich i pokazuje w języku panelu, niezależnie od nazwy folderu. Inne nazwy poziomów też działają: są pokazywane bez zmian i trafiają na koniec. Jeśli ta sama nazwa kategorii jest w dwóch poziomach, panel dopisze nazwę folderu poziomu w nawiasie, np. „Flagi (Trudne)”.
 
-Do wypróbowania aplikacji są gotowe przykładowe kategorie: `samples\categories-pl` (polskie nazwy) i `samples\categories-en` (angielskie).
+Do wypróbowania aplikacji są gotowe przykładowe kategorie, już podzielone na poziomy: `samples\categories-pl` (`Łatwe\Kolory`, `Łatwe\Owoce`, `Trudne\Kształty`) i `samples\categories-en` (to samo z angielskimi nazwami).
 
 ## 2. Uruchom
 

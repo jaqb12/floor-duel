@@ -26,7 +26,8 @@ Works on a single screen too (see 7.4 — hiding the answer).
 - The user points to a **main folder** (e.g. `D:\FloorDuel\Categories`).
 - **Each direct subfolder = a category.** Category name = subfolder name.
 - **Difficulty levels** (added at the user's request, 2026-10-24): a subfolder with no photos directly inside but with subfolders is a **level** (e.g. `Categories\Easy\Animals\`); its subfolders are that level's categories. We don't look deeper. Both layouts can be mixed — a category without a level works as before.
-  - Level order: easy → normal/medium → hard → expert (recognized by the start of the name, case-insensitive, English or Polish: `easy`/`łatw`, `norm`/`medium`/`śred`, `hard`/`trud`, `exp`/`eksp`); other level names last, alphabetically. Categories without a level come first.
+  - Known levels, in this order, recognized by the start of the folder name, case-insensitive, English or Polish: **easy** (`easy`, `łatw`), **normal** (`norm`), **medium** (`medium`, `śred`), **hard** (`hard`, `difficult`, `trud`), **expert** (`exp`, `eksp`). Other level names last, alphabetically. Categories without a level come first.
+  - The panel shows a known level in the UI language (folder `Łatwe` → “Easy” in English, folder `Easy` → “Łatwe” in Polish); other level names are shown as they are. The level is part of the content, so it never affects category identity.
   - The category name is its folder's name (players don't see the level). When the same name occurs in several places, categories with a level get the suffix “Name (Level)”.
   - The operator panel shows categories grouped by level (headers in the list, groups in the selects).
 - **Photos = files directly in the category folder** (no recursion). Supported extensions (case-insensitive): `jpg, jpeg, png, webp, gif, bmp, avif, svg`.

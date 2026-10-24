@@ -50,6 +50,11 @@
     return li;
   }
 
+  // Known levels in the operator's language ("Łatwe" -> "Easy"), other folder names as they are.
+  function levelLabel(cat) {
+    return cat.levelId ? t('levels.' + cat.levelId) : cat.level;
+  }
+
   function applyCategoryFilter() {
     const query = $('category-filter').value.trim().toLocaleLowerCase('pl');
     for (const li of $('category-list').children) li.hidden = !!query && !li.dataset.name.includes(query);
@@ -87,7 +92,8 @@
       if (cat.level !== level) {
         level = cat.level;
         // Empty data-name: level headers are hidden while filtering.
-        const header = el('li', 'category-level', level);
+        const header = el('li', 'category-level', levelLabel(cat));
+        header.title = level;
         header.dataset.name = '';
         list.append(header);
       }
@@ -99,12 +105,14 @@
   // Appends options to a <select>, grouped by difficulty level (categories come sorted by level).
   function appendCategoryOptions(select, categories, label) {
     let parent = select;
+    let level = null;
     for (const cat of categories) {
-      if (cat.level && (parent === select || parent.label !== cat.level)) {
+      if (cat.level && cat.level !== level) {
         parent = el('optgroup');
-        parent.label = cat.level;
+        parent.label = levelLabel(cat);
         select.append(parent);
       }
+      level = cat.level;
       parent.append(new Option(label(cat), cat.name));
     }
   }

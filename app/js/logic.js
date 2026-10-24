@@ -96,19 +96,37 @@
     return { rootName, folders: Array.from(folders.values(), plain) };
   }
 
-  // Difficulty folders sort by these name stems ("Easy", "Łatwe", ...); other names go last.
-  const LEVEL_STEMS = [['easy', 'łatw'], ['norm', 'medium', 'śred'], ['hard', 'trud'], ['exp', 'eksp']];
+  // Known difficulty levels, in order. A level folder is recognized by the start of its name
+  // in English or Polish ("Easy", "Łatwe", "trudny", ...), so the panel can show it in the
+  // operator's language. Other names keep their folder name and go last.
+  const LEVELS = [
+    { id: 'easy', stems: ['easy', 'łatw'] },
+    { id: 'normal', stems: ['norm'] },
+    { id: 'medium', stems: ['medium', 'śred'] },
+    { id: 'hard', stems: ['hard', 'difficult', 'trud'] },
+    { id: 'expert', stems: ['exp', 'eksp'] },
+  ];
+
+  function levelIndex(level) {
+    const name = level.normalize('NFC').toLowerCase();
+    return LEVELS.findIndex(l => l.stems.some(stem => name.startsWith(stem)));
+  }
+
+  // 'easy' | 'normal' | 'medium' | 'hard' | 'expert' | null (unknown name or no level).
+  function levelId(level) {
+    const i = level ? levelIndex(level) : -1;
+    return i < 0 ? null : LEVELS[i].id;
+  }
 
   function levelRank(level) {
-    const name = level.normalize('NFC').toLowerCase();
-    const rank = LEVEL_STEMS.findIndex(stems => stems.some(stem => name.startsWith(stem)));
-    return rank < 0 ? LEVEL_STEMS.length : rank;
+    const i = levelIndex(level);
+    return i < 0 ? LEVELS.length : i;
   }
 
   // Folders of the categories root -> categories (SPEC §3). A folder with images directly
   // inside, or without subfolders, is a category. Otherwise it is a difficulty level and its
   // subfolders are categories. A category name repeated across levels gets " (Level)".
-  // Input as from groupRelativePaths. Returns [{ name, level, fileNames, folder }], where
+  // Input as from groupRelativePaths. Returns [{ name, level, levelId, fileNames, folder }], where
   // `folder` is the input object the files came from, sorted: no level first, then by level.
   function resolveCategories(folders) {
     const list = [];
@@ -116,9 +134,10 @@
       if (!isCategoryFolder(top.name)) continue;
       const subs = (top.subfolders || []).filter(s => isCategoryFolder(s.name));
       if (top.fileNames.some(isSupportedImage) || !subs.length) {
-        list.push({ name: top.name, level: null, fileNames: top.fileNames, folder: top });
+        list.push({ name: top.name, level: null, levelId: null, fileNames: top.fileNames, folder: top });
       } else {
-        for (const sub of subs) list.push({ name: sub.name, level: top.name, fileNames: sub.fileNames, folder: sub });
+        const id = levelId(top.name);
+        for (const sub of subs) list.push({ name: sub.name, level: top.name, levelId: id, fileNames: sub.fileNames, folder: sub });
       }
     }
     const seen = new Map();
@@ -526,6 +545,7 @@
     isCategoryFolder,
     classifyFiles,
     groupRelativePaths,
+    levelId,
     resolveCategories,
     shuffle,
     rankPlayers,
