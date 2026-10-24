@@ -23,17 +23,17 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 ---
 
 ## Faza 1 — Rdzeń logiki + testy (bez UI)
-- [ ] `logic.js`: `normalizeAnswer(filename)`, `isSupportedImage(name)`, `isHeic(name)`, `shuffle(arr, rng)` (Fisher–Yates, wstrzykiwany RNG), `rankPlayers(players)`.
-- [ ] `logic.js`: pojedynek wg SPEC §5 — `createDuel`, `start`, `markCorrect`, `markPass`, `togglePause`, `tick`, `getClock`, `nextImage` (talia z ponownym tasowaniem bez natychmiastowej powtórki). Wszystkie metody przyjmują `now`.
-- [ ] Mini-runner testów (`tests/logic.test.js`) + `tests/tests.html` + `tests/run-node.js`.
-- [ ] Testy co najmniej:
-  - [ ] normalizacja nazw (przykłady z SPEC §3 + puste/dziwne nazwy),
-  - [ ] zegar: czas biegnie tylko aktywnemu; po `markCorrect` tura przechodzi, czas zamrożony poprawnie,
-  - [ ] pas: odsłona trwa 3 s, zegar w tym czasie leci, Spacja/P ignorowane, po odsłonie ta sama osoba,
-  - [ ] timeout w trakcie `running` i w trakcie `reveal` → `finished` z poprawnym zwycięzcą,
-  - [ ] pauza zatrzymuje zegar i odsłonę, wznowienie kontynuuje,
-  - [ ] talia: brak powtórek do wyczerpania; po przetasowaniu pierwsze ≠ ostatnie,
-  - [ ] ranking: wygrane ↓, porażki ↑, imię.
+- [x] `logic.js`: `normalizeAnswer(filename)`, `isSupportedImage(name)`, `isHeic(name)`, `shuffle(arr, rng)` (Fisher–Yates, wstrzykiwany RNG), `rankPlayers(players)`.
+- [x] `logic.js`: pojedynek wg SPEC §5 — `createDuel`, `start`, `markCorrect`, `markPass`, `togglePause`, `tick`, `getClock`, `nextImage` (talia z ponownym tasowaniem bez natychmiastowej powtórki). Wszystkie metody przyjmują `now`.
+- [x] Mini-runner testów (`tests/logic.test.js`) + `tests/tests.html` + `tests/run-node.js`.
+- [x] Testy co najmniej:
+  - [x] normalizacja nazw (przykłady z SPEC §3 + puste/dziwne nazwy),
+  - [x] zegar: czas biegnie tylko aktywnemu; po `markCorrect` tura przechodzi, czas zamrożony poprawnie,
+  - [x] pas: odsłona trwa 3 s, zegar w tym czasie leci, Spacja/P ignorowane, po odsłonie ta sama osoba,
+  - [x] timeout w trakcie `running` i w trakcie `reveal` → `finished` z poprawnym zwycięzcą,
+  - [x] pauza zatrzymuje zegar i odsłonę, wznowienie kontynuuje,
+  - [x] talia: brak powtórek do wyczerpania; po przetasowaniu pierwsze ≠ ostatnie,
+  - [x] ranking: wygrane ↓, porażki ↑, imię.
 
 **Odbiór:** wszystkie testy zielone w Node (jeśli jest) i w `tests/tests.html`.
 
@@ -116,3 +116,9 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | `.gitignore`: `Kategorie/` → `/Kategorie/` | Wzorzec bez `/` ignorował też `samples/Kategorie/`, które mają być commitowane |
 | 2026-10-24 | Po F5 operatora okna graczy nie odzyskujemy — tylko komunikat „Zamknij okno graczy i otwórz je ponownie” (SPEC §7.3) | Spike, Edge 155: nowy origin `"null"` przy każdym załadowaniu → `SecurityError`; nawigacja do `about:blank` też nie przywraca dostępu |
 | 2026-10-24 | Ostrzeżenie `beforeunload` przy otwartym oknie graczy / trwającym pojedynku; „Otwórz ekran graczy” zamyka stare, niedostępne okno | Zamiast odzyskiwania okna po F5 — zapobieganie przypadkowemu F5 (decyzja użytkownika) |
+| 2026-10-24 | Akcje pojedynku (`start`, `markCorrect`, `markPass`, `togglePause`, `tick`) zwracają tablicę zdarzeń; pusta = zignorowane. Każda akcja najpierw wywołuje `tick(now)` | Spóźniona Spacja po upływie czasu kończy pojedynek zamiast zaliczać odpowiedź |
+| 2026-10-24 | `lowTime` = raz na każdą pełną sekundę (5,4,3,2,1) aktywnego gracza | Pod „tyk” z SPEC §8 |
+| 2026-10-24 | Odsłona kończąca się dokładnie w chwili końca czasu = przegrana na czas | Jednoznaczna kolejność zdarzeń |
+| 2026-10-24 | Stan `setup` żyje w UI; `createDuel` zwraca pojedynek w stanie `ready` | Wybór graczy/kategorii to formularz, nie logika |
+| 2026-10-24 | Nazwa, która po normalizacji byłaby pusta (np. `(2).jpg`), zostaje jako nazwa bez rozszerzenia | Operator zawsze widzi jakąś odpowiedź |
+| 2026-10-24 | Dodane `applyResult(players, duel)` i `clockSeconds(ms)` w `logic.js` | Zatwierdzanie wyniku i zaokrąglanie zegara testowalne bez DOM |

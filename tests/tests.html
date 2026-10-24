@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>The Floor — testy logiki</title>
+  <style>
+    body { font-family: "Segoe UI", system-ui, sans-serif; margin: 24px auto; padding: 0 16px; max-width: 900px; background: #16181d; color: #e8e8e8; }
+    #summary { font-size: 22px; font-weight: 700; }
+    .ok { color: #4ade80; }
+    .fail { color: #f87171; }
+    li { margin: 4px 0; }
+    .err { color: #fca5a5; font-family: Consolas, monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Testy logiki</h1>
+  <p id="summary">Uruchamianie…</p>
+  <ul id="list"></ul>
+
+  <script src="../app/js/logic.js"></script>
+  <script src="logic.test.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const { results, passed, failed } = FloorTests.run();
+      const summary = document.getElementById('summary');
+      summary.textContent = passed + ' zaliczonych, ' + failed + ' niezaliczonych';
+      summary.className = failed ? 'fail' : 'ok';
+      const list = document.getElementById('list');
+      for (const r of results) {
+        const li = document.createElement('li');
+        li.className = r.ok ? 'ok' : 'fail';
+        li.textContent = (r.ok ? '✓ ' : '✗ ') + r.name;
+        if (!r.ok) {
+          const err = document.createElement('div');
+          err.className = 'err';
+          err.textContent = r.error;
+          li.append(err);
+        }
+        list.append(li);
+      }
+    })();
+  </script>
+</body>
+</html>
