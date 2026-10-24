@@ -102,7 +102,7 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 - Po **START** jest odliczanie **3, 2, 1** (piknięcia i duże cyfry na TV) — zegar rusza po sygnale.
 - **Muzyka napięcia** włącza się sama, gdy na tablicy pierwszy raz pojawi się **12 sekund**, i narasta, im mniej czasu ma odpowiadający gracz. Przycisk 💓 Napięcie to osobny, krótki efekt na żądanie.
 - **Efekty dźwiękowe**: 🥁 Werble, 🎺 Fanfara, 👏 Brawa, 💓 Napięcie, 🔔 Gong, 😬 Pudło — do użycia w dowolnej chwili.
-- Głośność ustawisz suwakiem w **Ustawieniach**; wyłączenie opcji **Dźwięk** wycisza wszystko.
+- Głośność i przełącznik **Dźwięk** (wycisza wszystko) są na górnym pasku panelu.
 
 ## 6. Zasady w skrócie
 

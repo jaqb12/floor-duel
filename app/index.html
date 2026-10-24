@@ -61,54 +61,80 @@
 </head>
 <body>
   <header class="top">
-    <h1>The Floor</h1>
-    <span class="subtitle">panel operatora</span>
+    <div class="brand">
+      <h1>The Floor</h1>
+      <span class="subtitle">panel operatora</span>
+    </div>
+
+    <div class="top-group" aria-label="Ekran graczy">
+      <span id="display-pill" class="pill" data-status="closed"><span class="dot"></span><span id="display-pill-text">Ekran graczy: zamknięty</span></span>
+      <button type="button" id="open-display" class="primary">Otwórz ekran graczy</button>
+      <button type="button" id="big-open" title="Tryb jednego ekranu: ekran graczy na całym panelu">Duży podgląd</button>
+    </div>
+
+    <div class="top-group" aria-label="Dźwięk">
+      <label class="toggle" title="Włącz / wyłącz wszystkie dźwięki"><input type="checkbox" id="set-sound"><span>🔊 Dźwięk</span></label>
+      <input type="range" id="set-volume" step="5" aria-label="Głośność" title="Głośność">
+    </div>
+
+    <button type="button" id="settings-open" class="icon-button" title="Ustawienia">⚙ Ustawienia</button>
   </header>
-  <p id="app-message" class="message"></p>
+  <p id="app-message" class="message banner"></p>
+  <p id="display-status" class="message banner"></p>
 
   <main class="columns">
-    <section class="col" id="col-players">
-      <h2>Gracze</h2>
+    <section class="col card" id="col-players">
+      <div class="card-head">
+        <h2>Gracze</h2>
+        <span id="players-count" class="badge"></span>
+      </div>
       <form id="player-form" class="player-form" autocomplete="off">
         <div class="row">
           <input type="text" id="player-name" placeholder="Imię gracza" aria-label="Imię gracza">
           <input type="color" id="player-color" title="Kolor gracza" aria-label="Kolor gracza">
         </div>
-        <select id="player-category" aria-label="Kategoria gracza"></select>
-        <div class="buttons">
-          <button type="submit" id="player-submit">Dodaj gracza</button>
+        <div class="row">
+          <select id="player-category" aria-label="Kategoria gracza"></select>
+          <button type="submit" id="player-submit" class="primary">Dodaj gracza</button>
           <button type="button" id="player-cancel" hidden>Anuluj</button>
         </div>
         <p id="player-message" class="message"></p>
       </form>
-      <ol id="player-list" class="player-list"></ol>
-      <p id="players-empty" class="placeholder">Brak graczy — dodaj pierwszego.</p>
-      <button type="button" id="reset-scores" class="danger" hidden>Wyzeruj wyniki</button>
+      <div class="scroll">
+        <ol id="player-list" class="player-list"></ol>
+        <p id="players-empty" class="placeholder">Brak graczy — dodaj pierwszego.</p>
+      </div>
+      <button type="button" id="reset-scores" class="danger subtle" hidden>Wyzeruj wyniki</button>
     </section>
 
-    <section class="col" id="col-duel">
-      <h2>Pojedynek</h2>
+    <section class="col card" id="col-duel">
+      <div class="card-head">
+        <h2>Pojedynek</h2>
+      </div>
 
       <form id="duel-setup" class="duel-setup" autocomplete="off">
-        <label>Wyzywający
-          <span class="inline">
-            <select id="duel-challenger"></select>
-            <button type="button" id="duel-random" title="Losuj wyzywającego">🎲 Losuj</button>
-          </span>
-        </label>
-        <label>Rywal <select id="duel-opponent"></select></label>
+        <div class="versus">
+          <label>Wyzywający
+            <span class="inline">
+              <select id="duel-challenger"></select>
+              <button type="button" id="duel-random" title="Losuj wyzywającego">🎲</button>
+            </span>
+          </label>
+          <span class="vs">VS</span>
+          <label>Rywal <select id="duel-opponent"></select></label>
+        </div>
         <label>Kategoria <select id="duel-category"></select></label>
         <fieldset class="starts">
           <legend>Zaczyna odpowiadać</legend>
           <label class="check"><input type="radio" name="duel-first" value="challenger" checked> wyzywający</label>
           <label class="check"><input type="radio" name="duel-first" value="opponent"> rywal</label>
         </fieldset>
-        <div class="buttons">
-          <button type="submit" id="duel-start" class="primary" disabled>START (Enter)</button>
-          <button type="button" id="duel-clear">Wyczyść</button>
-          <button type="button" class="music-toggle" title="Muzyka na przygotowanie — wycisza się sama po START">🎵 Muzyka</button>
-        </div>
         <p id="duel-problem" class="message"></p>
+        <div class="buttons start-row">
+          <button type="submit" id="duel-start" class="primary big" disabled>START <kbd>Enter</kbd></button>
+          <button type="button" class="music-toggle" title="Muzyka na przygotowanie — wycisza się sama po START">🎵 Muzyka</button>
+          <button type="button" id="duel-clear" class="subtle">Wyczyść</button>
+        </div>
       </form>
 
       <div id="duel-live" class="duel-live" hidden>
@@ -118,7 +144,7 @@
         </div>
         <div class="preview"><img id="live-photo" alt=""></div>
         <div id="live-answer" class="live-answer"></div>
-        <p id="live-hint" class="note"></p>
+        <p id="live-hint" class="note live-hint"></p>
         <div class="clocks">
           <div id="live-left" class="clock-box"><span class="c-name"></span><span class="c-time"></span><span class="c-stats note"></span></div>
           <div id="live-right" class="clock-box"><span class="c-name"></span><span class="c-time"></span><span class="c-stats note"></span></div>
@@ -134,49 +160,64 @@
             <button type="button" id="live-confirm" class="primary">Zatwierdź wynik</button>
           </div>
         </div>
-        <button type="button" id="live-cancel" class="danger">Unieważnij pojedynek</button>
+        <button type="button" id="live-cancel" class="danger subtle">Unieważnij pojedynek</button>
       </div>
+
+      <dl class="shortcuts" aria-label="Skróty klawiszowe">
+        <div><dt><kbd>Enter</kbd></dt><dd>START</dd></div>
+        <div><dt><kbd>Spacja</kbd></dt><dd>dobrze</dd></div>
+        <div><dt><kbd>P</kbd></dt><dd>pas</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>pauza</dd></div>
+        <div><dt><kbd>H</kbd></dt><dd>pokaż odpowiedź (przytrzymaj)</dd></div>
+      </dl>
     </section>
 
-    <section class="col" id="col-categories">
-      <h2>Kategorie</h2>
-      <div class="buttons">
-        <button type="button" id="pick-folder">Wybierz folder…</button>
-        <button type="button" id="restore-folder" hidden>Wczytaj ostatni folder</button>
-      </div>
-      <p id="folder-name" class="folder-name"></p>
-      <p id="folder-message" class="message"></p>
-      <ul id="category-list" class="category-list"></ul>
+    <div class="col side">
+      <section class="card" id="col-sounds">
+        <div class="card-head">
+          <h2>Efekty dźwiękowe</h2>
+        </div>
+        <div class="soundboard">
+          <button type="button" class="music-toggle wide">🎵 Muzyka</button>
+          <button type="button" data-sound="drumroll">🥁 Werble</button>
+          <button type="button" data-sound="fanfare">🎺 Fanfara</button>
+          <button type="button" data-sound="applause">👏 Brawa</button>
+          <button type="button" data-sound="suspense">💓 Napięcie</button>
+          <button type="button" data-sound="gong">🔔 Gong</button>
+          <button type="button" data-sound="wrong">😬 Pudło</button>
+        </div>
+        <p id="sound-note" class="message"></p>
+      </section>
 
-      <h2 class="section-gap">Ekran graczy</h2>
-      <div class="buttons">
-        <button type="button" id="open-display">Otwórz ekran graczy</button>
-        <button type="button" id="big-open" title="Tryb jednego ekranu: ekran graczy na całym panelu">Duży podgląd</button>
-      </div>
-      <p id="display-status" class="message"></p>
-
-      <h2 class="section-gap">Efekty dźwiękowe</h2>
-      <div class="soundboard">
-        <button type="button" class="music-toggle wide">🎵 Muzyka</button>
-        <button type="button" data-sound="drumroll">🥁 Werble</button>
-        <button type="button" data-sound="fanfare">🎺 Fanfara</button>
-        <button type="button" data-sound="applause">👏 Brawa</button>
-        <button type="button" data-sound="suspense">💓 Napięcie</button>
-        <button type="button" data-sound="gong">🔔 Gong</button>
-        <button type="button" data-sound="wrong">😬 Pudło</button>
-      </div>
-      <p id="sound-note" class="message"></p>
-
-      <h2 class="section-gap">Ustawienia</h2>
-      <form id="settings-form" class="settings">
-        <label>Czas pojedynku (s) <input type="number" id="set-duel" step="1"></label>
-        <label>Kara za pas (s) <input type="number" id="set-pass" step="1"></label>
-        <label class="check"><input type="checkbox" id="set-sound"> Dźwięk</label>
-        <label>Głośność <input type="range" id="set-volume" step="5"></label>
-        <label class="check"><input type="checkbox" id="set-hide"> Ukrywaj odpowiedź (tryb jednego ekranu)</label>
-      </form>
-    </section>
+      <section class="card grow" id="col-categories">
+        <div class="card-head">
+          <h2>Kategorie</h2>
+          <span id="categories-count" class="badge"></span>
+        </div>
+        <p id="folder-name" class="folder-name"></p>
+        <div class="buttons">
+          <button type="button" id="restore-folder" hidden>Wczytaj ostatni folder</button>
+          <button type="button" id="pick-folder">Wybierz folder…</button>
+        </div>
+        <p id="folder-message" class="message"></p>
+        <input type="search" id="category-filter" class="filter" placeholder="Szukaj kategorii…" aria-label="Szukaj kategorii" hidden>
+        <ul id="category-list" class="category-list scroll"></ul>
+      </section>
+    </div>
   </main>
+
+  <dialog id="settings-dialog" class="settings-dialog">
+    <form id="settings-form" class="settings" method="dialog">
+      <h2>Ustawienia</h2>
+      <label>Czas pojedynku na gracza (s) <input type="number" id="set-duel" step="1"></label>
+      <label>Kara za pas (s) <input type="number" id="set-pass" step="1"></label>
+      <label class="check"><input type="checkbox" id="set-hide"> Ukrywaj odpowiedź (tryb jednego ekranu — podgląd: przytrzymaj H)</label>
+      <p class="note">Zmiany zapisują się od razu i obowiązują od następnego pojedynku.</p>
+      <div class="buttons end">
+        <button type="submit" class="primary">Gotowe</button>
+      </div>
+    </form>
+  </dialog>
 
   <div id="big-preview" class="big-preview" hidden>
     <div class="big-bar">

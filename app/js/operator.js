@@ -41,33 +41,46 @@
 
   function categoryItem(cat) {
     const n = cat.images.length;
-    const li = el('li', 'category' + (n === 0 ? ' category-empty' : ''));
-    const head = el('div', 'category-head');
-    head.append(el('span', 'category-name', cat.name), el('span', 'category-count', n + ' ' + plural(n, 'zdjęcie', 'zdjęcia', 'zdjęć')));
-    li.append(head);
-    if (n === 0) {
-      li.append(el('div', 'note', 'Brak zdjęć — nie można wybrać tej kategorii.'));
-    } else if (n < L.MIN_RECOMMENDED_IMAGES) {
-      li.append(el('div', 'note warn', '⚠ Mniej niż ' + L.MIN_RECOMMENDED_IMAGES + ' zdjęć — pojedynek może je wyczerpać.'));
-    }
-    if (cat.heic) {
-      li.append(el('div', 'note warn', '⚠ ' + cat.heic + ' ' + plural(cat.heic, 'plik', 'pliki', 'plików') + ' HEIC — przekonwertuj na JPG.'));
-    }
-    if (cat.skipped) {
-      li.append(el('div', 'note', 'Pominięte inne pliki: ' + cat.skipped));
-    }
+    const level = n === 0 ? 'empty' : n < L.MIN_RECOMMENDED_IMAGES ? 'low' : 'ok';
+    const li = el('li', 'category category-' + level);
+    li.dataset.name = cat.name.toLocaleLowerCase('pl');
+    const count = el('span', 'count', String(n));
+    count.title = n + ' ' + plural(n, 'zdjęcie', 'zdjęcia', 'zdjęć');
+    li.append(el('span', 'category-name', cat.name), count);
+    const notes = [];
+    if (level === 'empty') notes.push(['note', 'brak zdjęć — nie do wyboru']);
+    if (level === 'low') notes.push(['note warn', '⚠ mniej niż ' + L.MIN_RECOMMENDED_IMAGES + ' — zdjęcia mogą się powtarzać']);
+    if (cat.heic) notes.push(['note warn', '⚠ ' + cat.heic + '× HEIC — przekonwertuj na JPG']);
+    if (cat.skipped) notes.push(['note', 'pominięte inne pliki: ' + cat.skipped]);
+    for (const [className, text] of notes) li.append(el('span', className + ' category-note', text));
     return li;
   }
+
+  function applyCategoryFilter() {
+    const query = $('category-filter').value.trim().toLocaleLowerCase('pl');
+    for (const li of $('category-list').children) li.hidden = !!query && !li.dataset.name.includes(query);
+  }
+
+  let shownLibrary = null;
+  let rememberedFolder = null;
 
   function renderCategories(library) {
     const list = $('category-list');
     list.textContent = '';
+    const filter = $('category-filter');
+    shownLibrary = library;
+    showRestoreButton(rememberedFolder);
+    $('pick-folder').textContent = library ? 'Zmień folder…' : 'Wybierz folder…';
     if (!library) {
       $('folder-name').textContent = 'Nie wybrano folderu z kategoriami.';
+      $('categories-count').textContent = '';
+      filter.hidden = true;
       return;
     }
     const count = library.categories.length;
-    $('folder-name').textContent = 'Folder „' + library.rootName + '”: ' + count + ' ' + plural(count, 'kategoria', 'kategorie', 'kategorii');
+    $('folder-name').textContent = '📁 ' + library.rootName;
+    $('categories-count').textContent = count + ' ' + plural(count, 'kategoria', 'kategorie', 'kategorii');
+    filter.hidden = count <= 8;
     if (!count) {
       showFolderMessage('W tym folderze nie ma podfolderów. Każdy podfolder to jedna kategoria.', true);
     } else if (library.source === 'files') {
@@ -75,12 +88,38 @@
     } else {
       showFolderMessage('');
     }
-    for (const cat of library.categories) list.append(categoryItem(cat));
+    let level = null;
+    for (const cat of library.categories) {
+      if (cat.level !== level) {
+        level = cat.level;
+        // Empty data-name: level headers are hidden while filtering.
+        const header = el('li', 'category-level', level);
+        header.dataset.name = '';
+        list.append(header);
+      }
+      list.append(categoryItem(cat));
+    }
+    applyCategoryFilter();
   }
 
+  // Appends options to a <select>, grouped by difficulty level (categories come sorted by level).
+  function appendCategoryOptions(select, categories, label) {
+    let parent = select;
+    for (const cat of categories) {
+      if (cat.level && (parent === select || parent.label !== cat.level)) {
+        parent = el('optgroup');
+        parent.label = cat.level;
+        select.append(parent);
+      }
+      parent.append(new Option(label(cat), cat.name));
+    }
+  }
+
+  // Hidden while that same folder is already loaded.
   function showRestoreButton(folderName) {
     const b = $('restore-folder');
-    b.hidden = !folderName;
+    rememberedFolder = folderName;
+    b.hidden = !folderName || (shownLibrary && shownLibrary.source === 'handle' && shownLibrary.rootName === folderName);
     if (folderName) b.textContent = 'Wczytaj ostatni folder: ' + folderName;
   }
 
@@ -103,13 +142,15 @@
     const select = $('player-category');
     const current = select.value;
     const editing = players.find(p => p.id === editingId);
-    const names = library ? library.categories.filter(c => c.images.length).map(c => c.name) : [];
-    if (editing && editing.category && !names.includes(editing.category)) names.push(editing.category);
+    const categories = library ? library.categories.filter(c => c.images.length) : [];
+    const names = categories.map(c => c.name);
     select.textContent = '';
     select.append(new Option('— bez kategorii —', ''));
-    for (const name of names) {
-      const status = categoryStatus(name);
-      select.append(new Option(status ? name + ' (' + status + ')' : name, name));
+    appendCategoryOptions(select, categories, cat => cat.name);
+    if (editing && editing.category && !names.includes(editing.category)) {
+      const status = categoryStatus(editing.category);
+      select.append(new Option(editing.category + ' (' + status + ')', editing.category));
+      names.push(editing.category);
     }
     select.value = names.includes(current) ? current : '';
   }
@@ -133,8 +174,8 @@
     actions.append(
       button('+1', 'win-plus', 'Dodaj wygraną'),
       button('−1', 'win-minus', 'Odejmij wygraną'),
-      button('Edytuj', 'edit'),
-      button('Usuń', 'delete'));
+      button('✎', 'edit', 'Edytuj'),
+      button('✕', 'delete', 'Usuń'));
     li.append(el('span', 'rank', (index + 1) + '.'), swatch, info, score, actions);
     return li;
   }
@@ -147,6 +188,7 @@
     list.textContent = '';
     L.rankPlayers(players).forEach((p, i) => list.append(playerItem(p, i)));
     $('players-empty').hidden = players.length > 0;
+    $('players-count').textContent = players.length ? String(players.length) : '';
     $('reset-scores').hidden = players.length === 0;
     renderCategorySelect();
     if (!editingId && !$('player-name').value) $('player-color').value = L.nextColor(players);
@@ -171,7 +213,7 @@
     $('player-name').value = p.name;
     $('player-color').value = p.color;
     $('player-category').value = p.category || '';
-    $('player-submit').textContent = 'Zapisz zmiany';
+    $('player-submit').textContent = 'Zapisz';
     $('player-cancel').hidden = false;
     showMessage('player-message', '');
     $('player-name').focus();
@@ -260,13 +302,11 @@
     fillPlayerSelect($('duel-opponent'), $('duel-challenger').value);
     const select = $('duel-category');
     const current = select.value;
-    const names = library ? library.categories.filter(c => c.images.length).map(c => c.name) : [];
+    const categories = library ? library.categories.filter(c => c.images.length) : [];
     select.textContent = '';
     select.append(new Option(library ? '— wybierz kategorię —' : '— najpierw wczytaj folder —', ''));
-    for (const cat of library ? library.categories : []) {
-      if (cat.images.length) select.append(new Option(cat.name + ' (' + cat.images.length + ')', cat.name));
-    }
-    select.value = names.includes(current) ? current : '';
+    appendCategoryOptions(select, categories, cat => cat.name + ' (' + cat.images.length + ')');
+    select.value = categories.some(c => c.name === current) ? current : '';
   }
 
   function notifySetup() {
@@ -388,6 +428,7 @@
 
   function handleKey(e) {
     if (!duelHandlers || isTyping(e.target) || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (document.querySelector('dialog[open]')) return;
     if (e.type === 'keyup') {
       if (e.code === 'KeyH') duelHandlers.holdAnswer(false);
       if (e.code === 'Space') e.preventDefault();
@@ -454,17 +495,20 @@
 
   // ---------- players window ----------
 
+  // status -> [top bar label, banner text, is error]
   const DISPLAY_STATUS = {
-    closed: ['Okno graczy jest zamknięte.', false],
-    open: ['Okno graczy otwarte. Przeciągnij je na telewizor i naciśnij F11.', false],
-    lost: ['Okno graczy zamknęło się przy odświeżeniu panelu — kliknij „Otwórz ekran graczy”.', true],
-    retry: ['Zamknięto stare okno graczy — kliknij „Otwórz ekran graczy” jeszcze raz.', true],
-    blocked: ['Przeglądarka zablokowała okno — zezwól na wyskakujące okna dla tej strony i spróbuj ponownie.', true],
-    reloaded: ['Okno graczy zostało odświeżone i straciło połączenie — kliknij „Otwórz ekran graczy”.', true],
+    closed: ['Ekran graczy: zamknięty', '', false],
+    open: ['Ekran graczy: otwarty', 'Okno graczy otwarte. Przeciągnij je na telewizor i naciśnij F11.', false],
+    lost: ['Ekran graczy: zamknięty', 'Okno graczy zamknęło się przy odświeżeniu panelu — kliknij „Otwórz ekran graczy”.', true],
+    retry: ['Ekran graczy: kliknij ponownie', 'Zamknięto stare okno graczy — kliknij „Otwórz ekran graczy” jeszcze raz.', true],
+    blocked: ['Ekran graczy: zablokowany', 'Przeglądarka zablokowała okno — zezwól na wyskakujące okna dla tej strony i spróbuj ponownie.', true],
+    reloaded: ['Ekran graczy: rozłączony', 'Okno graczy zostało odświeżone i straciło połączenie — kliknij „Otwórz ekran graczy”.', true],
   };
 
   function showDisplayStatus(status) {
-    const [text, isError] = DISPLAY_STATUS[status] || ['', false];
+    const [label, text, isError] = DISPLAY_STATUS[status] || ['', '', false];
+    $('display-pill').dataset.status = isError ? 'error' : status;
+    $('display-pill-text').textContent = label;
     showMessage('display-status', text, isError);
     $('open-display').textContent = status === 'open' ? 'Pokaż ekran graczy' : 'Otwórz ekran graczy';
   }
@@ -511,7 +555,8 @@
     $('set-sound').checked = settings.sound;
     $('set-hide').checked = settings.hideAnswer;
     $('set-volume').value = settings.volume;
-    showMessage('sound-note', settings.sound ? '' : 'Dźwięk jest wyłączony w ustawieniach.');
+    showMessage('sound-note', settings.sound ? '' : 'Dźwięk jest wyłączony — przełącznik „Dźwięk” na górze.');
+    $('set-volume').disabled = !settings.sound;
   }
 
   function bindSettings(onChange) {
@@ -520,14 +565,18 @@
     Object.assign($('set-duel'), { min: duelMin, max: duelMax });
     Object.assign($('set-pass'), { min: passMin, max: passMax });
     Object.assign($('set-volume'), { min: L.SETTING_LIMITS.volume[0], max: L.SETTING_LIMITS.volume[1] });
-    $('settings-form').addEventListener('submit', e => e.preventDefault());
-    $('settings-form').addEventListener('change', () => onChange({
+    const dialog = $('settings-dialog');
+    $('settings-open').addEventListener('click', () => dialog.showModal());
+    // Sound controls sit in the top bar, the rest in the settings dialog.
+    const emit = () => onChange({
       duelSeconds: $('set-duel').value,
       passPenaltySeconds: $('set-pass').value,
       sound: $('set-sound').checked,
       hideAnswer: $('set-hide').checked,
       volume: $('set-volume').value,
-    }));
+    });
+    for (const id of ['set-duel', 'set-pass', 'set-sound', 'set-hide', 'set-volume']) $(id).addEventListener('change', emit);
+    $('category-filter').addEventListener('input', applyCategoryFilter);
     // Live volume while dragging; the final value is saved on 'change'.
     $('set-volume').addEventListener('input', () => Floor.sound.setVolume(Number($('set-volume').value)));
   }
