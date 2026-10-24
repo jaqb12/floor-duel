@@ -199,14 +199,14 @@
   }
 
   // ---------- duel (SPEC §5) ----------
-  // States: 'ready' -> 'running' <-> 'reveal', 'paused', 'finished'.
+  // States: 'ready' -> ('countdown' ->) 'running' <-> 'reveal', 'paused', 'finished'.
   // Actions return an array of events; an empty array means the action was ignored.
-  // Events: 'started', 'correct', 'pass', 'revealEnd', 'timeout', 'lowTime', 'suspense', 'paused', 'resumed'.
-  // 'suspense' fires once per player, when their clock first shows SUSPENSE_SECONDS or less.
+  // Events: 'countdown', 'started', 'correct', 'pass', 'revealEnd', 'timeout', 'lowTime', 'suspense', 'paused', 'resumed'.
+  // 'suspense' fires once per duel, when an active clock first shows SUSPENSE_SECONDS or less.
 
   class Duel {
     constructor({ challengerId, opponentId, category, images, firstId = challengerId,
-                  duelSeconds = 45, passPenaltySeconds = 3, rng = Math.random }) {
+                  duelSeconds = 45, passPenaltySeconds = 3, countdownSeconds = 0, rng = Math.random }) {
       if (challengerId === opponentId) throw new Error('Challenger and opponent must differ');
       if (firstId !== challengerId && firstId !== opponentId) throw new Error('firstId must be one of the players');
       if (!images || !images.length) throw new Error('Category has no images');
@@ -218,6 +218,8 @@
       this.activeId = firstId;
       this.remainingMs = { [challengerId]: duelSeconds * 1000, [opponentId]: duelSeconds * 1000 };
       this.passPenaltyMs = passPenaltySeconds * 1000;
+      this.countdownMs = countdownSeconds * 1000;
+      this.countdownUntil = null;
       this.turnStartedAt = null;
       this.revealUntil = null;
       this.images = images.slice();
@@ -233,8 +235,7 @@
       this.revealLeftMs = null;
       this.lastLowSecond = null;
       // A duel that starts at or below the threshold has no suspense moment.
-      const suspense = duelSeconds > SUSPENSE_SECONDS;
-      this.suspensePending = { [challengerId]: suspense, [opponentId]: suspense };
+      this.suspensePending = duelSeconds > SUSPENSE_SECONDS;
     }
 
     otherId(id) {
@@ -251,12 +252,23 @@
       return Math.max(0, ms - (now - this.turnStartedAt));
     }
 
+    // With a countdown the clocks start exactly when it ends, not at the next tick.
     start(now) {
       if (this.state !== 'ready') return [];
-      this.state = 'running';
-      this.turnStartedAt = now;
-      this.nextImage();
+      if (this.countdownMs > 0) {
+        this.state = 'countdown';
+        this.countdownUntil = now + this.countdownMs;
+        return ['countdown'];
+      }
+      this.begin(now);
       return ['started'];
+    }
+
+    begin(at) {
+      this.state = 'running';
+      this.countdownUntil = null;
+      this.turnStartedAt = at;
+      this.nextImage();
     }
 
     markCorrect(now) {
@@ -305,6 +317,11 @@
     // Safe to call at any rate: outcomes depend only on timestamps.
     tick(now) {
       const events = [];
+      if (this.state === 'countdown') {
+        if (now < this.countdownUntil) return events;
+        this.begin(this.countdownUntil);
+        events.push('started');
+      }
       if (!this.isClockRunning()) return events;
       const timeoutAt = this.turnStartedAt + this.remainingMs[this.activeId];
       if (this.state === 'reveal' && now >= this.revealUntil && this.revealUntil < timeoutAt) {
@@ -319,8 +336,8 @@
         return events;
       }
       const seconds = clockSeconds(this.getClock(this.activeId, now));
-      if (seconds <= SUSPENSE_SECONDS && this.suspensePending[this.activeId]) {
-        this.suspensePending[this.activeId] = false;
+      if (seconds <= SUSPENSE_SECONDS && this.suspensePending) {
+        this.suspensePending = false;
         events.push('suspense');
       }
       if (seconds <= LOW_TIME_SECONDS && seconds !== this.lastLowSecond) {
@@ -438,8 +455,10 @@
     };
     const revealing = duel.state === 'reveal' || (duel.state === 'paused' && duel.pausedFrom === 'reveal');
     const winner = finished ? players.find(p => p.id === duel.winnerId) : null;
+    const screen = duel.state === 'ready' || duel.state === 'countdown' ? duel.state : finished ? 'finished' : 'duel';
     return {
-      screen: duel.state === 'ready' ? 'ready' : finished ? 'finished' : 'duel',
+      screen,
+      countdown: duel.state === 'countdown' ? clockSeconds(duel.countdownUntil - now) : null,
       category: duel.category,
       left: side(duel.challengerId),
       right: side(duel.opponentId),

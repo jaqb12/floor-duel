@@ -5,6 +5,8 @@
   const L = Floor.logic;
   const ui = () => Floor.operator;
 
+  const COUNTDOWN_SECONDS = 3;
+  const TENSION_FROM_MS = 12000;
   const EMPTY_SETUP = { challengerId: null, opponentId: null, category: '', firstSide: 'challenger' };
 
   let library = null;
@@ -15,6 +17,7 @@
   let holdingAnswer = false;
   let skippedImages = 0;
   let checkedKey = null;
+  let tensionOn = false;  // tension music started in this duel (SPEC §8)
   let bigRenderer = null; // big preview on the operator screen (SPEC §7.4)
 
   function newPlayerId() {
@@ -133,6 +136,7 @@
       firstId: setup.firstSide === 'opponent' ? setup.opponentId : setup.challengerId,
       duelSeconds: state.settings.duelSeconds,
       passPenaltySeconds: state.settings.passPenaltySeconds,
+      countdownSeconds: COUNTDOWN_SECONDS,
     });
   }
 
@@ -141,12 +145,22 @@
       if (e === 'lowTime') Floor.sound.tick();
       else if (e === 'correct') Floor.sound.correct();
       else if (e === 'pass') Floor.sound.pass();
-      else if (e === 'timeout') Floor.sound.timeout();
-      else if (e === 'suspense') Floor.sound.play('suspense');
+      else if (e === 'countdown') Floor.sound.countdown(COUNTDOWN_SECONDS);
+      else if (e === 'suspense') {
+        tensionOn = true;
+        Floor.sound.startTension();
+      } else if (e === 'paused') Floor.sound.stopTension();
+      else if (e === 'resumed' && tensionOn) Floor.sound.startTension();
+      else if (e === 'timeout') {
+        Floor.sound.stopTension();
+        Floor.sound.timeout();
+      }
     }
   }
 
   function endDuel() {
+    Floor.sound.stopTension();
+    tensionOn = false;
     duel = null;
     setup = EMPTY_SETUP;
     checkedKey = null;
@@ -192,6 +206,7 @@
       Floor.sound.stopMusic();
       skippedImages = 0;
       checkedKey = null;
+      tensionOn = false;
       handleEvents(duel.start(performance.now()));
       frame();
       return true;
@@ -228,6 +243,7 @@
     if (isDuelLive()) {
       handleEvents(duel.tick(now));
       checkCurrentImage();
+      if (tensionOn) Floor.sound.setTensionLevel(1 - duel.getClock(duel.activeId, now) / TENSION_FROM_MS);
     }
     Floor.display.checkWindow();
     const view = L.displayView({ duel, players: state.players, now });

@@ -85,7 +85,8 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 ### Muzyka i efekty
 
 - **🎵 Muzyka** (przy START i w sekcji *Efekty dźwiękowe*) — podkład na czas przygotowania. Wycisza się sama po START.
-- **💓 Napięcie** włącza się samo, gdy graczowi zostanie 12 sekund (raz na gracza w pojedynku).
+- Po **START** jest odliczanie **3, 2, 1** (piknięcia i duże cyfry na TV) — zegar rusza po sygnale.
+- **Muzyka napięcia** włącza się sama, gdy na tablicy pierwszy raz pojawi się **12 sekund**, i narasta, im mniej czasu ma odpowiadający gracz. Przycisk 💓 Napięcie to osobny, krótki efekt na żądanie.
 - **Efekty dźwiękowe**: 🥁 Werble, 🎺 Fanfara, 👏 Brawa, 💓 Napięcie, 🔔 Gong, 😬 Pudło — do użycia w dowolnej chwili.
 - Głośność ustawisz suwakiem w **Ustawieniach**; wyłączenie opcji **Dźwięk** wycisza wszystko.
 

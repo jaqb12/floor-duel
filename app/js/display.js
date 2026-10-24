@@ -182,7 +182,18 @@
       dom.root.classList.toggle('is-paused', view.paused);
       dom.reveal.classList.toggle('visible', view.reveal !== null);
       setText(dom.revealAnswer, view.reveal || '');
-      if (view.screen === 'ready') {
+      dom.messageTitle.classList.toggle('countdown', view.screen === 'countdown');
+      if (view.screen === 'countdown') {
+        const digit = String(view.countdown);
+        if (dom.messageTitle.textContent !== digit) {
+          // Restart the "pop" animation for every new digit.
+          dom.messageTitle.textContent = digit;
+          dom.messageTitle.classList.remove('countdown');
+          void dom.messageTitle.offsetWidth;
+          dom.messageTitle.classList.add('countdown');
+        }
+        setText(dom.messageName, '');
+      } else if (view.screen === 'ready') {
         setText(dom.messageTitle, 'Przygotujcie się!');
         setText(dom.messageName, '');
       } else if (view.screen === 'finished') {

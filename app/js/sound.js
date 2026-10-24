@@ -49,7 +49,7 @@
   }
 
   // Filtered white noise burst: snares, hi-hats, cymbals, applause.
-  function noise(duration, { gain = 0.2, at = 0, when = null, dest = null, filter = 'highpass', freq = 1000, q = 1, attack = 0.002 } = {}) {
+  function noise(duration, { gain = 0.2, at = 0, when = null, dest = null, filter = 'highpass', freq = 1000, q = 1, attack = 0.002, pan = 0 } = {}) {
     if (!ready()) return;
     if (!noiseBuffer) {
       noiseBuffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -68,7 +68,13 @@
     vol.gain.setValueAtTime(0.0001, t);
     vol.gain.exponentialRampToValueAtTime(gain, t + attack);
     vol.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    src.connect(f).connect(vol).connect(dest || master);
+    let out = src.connect(f).connect(vol);
+    if (pan) {
+      const p = ctx.createStereoPanner();
+      p.pan.value = pan;
+      out = out.connect(p);
+    }
+    out.connect(dest || master);
     src.start(t, Math.random() * 0.5);
     src.stop(t + duration + 0.05);
   }
@@ -130,6 +136,100 @@
     onMusicChange(false);
   }
 
+  // ---------- tension music: builds up as the active clock runs down ----------
+  // level 0 = calm (12 s or more left), 1 = last moment. The app updates it every frame.
+
+  const tension = { timer: null, gain: null, drone: null, next: 0, step: 0, level: 0 };
+
+  function startTension() {
+    unlock();
+    if (!ready() || tension.timer) return;
+    const now = ctx.currentTime;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(1, now + 1.5);
+    gain.connect(master);
+    // Low, slowly opening drone: two detuned saws through a lowpass filter.
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.Q.value = 6;
+    const droneGain = ctx.createGain();
+    droneGain.gain.value = 0.05;
+    const oscs = [0, 7].map(detune => {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.detune.value = detune;
+      o.connect(filter);
+      o.start(now);
+      return o;
+    });
+    filter.connect(droneGain).connect(gain);
+    tension.gain = gain;
+    tension.drone = { oscs, filter, droneGain };
+    tension.next = now + 0.1;
+    tension.step = 0;
+    setTensionLevel(tension.level);
+    tension.timer = setInterval(scheduleTension, 25);
+  }
+
+  function setTensionLevel(level) {
+    tension.level = Math.max(0, Math.min(1, level));
+    if (!tension.drone) return;
+    const t = ctx.currentTime;
+    const l = tension.level;
+    for (const o of tension.drone.oscs) o.frequency.setTargetAtTime(midi(33 + l * 12), t, 0.3);
+    tension.drone.filter.frequency.setTargetAtTime(250 + l * l * 3500, t, 0.3);
+    tension.drone.droneGain.gain.setTargetAtTime(0.04 + l * 0.08, t, 0.3);
+  }
+
+  // Heartbeat that speeds up, a rising high ostinato from level 0.35, snare ticks from 0.7.
+  function scheduleTension() {
+    const dest = tension.gain;
+    while (tension.next < ctx.currentTime + LOOKAHEAD) {
+      const t = tension.next;
+      const l = tension.level;
+      const beat = 0.75 - 0.5 * l;   // seconds per heartbeat
+      const sub = beat / 4;          // sixteenth of a beat
+      const pos = tension.step % 4;
+      if (pos === 0) {
+        tone(62, 0.22, { when: t, dest, gain: 0.5 + 0.3 * l, slideTo: 40 });
+        tone(55, 0.25, { when: t + beat * 0.3, dest, gain: 0.35 + 0.25 * l, slideTo: 38 });
+      }
+      if (l > 0.35) {
+        const pitch = 69 + Math.round(l * 10) + (pos % 2 ? 1 : 0);
+        tone(midi(pitch), sub * 0.8, { when: t, dest, type: 'triangle', gain: 0.03 + 0.07 * (l - 0.35) });
+      }
+      if (l > 0.7 && pos % 2 === 1) {
+        noise(0.05, { when: t, dest, gain: 0.05 + 0.15 * (l - 0.7), filter: 'bandpass', freq: 2200, q: 0.8 });
+      }
+      tension.next += sub;
+      tension.step++;
+    }
+  }
+
+  function stopTension() {
+    if (!tension.timer) return;
+    clearInterval(tension.timer);
+    tension.timer = null;
+    const { gain, drone } = tension;
+    const t = ctx.currentTime;
+    gain.gain.setTargetAtTime(0.0001, t, 0.2);
+    for (const o of drone.oscs) o.stop(t + 1.5);
+    setTimeout(() => gain.disconnect(), 1800);
+    tension.gain = null;
+    tension.drone = null;
+  }
+
+  // Round start like on TV: three short beeps (3, 2, 1) and a long high one when the clock starts.
+  function countdown(seconds) {
+    unlock();
+    for (let i = 0; i < seconds; i++) {
+      tone(880, 0.18, { at: i, type: 'square', gain: 0.12 });
+    }
+    tone(1760, 0.7, { at: seconds, type: 'square', gain: 0.14 });
+    tone(880, 0.7, { at: seconds, type: 'sine', gain: 0.2 });
+  }
+
   // ---------- operator sound effects ----------
 
   const effects = {
@@ -151,12 +251,22 @@
       }
       for (const n of [72, 76, 79, 84]) tone(midi(n), 1.4, { at: 1.15, type: 'sawtooth', gain: 0.06, attack: 0.05 });
     },
+    // A crowd: each person claps at their own pitch, pace and place in the stereo image,
+    // and people stop at different moments. A soft noise bed fills the gaps.
     applause() {
-      for (let i = 0; i < 160; i++) {
-        const at = Math.random() * 3.2;
-        const fade = at < 2.4 ? 1 : (3.2 - at) / 0.8;
-        noise(0.03 + Math.random() * 0.03, { at, gain: (0.08 + Math.random() * 0.12) * fade, filter: 'bandpass', freq: 1200 + Math.random() * 2500, q: 1.5 });
+      const length = 4.5;
+      for (let p = 0; p < 28; p++) {
+        const freq = 900 + Math.random() * 1800;
+        const pan = Math.random() * 1.6 - 0.8;
+        const rate = 3.5 + Math.random() * 3;              // claps per second
+        const stopAt = length - 1.6 + Math.random() * 1.6;
+        for (let at = Math.random() * 0.25; at < stopAt; at += (1 / rate) * (0.85 + Math.random() * 0.3)) {
+          const swell = Math.min(1, at / 0.4) * (at > stopAt - 0.6 ? (stopAt - at) / 0.6 : 1);
+          noise(0.012 + Math.random() * 0.012, { at, gain: (0.05 + Math.random() * 0.05) * swell, filter: 'bandpass', freq, q: 1.2, attack: 0.001, pan });
+          noise(0.02, { at, gain: 0.02 * swell, filter: 'lowpass', freq: 500, pan });
+        }
       }
+      noise(length, { gain: 0.035, filter: 'bandpass', freq: 2500, q: 0.4, attack: 0.4 });
     },
     // Heartbeat-like low pulses.
     suspense() {
@@ -188,7 +298,10 @@
     unlock,
     setEnabled(on) {
       enabled = !!on;
-      if (!enabled) stopMusic();
+      if (!enabled) {
+        stopMusic();
+        stopTension();
+      }
     },
     setVolume(percent) {
       volume = Math.max(0, Math.min(100, percent)) / 100;
@@ -196,6 +309,11 @@
     },
     startMusic,
     stopMusic,
+    startTension,
+    stopTension,
+    setTensionLevel,
+    isTensionPlaying: () => !!tension.timer,
+    countdown,
     isMusicPlaying: () => !!music.timer,
     setMusicListener: fn => { onMusicChange = fn; },
     play,

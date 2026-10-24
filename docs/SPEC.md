@@ -63,7 +63,7 @@ Czas pozostały aktywnego gracza = `remainingMs[activeId] - (now - turnStartedAt
 ## 5. Maszyna stanów pojedynku
 ```
 setup ──(wybrano 2 graczy + kategorię)──> ready
-ready ──START──> running
+ready ──START──> countdown (3 s: 3, 2, 1) ──> running   (zegar rusza dokładnie w chwili końca odliczania)
 running ──Spacja──> running (nowe zdjęcie, tura → rywal)
 running ──P──> reveal ──(po passPenaltySeconds)──> running (nowe zdjęcie, ta sama osoba)
 running/reveal ──czas aktywnego = 0──> finished
@@ -80,7 +80,7 @@ API logiki (propozycja, wszystkie metody przyjmują `now`):
 - **Środek:** zdjęcie, `object-fit: contain`, maksymalnie duże.
 - **Dół:** dwa panele graczy (lewy = challenger, prawy = rywal): imię w kolorze gracza i duży zegar w sekundach (zaokrąglenie w górę). Aktywny panel wyraźnie podświetlony, nieaktywny przygaszony. ≤ 10 s — zegar czerwony/pulsujący.
 - **Odsłona po pasie:** pasek z poprawną odpowiedzią na zdjęciu + napis „PAS”.
-- **Stany:** brak pojedynku → plansza „THE FLOOR” + ranking; `ready` → imiona, kategoria, „Przygotujcie się”; `paused` → nakładka „PAUZA”; `finished` → duży napis ze zwycięzcą.
+- **Stany:** brak pojedynku → plansza „THE FLOOR” + ranking; `ready` → imiona, kategoria, „Przygotujcie się”; `countdown` → duże cyfry 3, 2, 1; `paused` → nakładka „PAUZA”; `finished` → duży napis ze zwycięzcą.
 - Brak jakichkolwiek elementów sterujących i kursora (`cursor: none`).
 
 ## 7. Panel operatora
@@ -117,7 +117,8 @@ Ustawienie „Ukrywaj odpowiedź”: w panelu operatora odpowiedź jest zamazana
 
 ## 8. Dźwięk (WebAudio, bez plików)
 - Krótkie „tyk” co sekundę w ostatnich 5 s aktywnego gracza.
-- Efekt „napięcie” (bicie serca) automatycznie, gdy zegar aktywnego gracza po raz pierwszy pokaże 12 s — raz na gracza w pojedynku (zdarzenie `suspense`; nie występuje, gdy czas pojedynku ≤ 12 s).
+- **Odliczanie przed rundą:** po START trzy krótkie piknięcia (3, 2, 1) i długi wysoki sygnał w chwili startu zegara.
+- **Muzyka napięcia** (niezależna od przycisku „Napięcie”): włącza się raz w pojedynku, gdy na tablicy po raz pierwszy pojawi się 12 s (zdarzenie `suspense`; brak, gdy czas pojedynku ≤ 12 s), i gra do końca pojedynku. Intensywność = 1 − (czas aktywnego gracza / 12 s): szybszy puls, wyższy i jaśniejszy dron, kolejne warstwy (ostinato, werbel). Pauza ją wycisza, wznowienie przywraca, koniec czasu/unieważnienie kończy.
 - Krótki „ding” przy dobrej odpowiedzi, niski ton przy pasie.
 - Długi buzzer przy końcu czasu.
 - `AudioContext` tworzony/wznawiany przy kliknięciu START albo dowolnego przycisku dźwięku (wymóg przeglądarek). Wyłącznik i suwak głośności (0–100, domyślnie 80) w ustawieniach; wyłączony dźwięk wycisza wszystko, także muzykę.

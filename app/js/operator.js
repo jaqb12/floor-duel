@@ -312,6 +312,7 @@
   }
 
   function poolText(duel, skipped) {
+    if (!duel.deck.length) return '';
     const parts = ['zdjęcie ' + duel.deckPos + ' z ' + duel.deck.length];
     if (duel.reshuffles) parts.push('pula wyczerpana — powtórki');
     if (skipped) parts.push('pominięte uszkodzone: ' + skipped);
@@ -342,7 +343,8 @@
       node.classList.toggle('hidden-answer', hidden);
     }
     let hint = '';
-    if (state === 'paused') hint = 'Pauza — Esc, żeby wznowić.';
+    if (state === 'countdown') hint = 'Odliczanie… ' + L.clockSeconds(duel.countdownUntil - info.now);
+    else if (state === 'paused') hint = 'Pauza — Esc, żeby wznowić.';
     else if (state === 'reveal') hint = 'Pas — gracze widzą odpowiedź, zegar biegnie.';
     else if (info.hideAnswer && state === 'running') hint = 'Odpowiedź ukryta — przytrzymaj H, żeby ją zobaczyć.';
     setText($('live-hint'), hint);
@@ -352,7 +354,7 @@
     const finished = state === 'finished';
     $('live-correct').disabled = state !== 'running';
     $('live-pass').disabled = state !== 'running';
-    $('live-pause').disabled = finished;
+    $('live-pause').disabled = finished || state === 'countdown';
     setText($('live-pause'), state === 'paused' ? 'WZNÓW (Esc)' : 'PAUZA (Esc)');
     $('live-result').hidden = !finished;
     $('live-correct').parentElement.hidden = finished;

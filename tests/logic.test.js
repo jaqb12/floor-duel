@@ -378,7 +378,7 @@
     eq(events.filter(e => e === 'timeout').length, 1);
   });
 
-  test('suspense fires once per player at 12 s, also on coarse ticks', () => {
+  test('suspense fires once per duel, at the first 12 s on any clock', () => {
     const d = makeDuel();
     d.start(0);
     const count = events => events.filter(e => e === 'suspense').length;
@@ -386,10 +386,36 @@
     eq(count(d.tick(33000)), 1, 'at 12 s');
     eq(count(d.tick(34000)), 0, 'only once');
     d.markCorrect(35000);
-    eq(count(d.tick(45000)), 0, 'B still has 35 s');
-    eq(count(d.tick(70000)), 1, 'coarse tick from 35 s to 10 s');
-    d.markCorrect(70000);
-    eq(count(d.tick(71000)), 0, 'A already had it');
+    eq(count(d.tick(70000)), 0, 'B reaching 10 s does not fire again');
+  });
+
+  test('suspense on a coarse tick that jumps past 12 s', () => {
+    const d = makeDuel();
+    d.start(0);
+    eq(d.tick(40000).includes('suspense'), true);
+  });
+
+  test('countdown: clocks start exactly when it ends, actions ignored before', () => {
+    const d = makeDuel({ countdownSeconds: 3 });
+    eq(d.start(1000), ['countdown']);
+    eq([d.state, d.current], ['countdown', null]);
+    eq(d.markCorrect(2000), []);
+    eq(d.markPass(2000), []);
+    eq(d.togglePause(2000), []);
+    eq(d.getClock(A, 3500), 45000);
+    eq(d.tick(3999), []);
+    eq(d.tick(4500), ['started'], 'late tick');
+    ok(d.current !== null, 'first image drawn');
+    eq(d.getClock(A, 4500), 44500, 'clock counted from the end of the countdown');
+    const v = L.displayView({ duel: makeDuel({ countdownSeconds: 3 }), players: [], now: 0 });
+    eq(v.countdown, null);
+  });
+
+  test('displayView: countdown screen with 3, 2, 1', () => {
+    const d = makeDuel({ countdownSeconds: 3 });
+    d.start(0);
+    const at = now => L.displayView({ duel: d, players: viewPlayers, now });
+    eq([at(0).screen, at(0).countdown, at(1500).countdown, at(2999).countdown], ['countdown', 3, 2, 1]);
   });
 
   test('no suspense when the duel starts at or below 12 s', () => {

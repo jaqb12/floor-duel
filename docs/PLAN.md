@@ -142,4 +142,7 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Globalna reguła CSS `[hidden] { display: none !important }` | `display: flex` w klasach nadpisywało `hidden`: po zatwierdzeniu wyniku sekcja pojedynku z aktywnymi przyciskami zostawała na ekranie (zgłoszenie użytkownika) |
 | 2026-10-24 | Muzyka na przygotowanie + efekty dźwiękowe dla operatora + suwak głośności (SPEC §8) — syntezowane w WebAudio, bez plików | Prośba użytkownika; zachowany wymóg „bez plików dźwiękowych”, działa offline |
 | 2026-10-24 | Muzyka wycisza się sama po START; efekty tylko jako przyciski, bez skrótów | „Przygotowanie do gry”; skróty kolidowałyby ze Spacją/P/Esc |
-| 2026-10-24 | „Napięcie” automatycznie przy 12 s aktywnego gracza, raz na gracza w pojedynku; pomijane, gdy pojedynek trwa ≤ 12 s | Prośba użytkownika; bez powtórek przy każdej zmianie tury |
+| 2026-10-24 | ~~„Napięcie” automatycznie przy 12 s, raz na gracza~~ → zastąpione: muzyka napięcia raz na pojedynek (pierwsze 12 s na tablicy), gra do końca i narasta wg czasu aktywnego gracza | Prośba użytkownika: ma budować napięcie, niezależnie od przycisku |
+| 2026-10-24 | Odliczanie 3 s po START jako stan `countdown` w `Duel` (`countdownSeconds`, domyślnie 0 w logice, 3 w aplikacji); zegar startuje od `countdownUntil`, nie od najbliższego ticka | Prośba użytkownika („3 piknięcia jak w programie”); czas z timestampów |
+| 2026-10-24 | Muzyka napięcia cichnie przy pauzie, wraca po wznowieniu; po zmianie tury intensywność spada, jeśli rywal ma ≥ 12 s | Napięcie zależy od tego, kto teraz odpowiada |
+| 2026-10-24 | Nowe brawa: ~28 „osób” z własną barwą, tempem i pozycją stereo, różne momenty końca + tło szumu | Poprzednie brawa brzmiały sztucznie (zgłoszenie użytkownika) |

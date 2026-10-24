@@ -35,7 +35,9 @@
     .reveal.visible { display: flex; }
     .reveal-tag { color: #000; background: #fbbf24; padding: 0 2vw; border-radius: 1.5vh; font-size: 6vh; }
     .message { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .floor[data-screen="ready"] .message, .floor[data-screen="finished"] .message { display: flex; }
+    .floor[data-screen="ready"] .message, .floor[data-screen="countdown"] .message, .floor[data-screen="finished"] .message { display: flex; }
+    .message-title.countdown { font-size: 42vh; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; animation: count-pop 0.6s ease-out; }
+    @keyframes count-pop { from { transform: scale(1.35); } to { transform: scale(1); } }
     .message-title { font-size: 9vh; font-weight: 800; }
     .message-name { font-size: 16vh; font-weight: 900; }
     .message-name:empty { display: none; }
@@ -45,7 +47,7 @@
       padding: 1.5vh 2.5vw; border-radius: 2vh; background: #111; border: 0.6vh solid #222; opacity: 0.4; transition: opacity 0.2s; }
     .panel.right { flex-direction: row-reverse; }
     .panel.active, .panel.winner { opacity: 1; border-color: var(--player); box-shadow: 0 0 4vh var(--player); }
-    .floor[data-screen="ready"] .panel { opacity: 1; }
+    .floor[data-screen="ready"] .panel, .floor[data-screen="countdown"] .panel { opacity: 1; }
     .pname { font-size: 7vh; font-weight: 800; color: var(--player); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pclock { font-size: 13vh; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
     .pclock.low { color: #ff3b3b; }
