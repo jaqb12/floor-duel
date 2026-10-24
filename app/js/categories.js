@@ -97,13 +97,19 @@
     }
   }
 
-  // Must run from a click: requestPermission needs a user gesture.
-  async function restoreLastFolder() {
+  // From a click it may ask for permission (requestPermission needs a user gesture).
+  // On page load (ask = false) it only reads when permission is still granted,
+  // otherwise it throws an error named 'PermissionNeeded'.
+  async function restoreLastFolder(ask = true) {
     const root = await Floor.storage.loadRootHandle();
     if (!root) return null;
     let permission = await root.queryPermission({ mode: 'read' });
-    if (permission !== 'granted') permission = await root.requestPermission({ mode: 'read' });
-    if (permission !== 'granted') throw new Error('Brak zgody na odczyt folderu „' + root.name + '”.');
+    if (permission !== 'granted' && ask) permission = await root.requestPermission({ mode: 'read' });
+    if (permission !== 'granted') {
+      const e = new Error('Brak zgody na odczyt folderu „' + root.name + '”.');
+      if (!ask) e.name = 'PermissionNeeded';
+      throw e;
+    }
     return readHandle(root);
   }
 

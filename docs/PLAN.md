@@ -146,3 +146,4 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Odliczanie 3 s po START jako stan `countdown` w `Duel` (`countdownSeconds`, domyślnie 0 w logice, 3 w aplikacji); zegar startuje od `countdownUntil`, nie od najbliższego ticka | Prośba użytkownika („3 piknięcia jak w programie”); czas z timestampów |
 | 2026-10-24 | Muzyka napięcia cichnie przy pauzie, wraca po wznowieniu; po zmianie tury intensywność spada, jeśli rywal ma ≥ 12 s | Napięcie zależy od tego, kto teraz odpowiada |
 | 2026-10-24 | Nowe brawa: ~28 „osób” z własną barwą, tempem i pozycją stereo, różne momenty końca + tło szumu | Poprzednie brawa brzmiały sztucznie (zgłoszenie użytkownika) |
+| 2026-10-24 | Ostatni folder wczytuje się automatycznie przy starcie, ale tylko bez pytania o zgodę (`queryPermission` = granted); inaczej komunikat i przycisk | Prośba użytkownika; `requestPermission` wymaga kliknięcia, więc przy starcie nie da się poprosić o zgodę |

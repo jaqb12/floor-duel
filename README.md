@@ -42,7 +42,7 @@ Do wypróbowania aplikacji są gotowe przykładowe kategorie w `samples\Kategori
 
 1. Kliknij dwukrotnie `app\index.html` (otworzy się w domyślnej przeglądarce — jeśli to nie Edge ani Chrome, kliknij prawym przyciskiem → *Otwórz za pomocą*).
 2. W kolumnie **Kategorie** kliknij **Wybierz folder…** i wskaż folder główny. Przeglądarka zapyta o zgodę na odczyt — zezwól.
-3. Przy następnym uruchomieniu wystarczy **Wczytaj ostatni folder**.
+3. Przy następnym uruchomieniu (i po odświeżeniu) ostatni folder wczyta się sam. Jeśli przeglądarka zażąda ponownej zgody, panel to napisze — wtedy kliknij **Wczytaj ostatni folder** i zezwól.
 
 ## 3. Dodaj graczy
 

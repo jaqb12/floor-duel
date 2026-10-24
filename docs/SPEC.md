@@ -34,7 +34,7 @@ Działa też na jednym ekranie (patrz 7.4 — ukrywanie odpowiedzi).
   Przykłady: `Wieża_Eiffla.jpg` → „Wieża Eiffla”; `Słoń (2).png` → „Słoń”; `Słoń__3.webp` → „Słoń”; `F-16.jpg` → „F-16”.
 - Lista kategorii w panelu operatora pokazuje liczbę zdjęć. **Ostrzeżenie**, gdy kategoria ma < 30 zdjęć (pojedynek potrafi zużyć 30+).
 - **Pula pojedynku:** na starcie pojedynku tasowanie Fisher–Yates wszystkich zdjęć kategorii; zdjęcia bez powtórzeń. Gdy pula się wyczerpie — przetasuj ponownie (unikając zdjęcia, które właśnie było) i pokaż operatorowi dyskretną informację „pula wyczerpana — powtórki”.
-- Zapamiętanie folderu: jeśli działa `showDirectoryPicker`, uchwyt zapisujemy w IndexedDB; przy kolejnym uruchomieniu przycisk „Wczytaj ostatni folder” (wymaga kliknięcia — `requestPermission`). Fallback: `<input type="file" webkitdirectory>` (bez zapamiętywania; po odświeżeniu trzeba wskazać ponownie).
+- Zapamiętanie folderu: jeśli działa `showDirectoryPicker`, uchwyt zapisujemy w IndexedDB; przy kolejnym uruchomieniu/odświeżeniu aplikacja sama próbuje go wczytać (tylko gdy zgoda przeglądarki wciąż obowiązuje — `queryPermission`); jeśli się nie uda, pokazuje komunikat, a przycisk „Wczytaj ostatni folder” prosi o zgodę (wymaga kliknięcia — `requestPermission`). Fallback: `<input type="file" webkitdirectory>` (bez zapamiętywania; po odświeżeniu trzeba wskazać ponownie).
 - Zdjęcia ładujemy jako `URL.createObjectURL(file)`; przy zmianie folderu/kategorii zwalniamy (`revokeObjectURL`). **Następne zdjęcie preloadujemy** i czekamy na `img.decode()` przed pokazaniem, żeby duże zdjęcia z telefonu nie migały.
 
 ## 4. Model danych

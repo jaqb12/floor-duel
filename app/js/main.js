@@ -87,6 +87,9 @@
   function folderErrorText(e) {
     if (e && e.name === 'NotFoundError') return 'Folder nie istnieje — został przeniesiony lub usunięty? Wybierz go ponownie.';
     if (e && e.name === 'NotAllowedError') return 'Brak zgody na odczyt folderu.';
+    if (e && e.name === 'PermissionNeeded') {
+      return 'Nie udało się automatycznie wczytać ostatniego folderu — przeglądarka wymaga zgody. Kliknij „Wczytaj ostatni folder”.';
+    }
     return 'Nie udało się wczytać folderu: ' + (e && e.message ? e.message : e);
   }
 
@@ -308,8 +311,10 @@
     setInterval(frame, 100);
 
     document.getElementById('pick-folder').addEventListener('click', () => loadLibrary(Floor.categories.pickFolder));
-    document.getElementById('restore-folder').addEventListener('click', () => loadLibrary(Floor.categories.restoreLastFolder));
-    ui().showRestoreButton(await Floor.categories.lastFolderName());
+    document.getElementById('restore-folder').addEventListener('click', () => loadLibrary(() => Floor.categories.restoreLastFolder(true)));
+    const lastFolder = await Floor.categories.lastFolderName();
+    ui().showRestoreButton(lastFolder);
+    if (lastFolder) loadLibrary(() => Floor.categories.restoreLastFolder(false));
   }
 
   Floor.app = {
