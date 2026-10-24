@@ -13,10 +13,12 @@ Działa **bez instalacji, bez serwera i bez internetu** — w Microsoft Edge alb
 
 ## 1. Przygotuj zdjęcia
 
-Utwórz folder główny, np. `D:\FloorDuel\Kategorie`. **Każdy podfolder to jedna kategoria**, a zdjęcia leżą bezpośrednio w nim:
+Utwórz folder główny, np. `D:\FloorDuel\Categories` (nazwa dowolna). **Każdy podfolder to jedna kategoria**, a zdjęcia leżą bezpośrednio w nim. Wskazówka: folder `Categories` w folderze projektu jest ignorowany przez git, więc zdjęcia mogą leżeć obok aplikacji i nie trafią do repozytorium.
+
+Przykład:
 
 ```
-Kategorie\
+Categories\
   Zwierzęta\
     Słoń.jpg
     Żyrafa.png
@@ -44,7 +46,7 @@ Kategorie\
 **Poziomy trudności (opcjonalnie).** Kategorie można pogrupować w foldery poziomów — panel pokaże je w grupach, a gracze zobaczą tylko nazwę kategorii:
 
 ```
-Kategorie\
+Categories\
   Łatwe\
     Zwierzęta\
     Owoce\

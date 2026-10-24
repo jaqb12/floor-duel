@@ -44,7 +44,7 @@ samples/
   categories-en/          # small test categories with English names (SVG) — committed
   categories-pl/          # the same with Polish names
 ```
-The user's real photos live outside the repo or in `Kategorie/` / `categories/` (ignored by git).
+The user's real photos live outside the repo or in `Categories/` (ignored by git, as are `categories/` and the old `Kategorie/`). The user's set uses Polish level folders (`Łatwe`, `Normalne`, `Trudne`, `Eksperckie`).
 
 ## Conventions
 - **Code, names, comments and documentation in English.** UI texts only in `app/js/i18n.js` — every new text gets a key in **all** languages (tests check it). In `index.html` mark static texts with `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, `data-i18n-label`.

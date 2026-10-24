@@ -33,7 +33,9 @@ Floor Duel runs **in the browser, with no installation, no server and no interne
 
 ## 1. Prepare the photos
 
-Create a main folder, e.g. `D:\FloorDuel\Categories`. **Each subfolder is one category**, with the photos directly inside:
+Create a main folder, e.g. `D:\FloorDuel\Categories` (any name works). **Each subfolder is one category**, with the photos directly inside. Tip: a `Categories` folder inside the project folder is ignored by git, so your photos can live next to the app without ending up in the repository.
+
+Example:
 
 ```
 Categories\

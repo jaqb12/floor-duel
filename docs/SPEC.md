@@ -23,7 +23,7 @@ Works on a single screen too (see 7.4 — hiding the answer).
 11. Nobody is eliminated — after a duel everyone keeps playing (simpler than TV).
 
 ## 3. Categories and photos
-- The user points to a **main folder** (e.g. `D:\FloorDuel\Categories`).
+- The user points to a **main folder** (e.g. `D:\FloorDuel\Categories`; any name works, a `Categories` folder inside the project folder is ignored by git).
 - **Each direct subfolder = a category.** Category name = subfolder name.
 - **Difficulty levels** (added at the user's request, 2026-10-24): a subfolder with no photos directly inside but with subfolders is a **level** (e.g. `Categories\Easy\Animals\`); its subfolders are that level's categories. We don't look deeper. Both layouts can be mixed — a category without a level works as before.
   - Known levels, in this order, recognized by the start of the folder name, case-insensitive, English or Polish: **easy** (`easy`, `łatw`), **normal** (`norm`), **medium** (`medium`, `śred`), **hard** (`hard`, `difficult`, `trud`), **expert** (`exp`, `eksp`). Other level names last, alphabetically. Categories without a level come first.
