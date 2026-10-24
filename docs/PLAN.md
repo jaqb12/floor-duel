@@ -63,7 +63,7 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 - [x] Widoki: plansza startowa z rankingiem, `ready`, `running`, odsłona po pasie, `paused`, `finished` (SPEC §6).
 - [x] Pętla renderująca na `requestAnimationFrame` okna graczy + zapasowy `setInterval` (SPEC §7.3).
 - [x] Komunikaty przy zamkniętym/nieodzyskanym oknie; po F5 „Otwórz ekran graczy” zamyka stare okno i otwiera nowe (SPEC §7.3).
-- [x] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek.
+- [ ] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek. **Otwarte (2026-10-24):** przy ręcznym teście F5 nie pokazało się ani pytanie przeglądarki, ani komunikat po odświeżeniu — do zbadania później (decyzja użytkownika).
 
 **Odbiór (ręcznie):** okno przeciągnięte na TV, F11, czytelne z 3 m; zamknięcie okna nie psuje panelu.
 
