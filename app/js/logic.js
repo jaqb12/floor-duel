@@ -7,6 +7,7 @@
   const HEIC_EXTENSIONS = ['heic', 'heif'];
   const IGNORED_FILES = ['thumbs.db', 'desktop.ini'];
   const LOW_TIME_SECONDS = 5;
+  const SUSPENSE_SECONDS = 12;
   const MIN_RECOMMENDED_IMAGES = 30;
   const MAX_NAME_LENGTH = 24;
   // Bright colors that stay readable on the black players screen.
@@ -200,7 +201,8 @@
   // ---------- duel (SPEC §5) ----------
   // States: 'ready' -> 'running' <-> 'reveal', 'paused', 'finished'.
   // Actions return an array of events; an empty array means the action was ignored.
-  // Events: 'started', 'correct', 'pass', 'revealEnd', 'timeout', 'lowTime', 'paused', 'resumed'.
+  // Events: 'started', 'correct', 'pass', 'revealEnd', 'timeout', 'lowTime', 'suspense', 'paused', 'resumed'.
+  // 'suspense' fires once per player, when their clock first shows SUSPENSE_SECONDS or less.
 
   class Duel {
     constructor({ challengerId, opponentId, category, images, firstId = challengerId,
@@ -230,6 +232,9 @@
       this.pausedFrom = null;
       this.revealLeftMs = null;
       this.lastLowSecond = null;
+      // A duel that starts at or below the threshold has no suspense moment.
+      const suspense = duelSeconds > SUSPENSE_SECONDS;
+      this.suspensePending = { [challengerId]: suspense, [opponentId]: suspense };
     }
 
     otherId(id) {
@@ -314,6 +319,10 @@
         return events;
       }
       const seconds = clockSeconds(this.getClock(this.activeId, now));
+      if (seconds <= SUSPENSE_SECONDS && this.suspensePending[this.activeId]) {
+        this.suspensePending[this.activeId] = false;
+        events.push('suspense');
+      }
       if (seconds <= LOW_TIME_SECONDS && seconds !== this.lastLowSecond) {
         this.lastLowSecond = seconds;
         events.push('lowTime');
@@ -444,6 +453,7 @@
   const logic = {
     IMAGE_EXTENSIONS,
     MIN_RECOMMENDED_IMAGES,
+    SUSPENSE_SECONDS,
     normalizeAnswer,
     isSupportedImage,
     isHeic,

@@ -85,6 +85,7 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 ### Muzyka i efekty
 
 - **🎵 Muzyka** (przy START i w sekcji *Efekty dźwiękowe*) — podkład na czas przygotowania. Wycisza się sama po START.
+- **💓 Napięcie** włącza się samo, gdy graczowi zostanie 12 sekund (raz na gracza w pojedynku).
 - **Efekty dźwiękowe**: 🥁 Werble, 🎺 Fanfara, 👏 Brawa, 💓 Napięcie, 🔔 Gong, 😬 Pudło — do użycia w dowolnej chwili.
 - Głośność ustawisz suwakiem w **Ustawieniach**; wyłączenie opcji **Dźwięk** wycisza wszystko.
 

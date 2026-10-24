@@ -378,6 +378,28 @@
     eq(events.filter(e => e === 'timeout').length, 1);
   });
 
+  test('suspense fires once per player at 12 s, also on coarse ticks', () => {
+    const d = makeDuel();
+    d.start(0);
+    const count = events => events.filter(e => e === 'suspense').length;
+    eq(count(d.tick(32999)), 0, 'at 13 s');
+    eq(count(d.tick(33000)), 1, 'at 12 s');
+    eq(count(d.tick(34000)), 0, 'only once');
+    d.markCorrect(35000);
+    eq(count(d.tick(45000)), 0, 'B still has 35 s');
+    eq(count(d.tick(70000)), 1, 'coarse tick from 35 s to 10 s');
+    d.markCorrect(70000);
+    eq(count(d.tick(71000)), 0, 'A already had it');
+  });
+
+  test('no suspense when the duel starts at or below 12 s', () => {
+    const d = makeDuel({ duelSeconds: 10 });
+    d.start(0);
+    const events = [];
+    for (let t = 0; t <= 10000; t += 100) events.push(...d.tick(t));
+    eq(events.includes('suspense'), false);
+  });
+
   // ---------- duel: deck ----------
 
   test('deck: no repeats until exhausted, then reshuffle without immediate repeat', () => {

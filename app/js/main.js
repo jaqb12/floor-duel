@@ -142,6 +142,7 @@
       else if (e === 'correct') Floor.sound.correct();
       else if (e === 'pass') Floor.sound.pass();
       else if (e === 'timeout') Floor.sound.timeout();
+      else if (e === 'suspense') Floor.sound.play('suspense');
     }
   }
 

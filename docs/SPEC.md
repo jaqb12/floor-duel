@@ -117,6 +117,7 @@ Ustawienie „Ukrywaj odpowiedź”: w panelu operatora odpowiedź jest zamazana
 
 ## 8. Dźwięk (WebAudio, bez plików)
 - Krótkie „tyk” co sekundę w ostatnich 5 s aktywnego gracza.
+- Efekt „napięcie” (bicie serca) automatycznie, gdy zegar aktywnego gracza po raz pierwszy pokaże 12 s — raz na gracza w pojedynku (zdarzenie `suspense`; nie występuje, gdy czas pojedynku ≤ 12 s).
 - Krótki „ding” przy dobrej odpowiedzi, niski ton przy pasie.
 - Długi buzzer przy końcu czasu.
 - `AudioContext` tworzony/wznawiany przy kliknięciu START albo dowolnego przycisku dźwięku (wymóg przeglądarek). Wyłącznik i suwak głośności (0–100, domyślnie 80) w ustawieniach; wyłączony dźwięk wycisza wszystko, także muzykę.
