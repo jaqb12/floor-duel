@@ -399,6 +399,56 @@
     eq([d.current, d.nextImage(), d.nextImage()], ['only', 'only', 'only']);
   });
 
+  // ---------- players screen ----------
+
+  const viewPlayers = [
+    { id: A, name: 'Ala', color: '#ff5a5a', wins: 1, losses: 0 },
+    { id: B, name: 'Bartek', color: '#4ade80', wins: 2, losses: 1 },
+  ];
+
+  test('answerForKey uses the file name after the category', () => {
+    eq(L.answerForKey('Sławne osoby/Robert_Lewandowski (2).jpg'), 'Robert Lewandowski');
+  });
+
+  test('displayView: board with ranking when there is no duel', () => {
+    eq(L.displayView({ duel: null, players: viewPlayers, now: 0 }), {
+      screen: 'board',
+      ranking: [
+        { name: 'Bartek', color: '#4ade80', wins: 2, losses: 1 },
+        { name: 'Ala', color: '#ff5a5a', wins: 1, losses: 0 },
+      ],
+    });
+  });
+
+  test('displayView: ready, running, low time', () => {
+    const d = makeDuel({ images: ['Owoce/Banan.svg', 'Owoce/Jabłko.svg'] });
+    let v = L.displayView({ duel: d, players: viewPlayers, now: 0 });
+    eq([v.screen, v.category, v.left.name, v.right.name, v.left.seconds, v.left.active], ['ready', 'Test', 'Ala', 'Bartek', 45, true]);
+    d.start(0);
+    v = L.displayView({ duel: d, players: viewPlayers, now: 35500 });
+    eq([v.screen, v.left.seconds, v.left.low, v.right.seconds, v.right.low, v.right.active], ['duel', 10, true, 45, false, false]);
+    ok(v.imageKey === d.current && v.reveal === null && !v.paused);
+  });
+
+  test('displayView: reveal shows the answer, also while paused', () => {
+    const d = makeDuel({ images: ['Kształty/Koło (2).svg'] });
+    d.start(0);
+    d.markPass(1000);
+    eq(L.displayView({ duel: d, players: viewPlayers, now: 1500 }).reveal, 'Koło');
+    d.togglePause(2000);
+    const v = L.displayView({ duel: d, players: viewPlayers, now: 2500 });
+    eq([v.paused, v.reveal], [true, 'Koło']);
+  });
+
+  test('displayView: finished shows the winner, nobody active', () => {
+    const d = makeDuel();
+    d.start(0);
+    d.tick(45000);
+    const v = L.displayView({ duel: d, players: viewPlayers, now: 46000 });
+    eq([v.screen, v.winner, v.left.active, v.right.active, v.left.winner, v.right.winner, v.left.seconds],
+      ['finished', { name: 'Bartek', color: '#4ade80' }, false, false, false, true, 0]);
+  });
+
   // ---------- runner ----------
 
   function run() {

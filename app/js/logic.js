@@ -355,6 +355,51 @@
     return new Duel(options);
   }
 
+  // ---------- players screen (SPEC §6) ----------
+
+  const LOW_CLOCK_MS = 10000;
+
+  // Image keys are "Category/file name"; category names can't contain "/".
+  function answerForKey(key) {
+    return normalizeAnswer(String(key).slice(String(key).indexOf('/') + 1));
+  }
+
+  // Everything the players screen shows, as plain data. `duel` may be null (start board).
+  // screen: 'board' | 'ready' | 'duel' | 'finished'
+  function displayView({ duel, players, now }) {
+    if (!duel) {
+      return {
+        screen: 'board',
+        ranking: rankPlayers(players).map(p => ({ name: p.name, color: p.color, wins: p.wins, losses: p.losses })),
+      };
+    }
+    const finished = duel.state === 'finished';
+    const side = id => {
+      const p = players.find(x => x.id === id) || { name: '?', color: '#ffffff' };
+      const ms = duel.getClock(id, now);
+      return {
+        name: p.name,
+        color: p.color,
+        seconds: clockSeconds(ms),
+        low: ms <= LOW_CLOCK_MS,
+        active: !finished && id === duel.activeId,
+        winner: finished && id === duel.winnerId,
+      };
+    };
+    const revealing = duel.state === 'reveal' || (duel.state === 'paused' && duel.pausedFrom === 'reveal');
+    const winner = finished ? players.find(p => p.id === duel.winnerId) : null;
+    return {
+      screen: duel.state === 'ready' ? 'ready' : finished ? 'finished' : 'duel',
+      category: duel.category,
+      left: side(duel.challengerId),
+      right: side(duel.opponentId),
+      imageKey: duel.current,
+      reveal: revealing ? answerForKey(duel.current) : null,
+      paused: duel.state === 'paused',
+      winner: winner ? { name: winner.name, color: winner.color } : null,
+    };
+  }
+
   const logic = {
     IMAGE_EXTENSIONS,
     MIN_RECOMMENDED_IMAGES,
@@ -382,6 +427,8 @@
     sanitizeState,
     createDuel,
     Duel,
+    answerForKey,
+    displayView,
   };
 
   root.Floor = root.Floor || {};

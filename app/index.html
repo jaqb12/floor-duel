@@ -6,7 +6,55 @@
   <link rel="stylesheet" href="css/operator.css">
   <!-- Players window styles: copied into the about:blank players window by display.js. -->
   <style id="display-css" media="not all">
-    body { margin: 0; background: #000; color: #fff; cursor: none; }
+    html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden; cursor: none; user-select: none; }
+    body { font-family: "Segoe UI", system-ui, sans-serif; }
+    .floor { position: relative; height: 100vh; display: flex; flex-direction: column; }
+    .board, .duel { display: none; flex: 1; min-height: 0; }
+    .floor[data-screen="board"] .board { display: flex; }
+    .floor:not([data-screen="board"]) .duel { display: flex; }
+
+    /* start board */
+    .board { flex-direction: column; align-items: center; justify-content: center; gap: 5vh; padding: 4vh 5vw; }
+    .logo { margin: 0; font-size: 15vh; font-weight: 900; letter-spacing: 0.08em;
+      background: linear-gradient(90deg, #60a5fa, #c084fc, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .ranking { list-style: none; margin: 0; padding: 0; width: min(70vw, 1100px); font-size: 5vh; }
+    .ranking.two-columns { columns: 2; column-gap: 5vw; width: 90vw; font-size: 4.2vh; }
+    .ranking li { display: flex; gap: 1.5vw; break-inside: avoid; padding: 0.7vh 0; border-bottom: 1px solid #222; }
+    .r-pos { color: #888; min-width: 3ch; text-align: right; }
+    .r-name { flex: 1; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .r-score { font-variant-numeric: tabular-nums; color: #ddd; }
+
+    /* duel */
+    .duel { flex-direction: column; }
+    .category { text-align: center; font-size: 6vh; font-weight: 800; padding: 1.5vh 2vw 1vh; text-transform: uppercase; letter-spacing: 0.06em; color: #e5e7eb; }
+    .stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+    .photo { width: 100%; height: 100%; object-fit: contain; }
+    .floor:not([data-screen="duel"]) .photo { visibility: hidden; }
+    .reveal { position: absolute; left: 0; right: 0; bottom: 3vh; display: none; justify-content: center; align-items: center; gap: 3vw;
+      padding: 2vh 3vw; background: rgba(0, 0, 0, 0.82); font-size: 8vh; font-weight: 800; }
+    .reveal.visible { display: flex; }
+    .reveal-tag { color: #000; background: #fbbf24; padding: 0 2vw; border-radius: 1.5vh; font-size: 6vh; }
+    .message { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .floor[data-screen="ready"] .message, .floor[data-screen="finished"] .message { display: flex; }
+    .message-title { font-size: 9vh; font-weight: 800; }
+    .message-name { font-size: 16vh; font-weight: 900; }
+    .message-name:empty { display: none; }
+
+    .panels { display: flex; gap: 2vw; padding: 1.5vh 2vw 3vh; }
+    .panel { --player: #fff; flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 2vw; min-width: 0;
+      padding: 1.5vh 2.5vw; border-radius: 2vh; background: #111; border: 0.6vh solid #222; opacity: 0.4; transition: opacity 0.2s; }
+    .panel.right { flex-direction: row-reverse; }
+    .panel.active, .panel.winner { opacity: 1; border-color: var(--player); box-shadow: 0 0 4vh var(--player); }
+    .floor[data-screen="ready"] .panel { opacity: 1; }
+    .pname { font-size: 7vh; font-weight: 800; color: var(--player); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pclock { font-size: 13vh; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
+    .pclock.low { color: #ff3b3b; }
+    .panel.active .pclock.low { animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.35; } }
+
+    .paused { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+      background: rgba(0, 0, 0, 0.78); font-size: 20vh; font-weight: 900; letter-spacing: 0.1em; }
+    .floor.is-paused .paused { display: flex; }
   </style>
 </head>
 <body>
@@ -50,6 +98,12 @@
       <p id="folder-name" class="folder-name"></p>
       <p id="folder-message" class="message"></p>
       <ul id="category-list" class="category-list"></ul>
+
+      <h2 class="section-gap">Ekran graczy</h2>
+      <div class="buttons">
+        <button type="button" id="open-display">Otwórz ekran graczy</button>
+      </div>
+      <p id="display-status" class="message"></p>
 
       <h2 class="section-gap">Ustawienia</h2>
       <form id="settings-form" class="settings">

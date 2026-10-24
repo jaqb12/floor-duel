@@ -6,7 +6,9 @@
   const ui = () => Floor.operator;
 
   let library = null;
+  let imagesByKey = new Map();
   let state = null; // { players, settings }
+  let duel = null;  // Floor.logic.Duel, phase 5
 
   function newPlayerId() {
     return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -57,6 +59,7 @@
       if (!next) return;
       Floor.categories.releaseUrls();
       library = next;
+      imagesByKey = new Map(library.categories.flatMap(c => c.images.map(img => [img.key, img])));
       ui().renderCategories(library);
       ui().renderPlayers(state.players, library);
       if (library.source === 'handle') ui().showRestoreButton(library.rootName);
@@ -64,6 +67,25 @@
       console.error(e);
       ui().showFolderMessage(folderErrorText(e), true);
     }
+  }
+
+  // One frame for both windows; called from the players window's rAF and from a fallback interval.
+  function frame() {
+    Floor.display.checkWindow();
+    Floor.display.render(L.displayView({ duel, players: state.players, now: performance.now() }));
+  }
+
+  function resolveImage(key) {
+    const image = imagesByKey.get(key);
+    return image ? Floor.categories.getImageUrl(image) : Promise.reject(new Error('Unknown image ' + key));
+  }
+
+  // A refresh drops the duel and the players window (docs/SPIKE.md), so ask first.
+  function warnBeforeUnload(e) {
+    const duelActive = duel && duel.state !== 'finished';
+    if (!Floor.display.isOpen() && !duelActive) return;
+    e.preventDefault();
+    e.returnValue = '';
   }
 
   async function init() {
@@ -76,6 +98,17 @@
     ui().renderPlayers(state.players, library);
     ui().renderSettings(state.settings);
     ui().renderCategories(null);
+
+    Floor.display.setStatusListener(status => ui().showDisplayStatus(status));
+    Floor.display.setFrameListener(frame);
+    Floor.display.setImageResolver(resolveImage);
+    Floor.display.init();
+    document.getElementById('open-display').addEventListener('click', () => {
+      Floor.display.open();
+      frame();
+    });
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    setInterval(frame, 100);
 
     document.getElementById('pick-folder').addEventListener('click', () => loadLibrary(Floor.categories.pickFolder));
     document.getElementById('restore-folder').addEventListener('click', () => loadLibrary(Floor.categories.restoreLastFolder));

@@ -59,11 +59,11 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 ---
 
 ## Faza 4 — Ekran graczy
-- [ ] `display.js`: otwieranie/odzyskiwanie okna, kopiowanie CSS z `#display-css`, budowa DOM.
-- [ ] Widoki: plansza startowa z rankingiem, `ready`, `running`, odsłona po pasie, `paused`, `finished` (SPEC §6).
-- [ ] Pętla renderująca na `requestAnimationFrame` okna graczy + zapasowy `setInterval` (SPEC §7.3).
-- [ ] Komunikaty przy zamkniętym/nieodzyskanym oknie; po F5 „Otwórz ekran graczy” zamyka stare okno i otwiera nowe (SPEC §7.3).
-- [ ] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek.
+- [x] `display.js`: otwieranie/odzyskiwanie okna, kopiowanie CSS z `#display-css`, budowa DOM.
+- [x] Widoki: plansza startowa z rankingiem, `ready`, `running`, odsłona po pasie, `paused`, `finished` (SPEC §6).
+- [x] Pętla renderująca na `requestAnimationFrame` okna graczy + zapasowy `setInterval` (SPEC §7.3).
+- [x] Komunikaty przy zamkniętym/nieodzyskanym oknie; po F5 „Otwórz ekran graczy” zamyka stare okno i otwiera nowe (SPEC §7.3).
+- [x] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek.
 
 **Odbiór (ręcznie):** okno przeciągnięte na TV, F11, czytelne z 3 m; zamknięcie okna nie psuje panelu.
 
@@ -128,3 +128,7 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Zakresy ustawień: czas pojedynku 10–300 s, kara za pas 1–10 s; wartości spoza zakresu przycinane | Ochrona przed literówką typu 450 zamiast 45 |
 | 2026-10-24 | Uszkodzony JSON w `thefloor.v1` → start od zera + kopia surowych danych w `thefloor.v1.corrupt` + komunikat w panelu | Bezpieczny fallback bez utraty danych |
 | 2026-10-24 | Paleta 12 jasnych kolorów (czytelnych na czarnym ekranie TV) | SPEC §7.1, tło ekranu graczy jest czarne |
+| 2026-10-24 | Widok ekranu graczy liczony czystą funkcją `displayView({ duel, players, now })` w `logic.js`; `display.js` tylko rysuje | Widoki testowalne w Node |
+| 2026-10-24 | Przy zamykaniu/odświeżaniu panelu (`pagehide`) panel sam zamyka okno graczy | Po F5 i tak jest bezużyteczne (białe); nie zostaje sierota na TV |
+| 2026-10-24 | Jeśli „Otwórz ekran graczy” trafi na stare, niedostępne okno i nie da się od razu otworzyć nowego — zamyka stare i prosi o drugie kliknięcie | Przeglądarka pozwala na jedno wyskakujące okno na kliknięcie |
+| 2026-10-24 | Ranking na planszy startowej w dwóch kolumnach przy > 8 graczach; zegar ≤ 10 s czerwony u obu graczy, pulsuje tylko u aktywnego | Czytelność z kanapy |

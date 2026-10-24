@@ -219,6 +219,22 @@
     });
   }
 
+  // ---------- players window ----------
+
+  const DISPLAY_STATUS = {
+    closed: ['Okno graczy jest zamknięte.', false],
+    open: ['Okno graczy otwarte. Przeciągnij je na telewizor i naciśnij F11.', false],
+    lost: ['Okno graczy zamknęło się przy odświeżeniu panelu — kliknij „Otwórz ekran graczy”.', true],
+    retry: ['Zamknięto stare okno graczy — kliknij „Otwórz ekran graczy” jeszcze raz.', true],
+    blocked: ['Przeglądarka zablokowała okno — zezwól na wyskakujące okna dla tej strony i spróbuj ponownie.', true],
+  };
+
+  function showDisplayStatus(status) {
+    const [text, isError] = DISPLAY_STATUS[status] || ['', false];
+    showMessage('display-status', text, isError);
+    $('open-display').textContent = status === 'open' ? 'Pokaż ekran graczy' : 'Otwórz ekran graczy';
+  }
+
   // ---------- settings ----------
 
   function renderSettings(settings) {
@@ -252,5 +268,6 @@
     bindPlayers,
     renderSettings,
     bindSettings,
+    showDisplayStatus,
   };
 })();
