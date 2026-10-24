@@ -10,8 +10,35 @@
   </style>
 </head>
 <body>
-  <h1>The Floor</h1>
-  <p id="status">Ładowanie…</p>
+  <header class="top">
+    <h1>The Floor</h1>
+    <span class="subtitle">panel operatora</span>
+  </header>
+
+  <main class="columns">
+    <section class="col" id="col-players">
+      <h2>Gracze</h2>
+      <p class="placeholder">Lista graczy — faza 3.</p>
+    </section>
+
+    <section class="col" id="col-duel">
+      <h2>Pojedynek</h2>
+      <p class="placeholder">Pojedynek — faza 5.</p>
+    </section>
+
+    <section class="col" id="col-categories">
+      <h2>Kategorie</h2>
+      <div class="buttons">
+        <button type="button" id="pick-folder">Wybierz folder…</button>
+        <button type="button" id="restore-folder" hidden>Wczytaj ostatni folder</button>
+      </div>
+      <p id="folder-name" class="folder-name"></p>
+      <p id="folder-message" class="message"></p>
+      <ul id="category-list" class="category-list"></ul>
+    </section>
+  </main>
+
+  <input type="file" id="folder-input" webkitdirectory multiple hidden>
 
   <script src="js/logic.js"></script>
   <script src="js/storage.js"></script>

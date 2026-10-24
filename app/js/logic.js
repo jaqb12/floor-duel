@@ -7,6 +7,7 @@
   const HEIC_EXTENSIONS = ['heic', 'heif'];
   const IGNORED_FILES = ['thumbs.db', 'desktop.ini'];
   const LOW_TIME_SECONDS = 5;
+  const MIN_RECOMMENDED_IMAGES = 30;
 
   // ---------- file names ----------
 
@@ -40,6 +41,44 @@
       .replace(/\s+/g, ' ')
       .trim();
     return (answer || base.trim()).normalize('NFC');
+  }
+
+  // Natural, Polish-aware order: "2.jpg" before "10.jpg", "Łoś" after "Lis".
+  function compareNames(a, b) {
+    return a.localeCompare(b, 'pl', { numeric: true, sensitivity: 'base' });
+  }
+
+  function isCategoryFolder(name) {
+    return !!name && !name.startsWith('.');
+  }
+
+  // Splits one category's file names into images (sorted), HEIC count and other skipped files.
+  function classifyFiles(fileNames) {
+    const images = [];
+    let heic = 0;
+    let skipped = 0;
+    for (const name of fileNames) {
+      if (isSupportedImage(name)) images.push(name);
+      else if (isHeic(name)) heic++;
+      else skipped++;
+    }
+    images.sort(compareNames);
+    return { images, heic, skipped };
+  }
+
+  // webkitdirectory paths "Root/Category/file.jpg" -> { rootName, folders: Map(category -> [file names]) }.
+  // Files in the root and in deeper subfolders are ignored (no recursion).
+  function groupRelativePaths(paths) {
+    let rootName = '';
+    const folders = new Map();
+    for (const path of paths) {
+      const parts = path.split('/');
+      if (!rootName) rootName = parts[0];
+      if (parts.length !== 3 || !isCategoryFolder(parts[1])) continue;
+      if (!folders.has(parts[1])) folders.set(parts[1], []);
+      folders.get(parts[1]).push(parts[2]);
+    }
+    return { rootName, folders };
   }
 
   // ---------- helpers ----------
@@ -236,9 +275,14 @@
 
   const logic = {
     IMAGE_EXTENSIONS,
+    MIN_RECOMMENDED_IMAGES,
     normalizeAnswer,
     isSupportedImage,
     isHeic,
+    compareNames,
+    isCategoryFolder,
+    classifyFiles,
+    groupRelativePaths,
     shuffle,
     rankPlayers,
     clockSeconds,

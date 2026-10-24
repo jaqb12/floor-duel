@@ -40,10 +40,10 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 ---
 
 ## Faza 2 — Kategorie z folderu
-- [ ] `categories.js`: wybór folderu (`showDirectoryPicker` lub fallback wg wyników spike), lista bezpośrednich podfolderów i plików wg SPEC §3.
-- [ ] Zapamiętanie folderu (IndexedDB) i przycisk „Wczytaj ostatni folder”.
-- [ ] Lista kategorii w panelu: nazwa, liczba zdjęć, ostrzeżenie < 30, info o pominiętych HEIC.
-- [ ] Zarządzanie blob URL-ami (tworzenie na żądanie, zwalnianie przy zmianie folderu/kategorii).
+- [x] `categories.js`: wybór folderu (`showDirectoryPicker` lub fallback wg wyników spike), lista bezpośrednich podfolderów i plików wg SPEC §3.
+- [x] Zapamiętanie folderu (IndexedDB) i przycisk „Wczytaj ostatni folder”.
+- [x] Lista kategorii w panelu: nazwa, liczba zdjęć, ostrzeżenie < 30, info o pominiętych HEIC.
+- [x] Zarządzanie blob URL-ami (tworzenie na żądanie, zwalnianie przy zmianie folderu/kategorii).
 
 **Odbiór (ręcznie):** wskazanie `samples/Kategorie` pokazuje 3 kategorie z poprawnymi liczbami; `.txt` pominięty; po restarcie przeglądarki „Wczytaj ostatni folder” działa.
 
@@ -122,3 +122,5 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Stan `setup` żyje w UI; `createDuel` zwraca pojedynek w stanie `ready` | Wybór graczy/kategorii to formularz, nie logika |
 | 2026-10-24 | Nazwa, która po normalizacji byłaby pusta (np. `(2).jpg`), zostaje jako nazwa bez rozszerzenia | Operator zawsze widzi jakąś odpowiedź |
 | 2026-10-24 | Dodane `applyResult(players, duel)` i `clockSeconds(ms)` w `logic.js` | Zatwierdzanie wyniku i zaokrąglanie zegara testowalne bez DOM |
+| 2026-10-24 | Kolejność kategorii i zdjęć: naturalna, polska (`2.jpg` przed `10.jpg`); ukryte podfoldery (`.git`) pomijane | Przewidywalna lista w panelu |
+| 2026-10-24 | Kategorie z 0 zdjęć widoczne na liście (wyszarzone), z adnotacją, że nie można ich wybrać | Operator widzi, że folder istnieje, ale jest pusty |

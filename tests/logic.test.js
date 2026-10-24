@@ -81,6 +81,34 @@
     ok(!L.isHeic('a.jpg') && !L.isHeic('.x.heic'), 'not heic');
   });
 
+  // ---------- categories ----------
+
+  test('classifyFiles: images sorted naturally, HEIC and others counted', () => {
+    const r = L.classifyFiles(['10.jpg', '2.jpg', 'notatka.txt', 'IMG_1.HEIC', 'Thumbs.db', '.ukryty.png', 'Łoś.png', 'Lis.webp', 'x.heif']);
+    eq(r.images, ['2.jpg', '10.jpg', 'Lis.webp', 'Łoś.png']);
+    eq([r.heic, r.skipped], [2, 3]);
+    eq(L.classifyFiles([]), { images: [], heic: 0, skipped: 0 });
+  });
+
+  test('groupRelativePaths: direct subfolders only, no recursion, hidden folders skipped', () => {
+    const r = L.groupRelativePaths([
+      'Kategorie/Owoce/Banan.svg',
+      'Kategorie/Owoce/Jabłko.svg',
+      'Kategorie/plik_w_korzeniu.jpg',
+      'Kategorie/Kolory/Głębiej/Ukryty.svg',
+      'Kategorie/Kolory/Czerwony.svg',
+      'Kategorie/.git/config',
+      'Kategorie/__proto__/a.jpg',
+    ]);
+    eq(r.rootName, 'Kategorie');
+    eq(Array.from(r.folders), [['Owoce', ['Banan.svg', 'Jabłko.svg']], ['Kolory', ['Czerwony.svg']], ['__proto__', ['a.jpg']]]);
+    eq(L.groupRelativePaths([]).rootName, '');
+  });
+
+  test('isCategoryFolder skips hidden and empty names', () => {
+    ok(L.isCategoryFolder('Owoce') && !L.isCategoryFolder('.git') && !L.isCategoryFolder(''));
+  });
+
   // ---------- helpers ----------
 
   test('shuffle: permutation, input untouched, deterministic with seed', () => {
