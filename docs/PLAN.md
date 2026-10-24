@@ -93,6 +93,15 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 
 ---
 
+## Rozszerzenie — poziomy trudności kategorii (prośba użytkownika, 2026-10-24)
+- [x] `logic.js`: `groupRelativePaths` zwraca dwa poziomy folderów; `resolveCategories` rozpoznaje poziomy, sortuje i rozwiązuje powtórzone nazwy (SPEC §3).
+- [x] `categories.js`: odczyt dwóch poziomów folderów (uchwyt i fallback `webkitdirectory`), `Category.level`.
+- [x] Panel: nagłówki poziomów na liście kategorii, `<optgroup>` w wyborze kategorii gracza i pojedynku.
+- [x] Testy `resolveCategories` i nowego `groupRelativePaths`.
+- [ ] Ręcznie: folder z podfolderami `Łatwe` / `Trudne` → kategorie pogrupowane; pojedynek z kategorii z poziomu działa; na TV sama nazwa kategorii.
+
+---
+
 ## Lista ręcznego testu (na koniec)
 1. Dwuklik `app/index.html` w Edge → brak błędów w konsoli.
 2. Wybór folderu → kategorie z liczbami, ostrzeżenia działają.
@@ -146,4 +155,6 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Odliczanie 3 s po START jako stan `countdown` w `Duel` (`countdownSeconds`, domyślnie 0 w logice, 3 w aplikacji); zegar startuje od `countdownUntil`, nie od najbliższego ticka | Prośba użytkownika („3 piknięcia jak w programie”); czas z timestampów |
 | 2026-10-24 | Muzyka napięcia cichnie przy pauzie, wraca po wznowieniu; po zmianie tury intensywność spada, jeśli rywal ma ≥ 12 s | Napięcie zależy od tego, kto teraz odpowiada |
 | 2026-10-24 | Nowe brawa: ~28 „osób” z własną barwą, tempem i pozycją stereo, różne momenty końca + tło szumu | Poprzednie brawa brzmiały sztucznie (zgłoszenie użytkownika) |
+| 2026-10-24 | Poziomy trudności jako foldery pośrednie (`Kategorie\Łatwe\Zwierzęta`); folder ze zdjęciami albo bez podfolderów pozostaje kategorią | Wybór użytkownika (zamiast nawiasu w nazwie folderu); stary układ działa bez zmian |
+| 2026-10-24 | Kategoria nadal identyfikowana nazwą folderu; powtórzona nazwa z poziomem → „Nazwa (Poziom)” | Gracze mają zapisaną kategorię jako tekst — przeniesienie folderu do poziomu nie psuje przypisań |
 | 2026-10-24 | Ostatni folder wczytuje się automatycznie przy starcie, ale tylko bez pytania o zgodę (`queryPermission` = granted); inaczej komunikat i przycisk | Prośba użytkownika; `requestPermission` wymaga kliknięcia, więc przy starcie nie da się poprosić o zgodę |

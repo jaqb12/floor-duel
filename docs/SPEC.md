@@ -25,7 +25,11 @@ Działa też na jednym ekranie (patrz 7.4 — ukrywanie odpowiedzi).
 ## 3. Kategorie i zdjęcia
 - Użytkownik wskazuje **folder główny** (np. `D:\TheFloor\Kategorie`).
 - **Każdy bezpośredni podfolder = kategoria.** Nazwa kategorii = nazwa podfolderu.
-- **Zdjęcia = pliki bezpośrednio w podfolderze** (bez rekurencji). Obsługiwane rozszerzenia (bez względu na wielkość liter): `jpg, jpeg, png, webp, gif, bmp, avif, svg`.
+- **Poziomy trudności** (dodane na prośbę użytkownika, 2026-10-24): podfolder, który nie ma bezpośrednio żadnego zdjęcia, ale ma podfoldery, to **poziom** (np. `Kategorie\Łatwe\Zwierzęta\`); jego podfoldery są kategoriami tego poziomu. Głębiej nie szukamy. Oba układy można mieszać — kategoria bez poziomu działa jak dotąd.
+  - Kolejność poziomów: łatwe → normalne/średnie → trudne → eksperckie (rozpoznawane po początku nazwy, bez względu na wielkość liter: `łatw`, `norm`/`śred`, `trud`, `eksp`/`exp`); inne nazwy poziomów na końcu, alfabetycznie. Kategorie bez poziomu na początku listy.
+  - Nazwa kategorii to nazwa jej folderu (graczom nie pokazujemy poziomu). Gdy ta sama nazwa występuje w kilku miejscach, kategorie z poziomem dostają dopisek „Nazwa (Poziom)”.
+  - Panel operatora pokazuje kategorie pogrupowane według poziomów (nagłówki na liście, grupy w listach wyboru).
+- **Zdjęcia = pliki bezpośrednio w folderze kategorii** (bez rekurencji). Obsługiwane rozszerzenia (bez względu na wielkość liter): `jpg, jpeg, png, webp, gif, bmp, avif, svg`.
 - Pomijane: pliki ukryte (zaczynające się od `.`), `Thumbs.db`, `desktop.ini`, inne rozszerzenia. **HEIC/HEIF** są pomijane z czytelnym ostrzeżeniem („X plików HEIC — przekonwertuj na JPG”).
 - **Poprawna odpowiedź = nazwa pliku** po normalizacji:
   1. usuń rozszerzenie,

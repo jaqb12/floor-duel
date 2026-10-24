@@ -1,8 +1,8 @@
-// Reads the categories folder (SPEC §3): each direct subfolder is a category,
-// images are the files directly inside it.
+// Reads the categories folder (SPEC §3): each subfolder is a category, or a difficulty
+// level whose subfolders are categories. Images are the files directly inside a category.
 //
 // Library = { rootName, source: 'handle' | 'files', categories: [Category] }
-// Category = { name, heic, skipped, images: [{ key, fileName, answer, getFile() }] }
+// Category = { name, level, heic, skipped, images: [{ key, fileName, answer, getFile() }] }
 (function () {
   'use strict';
   window.Floor = window.Floor || {};
@@ -10,47 +10,55 @@
 
   const urls = new Map(); // image key -> Promise<blob URL>
 
-  function makeCategory(name, fileNames, getFile) {
-    const { images, heic, skipped } = L.classifyFiles(fileNames);
-    return {
-      name,
-      heic,
-      skipped,
-      images: images.map(fileName => ({
-        key: name + '/' + fileName,
-        fileName,
-        answer: L.normalizeAnswer(fileName),
-        getFile: () => getFile(fileName),
-      })),
-    };
+  // `folders` as for L.resolveCategories; getFile(folder, fileName) -> Promise<File>.
+  function makeCategories(folders, getFile) {
+    return L.resolveCategories(folders).map(({ name, level, fileNames, folder }) => {
+      const { images, heic, skipped } = L.classifyFiles(fileNames);
+      return {
+        name,
+        level,
+        heic,
+        skipped,
+        images: images.map(fileName => ({
+          key: name + '/' + fileName,
+          fileName,
+          answer: L.normalizeAnswer(fileName),
+          getFile: () => getFile(folder, fileName),
+        })),
+      };
+    });
   }
 
-  function sortByName(categories) {
-    return categories.sort((a, b) => L.compareNames(a.name, b.name));
+  // Directory handle -> { name, fileNames, files: Map(name -> handle), subfolders } (two levels).
+  async function readDirectory(dir, depth) {
+    const folder = { name: dir.name, fileNames: [], files: new Map(), subfolders: [] };
+    for await (const [name, entry] of dir.entries()) {
+      if (entry.kind === 'file') {
+        folder.fileNames.push(name);
+        folder.files.set(name, entry);
+      } else if (depth > 0 && L.isCategoryFolder(name)) {
+        folder.subfolders.push(await readDirectory(entry, depth - 1));
+      }
+    }
+    return folder;
   }
 
   async function readHandle(root) {
-    const categories = [];
-    for await (const [name, entry] of root.entries()) {
-      if (entry.kind !== 'directory' || !L.isCategoryFolder(name)) continue;
-      const files = new Map();
-      for await (const [fileName, fileEntry] of entry.entries()) {
-        if (fileEntry.kind === 'file') files.set(fileName, fileEntry);
-      }
-      categories.push(makeCategory(name, Array.from(files.keys()), fileName => files.get(fileName).getFile()));
-    }
-    return { rootName: root.name, source: 'handle', categories: sortByName(categories) };
+    const { subfolders } = await readDirectory(root, 2);
+    const categories = makeCategories(subfolders, (folder, fileName) => folder.files.get(fileName).getFile());
+    return { rootName: root.name, source: 'handle', categories };
   }
 
   function readFileList(fileList) {
     const byPath = new Map(Array.from(fileList, f => [f.webkitRelativePath, f]));
     const { rootName, folders } = L.groupRelativePaths(Array.from(byPath.keys()));
-    const categories = [];
-    for (const [name, fileNames] of folders) {
-      const prefix = rootName + '/' + name + '/';
-      categories.push(makeCategory(name, fileNames, fileName => Promise.resolve(byPath.get(prefix + fileName))));
+    // Remember each folder's path so its files can be found again.
+    for (const top of folders) {
+      top.path = rootName + '/' + top.name + '/';
+      for (const sub of top.subfolders) sub.path = top.path + sub.name + '/';
     }
-    return { rootName, source: 'files', categories: sortByName(categories) };
+    const categories = makeCategories(folders, (folder, fileName) => Promise.resolve(byPath.get(folder.path + fileName)));
+    return { rootName, source: 'files', categories };
   }
 
   function canRememberFolder() {

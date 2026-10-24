@@ -74,19 +74,57 @@
     return { images, heic, skipped };
   }
 
-  // webkitdirectory paths "Root/Category/file.jpg" -> { rootName, folders: Map(category -> [file names]) }.
-  // Files in the root and in deeper subfolders are ignored (no recursion).
+  // webkitdirectory paths "Root/Folder/file.jpg" and "Root/Folder/Sub/file.jpg" ->
+  // { rootName, folders: [{ name, fileNames, subfolders: [{ name, fileNames }] }] }.
+  // Files in the root and anything deeper are ignored.
   function groupRelativePaths(paths) {
     let rootName = '';
     const folders = new Map();
+    const folder = (map, name) => {
+      if (!map.has(name)) map.set(name, { name, fileNames: [], subs: new Map() });
+      return map.get(name);
+    };
     for (const path of paths) {
       const parts = path.split('/');
       if (!rootName) rootName = parts[0];
-      if (parts.length !== 3 || !isCategoryFolder(parts[1])) continue;
-      if (!folders.has(parts[1])) folders.set(parts[1], []);
-      folders.get(parts[1]).push(parts[2]);
+      if (parts.length === 3) folder(folders, parts[1]).fileNames.push(parts[2]);
+      else if (parts.length === 4) folder(folder(folders, parts[1]).subs, parts[2]).fileNames.push(parts[3]);
     }
-    return { rootName, folders };
+    const plain = f => ({ name: f.name, fileNames: f.fileNames, subfolders: Array.from(f.subs.values(), plain) });
+    return { rootName, folders: Array.from(folders.values(), plain) };
+  }
+
+  // Difficulty folders sort by these name stems ("Łatwe", "łatwy", ...); other names go last.
+  const LEVEL_STEMS = [['łatw'], ['norm', 'śred'], ['trud'], ['eksp', 'exp']];
+
+  function levelRank(level) {
+    const name = level.normalize('NFC').toLowerCase();
+    const rank = LEVEL_STEMS.findIndex(stems => stems.some(stem => name.startsWith(stem)));
+    return rank < 0 ? LEVEL_STEMS.length : rank;
+  }
+
+  // Folders of the categories root -> categories (SPEC §3). A folder with images directly
+  // inside, or without subfolders, is a category. Otherwise it is a difficulty level and its
+  // subfolders are categories. A category name repeated across levels gets " (Level)".
+  // Input as from groupRelativePaths. Returns [{ name, level, fileNames, folder }], where
+  // `folder` is the input object the files came from, sorted: no level first, then by level.
+  function resolveCategories(folders) {
+    const list = [];
+    for (const top of folders) {
+      if (!isCategoryFolder(top.name)) continue;
+      const subs = (top.subfolders || []).filter(s => isCategoryFolder(s.name));
+      if (top.fileNames.some(isSupportedImage) || !subs.length) {
+        list.push({ name: top.name, level: null, fileNames: top.fileNames, folder: top });
+      } else {
+        for (const sub of subs) list.push({ name: sub.name, level: top.name, fileNames: sub.fileNames, folder: sub });
+      }
+    }
+    const seen = new Map();
+    for (const c of list) seen.set(c.name, (seen.get(c.name) || 0) + 1);
+    for (const c of list) if (c.level && seen.get(c.name) > 1) c.name += ' (' + c.level + ')';
+    const levelOrder = c => c.level === null ? -1 : levelRank(c.level);
+    return list.sort((a, b) => levelOrder(a) - levelOrder(b) ||
+      (a.level !== b.level && compareNames(a.level, b.level)) || compareNames(a.name, b.name));
   }
 
   // ---------- helpers ----------
@@ -480,6 +518,7 @@
     isCategoryFolder,
     classifyFiles,
     groupRelativePaths,
+    resolveCategories,
     shuffle,
     rankPlayers,
     clockSeconds,

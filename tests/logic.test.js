@@ -90,19 +90,61 @@
     eq(L.classifyFiles([]), { images: [], heic: 0, skipped: 0 });
   });
 
-  test('groupRelativePaths: direct subfolders only, no recursion, hidden folders skipped', () => {
+  test('groupRelativePaths: two folder levels, root files and deeper paths ignored', () => {
     const r = L.groupRelativePaths([
       'Kategorie/Owoce/Banan.svg',
       'Kategorie/Owoce/Jabłko.svg',
       'Kategorie/plik_w_korzeniu.jpg',
       'Kategorie/Kolory/Głębiej/Ukryty.svg',
       'Kategorie/Kolory/Czerwony.svg',
-      'Kategorie/.git/config',
+      'Kategorie/Łatwe/Zwierzęta/Lew.jpg',
+      'Kategorie/Łatwe/Zwierzęta/Za/głęboko.jpg',
       'Kategorie/__proto__/a.jpg',
     ]);
     eq(r.rootName, 'Kategorie');
-    eq(Array.from(r.folders), [['Owoce', ['Banan.svg', 'Jabłko.svg']], ['Kolory', ['Czerwony.svg']], ['__proto__', ['a.jpg']]]);
+    eq(r.folders, [
+      { name: 'Owoce', fileNames: ['Banan.svg', 'Jabłko.svg'], subfolders: [] },
+      { name: 'Kolory', fileNames: ['Czerwony.svg'], subfolders: [{ name: 'Głębiej', fileNames: ['Ukryty.svg'], subfolders: [] }] },
+      { name: 'Łatwe', fileNames: [], subfolders: [{ name: 'Zwierzęta', fileNames: ['Lew.jpg'], subfolders: [] }] },
+      { name: '__proto__', fileNames: ['a.jpg'], subfolders: [] },
+    ]);
     eq(L.groupRelativePaths([]).rootName, '');
+  });
+
+  const folder = (name, fileNames, subfolders) => ({ name, fileNames, subfolders: subfolders || [] });
+  const resolved = folders => L.resolveCategories(folders).map(c => [c.name, c.level, c.fileNames]);
+
+  test('resolveCategories: plain categories, subfolders of a category ignored (SPEC §3)', () => {
+    eq(resolved([
+      folder('Owoce', ['Banan.svg']),
+      folder('Kolory', ['Czerwony.svg'], [folder('Głębiej', ['Ukryty.svg'])]),
+      folder('Pusta', []),
+      folder('.git', ['config']),
+    ]), [['Kolory', null, ['Czerwony.svg']], ['Owoce', null, ['Banan.svg']], ['Pusta', null, []]]);
+  });
+
+  test('resolveCategories: a folder without images but with subfolders is a difficulty level', () => {
+    const r = L.resolveCategories([
+      folder('Trudne', ['notatka.txt'], [folder('Samoloty', ['F-16.jpg']), folder('.ukryty', ['a.jpg'])]),
+      folder('Łatwe', [], [folder('Zwierzęta', ['Lew.jpg']), folder('Owoce', [])]),
+      folder('Flagi', ['Polska.png']),
+    ]);
+    eq(r.map(c => [c.name, c.level]), [['Flagi', null], ['Owoce', 'Łatwe'], ['Zwierzęta', 'Łatwe'], ['Samoloty', 'Trudne']]);
+    eq(r[3].folder.name, 'Samoloty', 'the source folder is kept for reading files');
+  });
+
+  test('resolveCategories: levels ordered easy → normal → hard → expert, unknown names last', () => {
+    const levels = ['Własne', 'Eksperckie', 'trudny', 'Średnie', 'ŁATWE', 'Expert', 'Normalne', 'Bonus'];
+    const r = L.resolveCategories(levels.map(l => folder(l, [], [folder('K ' + l, ['a.jpg'])])));
+    eq(r.map(c => c.level), ['ŁATWE', 'Normalne', 'Średnie', 'trudny', 'Eksperckie', 'Expert', 'Bonus', 'Własne']);
+  });
+
+  test('resolveCategories: a name repeated across levels gets the level in brackets', () => {
+    eq(resolved([
+      folder('Flagi', ['a.jpg']),
+      folder('Łatwe', [], [folder('Flagi', ['b.jpg'])]),
+      folder('Trudne', [], [folder('Flagi', ['c.jpg']), folder('Samoloty', ['d.jpg'])]),
+    ]).map(c => c[0]), ['Flagi', 'Flagi (Łatwe)', 'Flagi (Trudne)', 'Samoloty']);
   });
 
   test('isCategoryFolder skips hidden and empty names', () => {

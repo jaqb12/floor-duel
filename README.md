@@ -32,9 +32,23 @@ Kategorie\
 | `10.jpg` | 10 — **źle**: nazwij plik odpowiedzią! |
 
 - Obsługiwane formaty: **JPG, PNG, WEBP, GIF, BMP, AVIF, SVG**.
-- Podfoldery wewnątrz kategorii, pliki ukryte i inne formaty są pomijane.
+- Podfoldery wewnątrz kategorii, pliki ukryte i inne formaty są pomijane (wyjątek: foldery poziomów, patrz niżej).
 - **Zdjęcia z iPhone'a (HEIC)** nie są obsługiwane — aplikacja pokaże ostrzeżenie. Przekonwertuj je na JPG (np. w aplikacji Zdjęcia: *Zapisz jako* → JPG, albo w ustawieniach iPhone'a: *Aparat → Formaty → Najbardziej zgodne*).
 - Do pojedynku przyda się **co najmniej 30 zdjęć** w kategorii — przy mniejszej liczbie zdjęcia zaczną się powtarzać (panel ostrzega).
+
+**Poziomy trudności (opcjonalnie).** Kategorie można pogrupować w foldery poziomów — panel pokaże je w grupach, a gracze zobaczą tylko nazwę kategorii:
+
+```
+Kategorie\
+  Łatwe\
+    Zwierzęta\
+    Owoce\
+  Trudne\
+    Samoloty\
+  Flagi\          ← kategoria bez poziomu też działa
+```
+
+Folder bez zdjęć, za to z podfolderami, to poziom. Poziomy układają się w kolejności: łatwe → normalne/średnie → trudne → eksperckie (inne nazwy na końcu). Jeśli ta sama nazwa kategorii jest w dwóch poziomach, panel dopisze poziom w nawiasie, np. „Flagi (Trudne)”.
 
 Do wypróbowania aplikacji są gotowe przykładowe kategorie w `samples\Kategorie`.
 
