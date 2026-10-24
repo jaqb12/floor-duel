@@ -1,0 +1,16 @@
+# Prawdziwe zdjęcia użytkownika — nie commitujemy
+/Kategorie/
+/categories/
+
+# System
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Edytory
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Node (opcjonalne testy)
+node_modules/

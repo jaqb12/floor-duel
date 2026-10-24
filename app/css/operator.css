@@ -1,0 +1,8 @@
+/* Operator panel styles. Filled in phases 3-6. */
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: #16181d;
+  color: #e8e8e8;
+}
