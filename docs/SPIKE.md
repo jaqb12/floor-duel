@@ -1,6 +1,6 @@
 # SPIKE — faza 0: API przeglądarki z `file://`
 
-Strona testowa: `app/spike.html` (do usunięcia w fazie 6). Próbki: `samples/Kategorie` (Kolory 9, Kształty 9 + `notatka.txt`, Owoce 8).
+Strona testowa: `app/spike.html` — usunięta w fazie 6, dostępna w historii git (`git show 0dca6ad:app/spike.html`). Próbki: `samples/Kategorie` (Kolory 9, Kształty 9 + `notatka.txt`, Owoce 8).
 
 ## Wyniki
 

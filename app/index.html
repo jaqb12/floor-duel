@@ -148,6 +148,7 @@
       <h2 class="section-gap">Ekran graczy</h2>
       <div class="buttons">
         <button type="button" id="open-display">Otwórz ekran graczy</button>
+        <button type="button" id="big-open" title="Tryb jednego ekranu: ekran graczy na całym panelu">Duży podgląd</button>
       </div>
       <p id="display-status" class="message"></p>
 
@@ -160,6 +161,15 @@
       </form>
     </section>
   </main>
+
+  <div id="big-preview" class="big-preview" hidden>
+    <div class="big-bar">
+      <span class="note">Odpowiedź:</span>
+      <span id="big-answer" class="big-answer"></span>
+      <button type="button" id="big-close">Zamknij podgląd</button>
+    </div>
+    <div id="big-slot" class="big-slot"></div>
+  </div>
 
   <input type="file" id="folder-input" webkitdirectory multiple hidden>
 

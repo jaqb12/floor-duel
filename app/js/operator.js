@@ -327,6 +327,7 @@
     $('duel-live').hidden = !live;
     if (!live) {
       renderPreview(null);
+      setText($('big-answer'), '');
       return;
     }
     const state = duel.state;
@@ -335,8 +336,11 @@
     setText($('live-category'), duel.category);
     setText($('live-pool'), poolText(duel, info.skipped));
     renderPreview(duel.current);
-    setText($('live-answer'), info.answer || '');
-    $('live-answer').classList.toggle('hidden-answer', info.hideAnswer && !info.holdingAnswer && !revealing && state !== 'finished');
+    const hidden = info.hideAnswer && !info.holdingAnswer && !revealing && state !== 'finished';
+    for (const node of [$('live-answer'), $('big-answer')]) {
+      setText(node, info.answer || '');
+      node.classList.toggle('hidden-answer', hidden);
+    }
     let hint = '';
     if (state === 'paused') hint = 'Pauza — Esc, żeby wznowić.';
     else if (state === 'reveal') hint = 'Pas — gracze widzą odpowiedź, zegar biegnie.';
@@ -454,12 +458,32 @@
     lost: ['Okno graczy zamknęło się przy odświeżeniu panelu — kliknij „Otwórz ekran graczy”.', true],
     retry: ['Zamknięto stare okno graczy — kliknij „Otwórz ekran graczy” jeszcze raz.', true],
     blocked: ['Przeglądarka zablokowała okno — zezwól na wyskakujące okna dla tej strony i spróbuj ponownie.', true],
+    reloaded: ['Okno graczy zostało odświeżone i straciło połączenie — kliknij „Otwórz ekran graczy”.', true],
   };
 
   function showDisplayStatus(status) {
     const [text, isError] = DISPLAY_STATUS[status] || ['', false];
     showMessage('display-status', text, isError);
     $('open-display').textContent = status === 'open' ? 'Pokaż ekran graczy' : 'Otwórz ekran graczy';
+  }
+
+  // ---------- big preview (SPEC §7.4) ----------
+
+  // A fresh iframe each time, so key listeners never pile up. Returns its document.
+  function openBigPreview() {
+    const slot = $('big-slot');
+    slot.textContent = '';
+    const frame = el('iframe', 'big-frame');
+    frame.title = 'Duży podgląd ekranu graczy';
+    slot.append(frame);
+    $('big-preview').hidden = false;
+    frame.focus();
+    return frame.contentDocument;
+  }
+
+  function closeBigPreview() {
+    $('big-preview').hidden = true;
+    $('big-slot').textContent = '';
   }
 
   // ---------- settings ----------
@@ -501,5 +525,7 @@
     resetDuelSetup,
     showSetupProblem,
     handleKey,
+    openBigPreview,
+    closeBigPreview,
   };
 })();

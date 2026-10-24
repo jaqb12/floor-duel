@@ -15,6 +15,7 @@
   let holdingAnswer = false;
   let skippedImages = 0;
   let checkedKey = null;
+  let bigRenderer = null; // big preview on the operator screen (SPEC §7.4)
 
   function newPlayerId() {
     return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -166,7 +167,10 @@
     if (!key || key === checkedKey) return;
     checkedKey = key;
     const next = duel.peekNext();
-    if (next) Floor.display.preload(next);
+    if (next) {
+      Floor.display.preload(next);
+      if (bigRenderer) bigRenderer.preload(next);
+    }
     probeImage(key).catch(e => {
       console.error('Skipping broken image', key, e);
       if (!duel || duel.current !== key) return;
@@ -223,7 +227,9 @@
       checkCurrentImage();
     }
     Floor.display.checkWindow();
-    Floor.display.render(L.displayView({ duel, players: state.players, now }));
+    const view = L.displayView({ duel, players: state.players, now });
+    Floor.display.render(view);
+    if (bigRenderer) bigRenderer.render(view);
     const image = duel && imagesByKey.get(duel.current);
     ui().renderDuel({
       duel,
@@ -264,6 +270,14 @@
     document.getElementById('open-display').addEventListener('click', () => {
       Floor.display.open();
       frame();
+    });
+    document.getElementById('big-open').addEventListener('click', () => {
+      bigRenderer = Floor.display.createRenderer(ui().openBigPreview());
+      frame();
+    });
+    document.getElementById('big-close').addEventListener('click', () => {
+      bigRenderer = null;
+      ui().closeBigPreview();
     });
     window.addEventListener('beforeunload', warnBeforeUnload);
     setInterval(frame, 100);

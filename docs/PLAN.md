@@ -63,7 +63,7 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 - [x] Widoki: plansza startowa z rankingiem, `ready`, `running`, odsłona po pasie, `paused`, `finished` (SPEC §6).
 - [x] Pętla renderująca na `requestAnimationFrame` okna graczy + zapasowy `setInterval` (SPEC §7.3).
 - [x] Komunikaty przy zamkniętym/nieodzyskanym oknie; po F5 „Otwórz ekran graczy” zamyka stare okno i otwiera nowe (SPEC §7.3).
-- [ ] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek. **Otwarte (2026-10-24):** przy ręcznym teście F5 nie pokazało się ani pytanie przeglądarki, ani komunikat po odświeżeniu — do zbadania później (decyzja użytkownika).
+- [x] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek. *(2026-10-24: w ręcznym teście brak pytania i komunikatu — najpewniej F5 trafiło do okna graczy, które ma fokus po otwarciu. Poprawka w fazie 6: okno graczy blokuje F5/Ctrl+R, a panel wykrywa odświeżone okno. Do ponownego sprawdzenia.)*
 
 **Odbiór (ręcznie):** okno przeciągnięte na TV, F11, czytelne z 3 m; zamknięcie okna nie psuje panelu.
 
@@ -83,10 +83,10 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 ---
 
 ## Faza 6 — Szlif i dokumentacja
-- [ ] Usunięcie `spike.html`, porządek w kodzie, brak `console.log` poza błędami.
-- [ ] Tryb jednego ekranu (SPEC §7.4) z „Dużym podglądem”.
-- [ ] Wygląd: spójne kolory, duże fonty na TV, czytelne stany przycisków.
-- [ ] `README.md` po polsku: przygotowanie folderu i nazw plików, uruchomienie, dwa ekrany (Win+P → Rozszerz, przeciągnięcie okna, F11), skróty klawiszowe, zasady, HEIC → JPG, FAQ.
+- [x] Usunięcie `spike.html`, porządek w kodzie, brak `console.log` poza błędami.
+- [x] Tryb jednego ekranu (SPEC §7.4) z „Dużym podglądem”.
+- [x] Wygląd: spójne kolory, duże fonty na TV, czytelne stany przycisków.
+- [x] `README.md` po polsku: przygotowanie folderu i nazw plików, uruchomienie, dwa ekrany (Win+P → Rozszerz, przeciągnięcie okna, F11), skróty klawiszowe, zasady, HEIC → JPG, FAQ.
 - [ ] Test na prawdziwym folderze użytkownika (duże zdjęcia z telefonu).
 
 **Odbiór:** definicja „gotowe” z `CLAUDE.md` spełniona.
@@ -137,3 +137,6 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Przy „Ukrywaj odpowiedź” odpowiedź w panelu jest odsłonięta w trakcie pasa i po końcu pojedynku | W trybie jednego ekranu gracze mają ją zobaczyć jak na TV |
 | 2026-10-24 | Uszkodzone zdjęcie jest sprawdzane (`decode()`) w panelu, pomijane i usuwane z puli pojedynku; licznik w panelu | SPEC §9; nie wraca po przetasowaniu |
 | 2026-10-24 | „Unieważnij” zawsze z potwierdzeniem | Ochrona przed przypadkowym kliknięciem w trakcie gry |
+| 2026-10-24 | Okno graczy (i duży podgląd) blokuje F5 / Ctrl+R; panel wykrywa okno odświeżone przyciskiem przeglądarki (status „odświeżone — otwórz ponownie”) | Po otwarciu fokus jest w oknie graczy, więc F5 trafiało tam i robiło biały ekran bez żadnego komunikatu |
+| 2026-10-24 | „Duży podgląd” = ten sam renderer ekranu graczy w `<iframe>` na całym panelu + pasek z odpowiedzią (zamazaną bez H); `display.js` udostępnia `createRenderer(doc)` | SPEC §7.4; jeden kod widoku dla TV i jednego ekranu |
+| 2026-10-24 | Globalna reguła CSS `[hidden] { display: none !important }` | `display: flex` w klasach nadpisywało `hidden`: po zatwierdzeniu wyniku sekcja pojedynku z aktywnymi przyciskami zostawała na ekranie (zgłoszenie użytkownika) |
