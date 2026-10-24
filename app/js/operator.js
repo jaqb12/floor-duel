@@ -5,13 +5,7 @@
   const L = Floor.logic;
 
   const $ = id => document.getElementById(id);
-
-  // Polish plural: 1 zdjęcie, 2–4 zdjęcia, 5+ zdjęć (12–14 too).
-  function plural(n, one, few, many) {
-    if (n === 1) return one;
-    const tens = n % 100;
-    return n % 10 >= 2 && n % 10 <= 4 && (tens < 12 || tens > 14) ? few : many;
-  }
+  const t = (key, params) => Floor.i18n.t(key, params);
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -45,13 +39,13 @@
     const li = el('li', 'category category-' + level);
     li.dataset.name = cat.name.toLocaleLowerCase('pl');
     const count = el('span', 'count', String(n));
-    count.title = n + ' ' + plural(n, 'zdjęcie', 'zdjęcia', 'zdjęć');
+    count.title = t('categories.photos', { n });
     li.append(el('span', 'category-name', cat.name), count);
     const notes = [];
-    if (level === 'empty') notes.push(['note', 'brak zdjęć — nie do wyboru']);
-    if (level === 'low') notes.push(['note warn', '⚠ mniej niż ' + L.MIN_RECOMMENDED_IMAGES + ' — zdjęcia mogą się powtarzać']);
-    if (cat.heic) notes.push(['note warn', '⚠ ' + cat.heic + '× HEIC — przekonwertuj na JPG']);
-    if (cat.skipped) notes.push(['note', 'pominięte inne pliki: ' + cat.skipped]);
+    if (level === 'empty') notes.push(['note', t('categories.empty')]);
+    if (level === 'low') notes.push(['note warn', t('categories.low', { min: L.MIN_RECOMMENDED_IMAGES })]);
+    if (cat.heic) notes.push(['note warn', t('categories.heic', { n: cat.heic })]);
+    if (cat.skipped) notes.push(['note', t('categories.skipped', { n: cat.skipped })]);
     for (const [className, text] of notes) li.append(el('span', className + ' category-note', text));
     return li;
   }
@@ -70,21 +64,21 @@
     const filter = $('category-filter');
     shownLibrary = library;
     showRestoreButton(rememberedFolder);
-    $('pick-folder').textContent = library ? 'Zmień folder…' : 'Wybierz folder…';
+    $('pick-folder').textContent = t(library ? 'categories.change' : 'categories.pick');
     if (!library) {
-      $('folder-name').textContent = 'Nie wybrano folderu z kategoriami.';
+      $('folder-name').textContent = t('categories.noFolder');
       $('categories-count').textContent = '';
       filter.hidden = true;
       return;
     }
     const count = library.categories.length;
     $('folder-name').textContent = '📁 ' + library.rootName;
-    $('categories-count').textContent = count + ' ' + plural(count, 'kategoria', 'kategorie', 'kategorii');
+    $('categories-count').textContent = t('categories.count', { n: count });
     filter.hidden = count <= 8;
     if (!count) {
-      showFolderMessage('W tym folderze nie ma podfolderów. Każdy podfolder to jedna kategoria.', true);
+      showFolderMessage(t('categories.noSubfolders'), true);
     } else if (library.source === 'files') {
-      showFolderMessage('Ta przeglądarka nie zapamięta folderu — po odświeżeniu trzeba go wskazać ponownie.');
+      showFolderMessage(t('categories.notRemembered'));
     } else {
       showFolderMessage('');
     }
@@ -120,7 +114,7 @@
     const b = $('restore-folder');
     rememberedFolder = folderName;
     b.hidden = !folderName || (shownLibrary && shownLibrary.source === 'handle' && shownLibrary.rootName === folderName);
-    if (folderName) b.textContent = 'Wczytaj ostatni folder: ' + folderName;
+    if (folderName) b.textContent = t('categories.restore', { name: folderName });
   }
 
   // ---------- players ----------
@@ -134,8 +128,8 @@
   function categoryStatus(name) {
     if (!name || !library) return null;
     const cat = library.categories.find(c => c.name === name);
-    if (!cat) return 'brak w folderze';
-    return cat.images.length ? null : 'brak zdjęć';
+    if (!cat) return t('players.categoryMissing');
+    return cat.images.length ? null : t('players.categoryEmpty');
   }
 
   function renderCategorySelect() {
@@ -145,7 +139,7 @@
     const categories = library ? library.categories.filter(c => c.images.length) : [];
     const names = categories.map(c => c.name);
     select.textContent = '';
-    select.append(new Option('— bez kategorii —', ''));
+    select.append(new Option(t('players.noCategory'), ''));
     appendCategoryOptions(select, categories, cat => cat.name);
     if (editing && editing.category && !names.includes(editing.category)) {
       const status = categoryStatus(editing.category);
@@ -169,13 +163,13 @@
       info.append(el('div', status ? 'note warn' : 'note', (status ? '⚠ ' : '') + p.category + (status ? ' — ' + status : '')));
     }
     const score = el('span', 'score', p.wins + '–' + p.losses);
-    score.title = 'wygrane–porażki';
+    score.title = t('players.score');
     const actions = el('div', 'player-actions');
     actions.append(
-      button('+1', 'win-plus', 'Dodaj wygraną'),
-      button('−1', 'win-minus', 'Odejmij wygraną'),
-      button('✎', 'edit', 'Edytuj'),
-      button('✕', 'delete', 'Usuń'));
+      button('+1', 'win-plus', t('players.winPlus')),
+      button('−1', 'win-minus', t('players.winMinus')),
+      button('✎', 'edit', t('players.edit')),
+      button('✕', 'delete', t('players.delete')));
     li.append(el('span', 'rank', (index + 1) + '.'), swatch, info, score, actions);
     return li;
   }
@@ -191,15 +185,20 @@
     $('players-count').textContent = players.length ? String(players.length) : '';
     $('reset-scores').hidden = players.length === 0;
     renderCategorySelect();
+    renderPlayerSubmit();
     if (!editingId && !$('player-name').value) $('player-color').value = L.nextColor(players);
     renderDuelSetup();
+  }
+
+  function renderPlayerSubmit() {
+    $('player-submit').textContent = t(editingId ? 'players.save' : 'players.add');
   }
 
   function resetPlayerForm() {
     editingId = null;
     $('player-form').reset();
     $('player-color').value = L.nextColor(players);
-    $('player-submit').textContent = 'Dodaj gracza';
+    renderPlayerSubmit();
     $('player-cancel').hidden = true;
     showMessage('player-message', '');
     renderCategorySelect();
@@ -213,7 +212,7 @@
     $('player-name').value = p.name;
     $('player-color').value = p.color;
     $('player-category').value = p.category || '';
-    $('player-submit').textContent = 'Zapisz';
+    renderPlayerSubmit();
     $('player-cancel').hidden = false;
     showMessage('player-message', '');
     $('player-name').focus();
@@ -230,12 +229,12 @@
       case 'win-minus': playerHandlers.adjustWins(id, -1); break;
       case 'edit': startEdit(id); break;
       case 'delete':
-        if (confirm('Usunąć gracza „' + p.name + '”? Jego wyniki przepadną.')) playerHandlers.removePlayer(id);
+        if (confirm(t('players.confirmDelete', { name: p.name }))) playerHandlers.removePlayer(id);
         break;
     }
   }
 
-  // handlers: savePlayer(data) -> error message | null, adjustWins(id, delta), removePlayer(id), resetScores()
+  // handlers: savePlayer(data) -> problem ({ key, params }) | null, adjustWins(id, delta), removePlayer(id), resetScores()
   function bindPlayers(handlers) {
     playerHandlers = handlers;
     $('player-name').maxLength = L.MAX_NAME_LENGTH;
@@ -248,7 +247,7 @@
         category: $('player-category').value || null,
       });
       if (error) {
-        showMessage('player-message', error, true);
+        showMessage('player-message', Floor.i18n.problemText(error), true);
         $('player-name').focus();
         return;
       }
@@ -258,7 +257,7 @@
     $('player-cancel').addEventListener('click', resetPlayerForm);
     $('player-list').addEventListener('click', onListClick);
     $('reset-scores').addEventListener('click', () => {
-      if (confirm('Wyzerować wygrane i porażki wszystkich graczy?')) handlers.resetScores();
+      if (confirm(t('players.confirmReset'))) handlers.resetScores();
     });
   }
 
@@ -287,7 +286,7 @@
   function fillPlayerSelect(select, otherId) {
     const current = select.value;
     select.textContent = '';
-    select.append(new Option('— wybierz —', ''));
+    select.append(new Option(t('duel.choose'), ''));
     for (const p of L.rankPlayers(players)) {
       const option = new Option(p.name + ' (' + p.wins + '–' + p.losses + ')', p.id);
       option.disabled = p.id === otherId;
@@ -304,7 +303,7 @@
     const current = select.value;
     const categories = library ? library.categories.filter(c => c.images.length) : [];
     select.textContent = '';
-    select.append(new Option(library ? '— wybierz kategorię —' : '— najpierw wczytaj folder —', ''));
+    select.append(new Option(t(library ? 'duel.chooseCategory' : 'duel.loadFolderFirst'), ''));
     appendCategoryOptions(select, categories, cat => cat.name + ' (' + cat.images.length + ')');
     select.value = categories.some(c => c.name === current) ? current : '';
   }
@@ -319,8 +318,9 @@
     renderDuelSetup();
   }
 
+  // problem: { key, params } from Floor.logic.duelSetupProblem, or null.
   function showSetupProblem(problem) {
-    showMessage('duel-problem', problem || 'Gotowe — START albo Enter.', !!problem);
+    showMessage('duel-problem', problem ? Floor.i18n.problemText(problem) : t('duel.ready'), !!problem);
     $('duel-start').disabled = !!problem;
   }
 
@@ -332,7 +332,7 @@
     setText(box.querySelector('.c-name'), player ? player.name : '?');
     setText(box.querySelector('.c-time'), String(L.clockSeconds(ms)));
     const s = duel.stats[id];
-    setText(box.querySelector('.c-stats'), '✓ ' + s.correct + ' · pas ' + s.passes);
+    setText(box.querySelector('.c-stats'), t('live.stats', { correct: s.correct, passes: s.passes }));
     if (player && box.style.getPropertyValue('--player') !== player.color) box.style.setProperty('--player', player.color);
     box.classList.toggle('active', duel.state !== 'finished' && duel.activeId === id);
     box.querySelector('.c-time').classList.toggle('low', ms <= 10000);
@@ -353,9 +353,9 @@
 
   function poolText(duel, skipped) {
     if (!duel.deck.length) return '';
-    const parts = ['zdjęcie ' + duel.deckPos + ' z ' + duel.deck.length];
-    if (duel.reshuffles) parts.push('pula wyczerpana — powtórki');
-    if (skipped) parts.push('pominięte uszkodzone: ' + skipped);
+    const parts = [t('live.poolPosition', { pos: duel.deckPos, total: duel.deck.length })];
+    if (duel.reshuffles) parts.push(t('live.poolExhausted'));
+    if (skipped) parts.push(t('live.skippedBroken', { n: skipped }));
     return parts.join(' · ');
   }
 
@@ -383,10 +383,10 @@
       node.classList.toggle('hidden-answer', hidden);
     }
     let hint = '';
-    if (state === 'countdown') hint = 'Odliczanie… ' + L.clockSeconds(duel.countdownUntil - info.now);
-    else if (state === 'paused') hint = 'Pauza — Esc, żeby wznowić.';
-    else if (state === 'reveal') hint = 'Pas — gracze widzą odpowiedź, zegar biegnie.';
-    else if (info.hideAnswer && state === 'running') hint = 'Odpowiedź ukryta — przytrzymaj H, żeby ją zobaczyć.';
+    if (state === 'countdown') hint = t('live.countdown', { n: L.clockSeconds(duel.countdownUntil - info.now) });
+    else if (state === 'paused') hint = t('live.paused');
+    else if (state === 'reveal') hint = t('live.revealing');
+    else if (info.hideAnswer && state === 'running') hint = t('live.answerHidden');
     setText($('live-hint'), hint);
     renderClock($('live-left'), find(duel.challengerId), duel.challengerId, info);
     renderClock($('live-right'), find(duel.opponentId), duel.opponentId, info);
@@ -395,16 +395,16 @@
     $('live-correct').disabled = state !== 'running';
     $('live-pass').disabled = state !== 'running';
     $('live-pause').disabled = finished || state === 'countdown';
-    setText($('live-pause'), state === 'paused' ? 'WZNÓW (Esc)' : 'PAUZA (Esc)');
+    setText($('live-pause'), t(state === 'paused' ? 'live.resume' : 'live.pause'));
     $('live-result').hidden = !finished;
     $('live-correct').parentElement.hidden = finished;
     if (finished) {
       const winner = find(duel.winnerId);
       const loser = find(duel.loserId);
-      setText($('live-winner'), 'Wygrywa ' + (winner ? winner.name : '?') + '! ' + (loser ? loser.name : '?') + ' — koniec czasu.');
-      setText($('live-cancel'), 'Unieważnij (nie zapisuj wyniku)');
+      setText($('live-winner'), t('live.winner', { winner: winner ? winner.name : '?', loser: loser ? loser.name : '?' }));
+      setText($('live-cancel'), t('live.cancelFinished'));
     } else {
-      setText($('live-cancel'), 'Unieważnij pojedynek');
+      setText($('live-cancel'), t('live.cancel'));
     }
   }
 
@@ -486,7 +486,7 @@
     $('live-pause').addEventListener('click', () => handlers.togglePause());
     $('live-confirm').addEventListener('click', () => handlers.confirm());
     $('live-cancel').addEventListener('click', () => {
-      if (liveState && confirm('Unieważnić pojedynek? Wynik nie zostanie zapisany.')) handlers.cancel();
+      if (liveState && confirm(t('live.confirmCancel'))) handlers.cancel();
     });
     document.addEventListener('keydown', handleKey);
     document.addEventListener('keyup', handleKey);
@@ -495,29 +495,27 @@
 
   // ---------- players window ----------
 
-  // status -> [top bar label, banner text, is error]
-  const DISPLAY_STATUS = {
-    closed: ['Ekran graczy: zamknięty', '', false],
-    open: ['Ekran graczy: otwarty', 'Okno graczy otwarte. Przeciągnij je na telewizor i naciśnij F11.', false],
-    lost: ['Ekran graczy: zamknięty', 'Okno graczy zamknęło się przy odświeżeniu panelu — kliknij „Otwórz ekran graczy”.', true],
-    retry: ['Ekran graczy: kliknij ponownie', 'Zamknięto stare okno graczy — kliknij „Otwórz ekran graczy” jeszcze raz.', true],
-    blocked: ['Ekran graczy: zablokowany', 'Przeglądarka zablokowała okno — zezwól na wyskakujące okna dla tej strony i spróbuj ponownie.', true],
-    reloaded: ['Ekran graczy: rozłączony', 'Okno graczy zostało odświeżone i straciło połączenie — kliknij „Otwórz ekran graczy”.', true],
-  };
+  // Statuses shown as errors; texts are 'display.pill.<status>' and 'display.banner.<status>'.
+  const DISPLAY_ERRORS = ['lost', 'retry', 'blocked', 'reloaded'];
+  let displayStatus = 'closed';
 
   function showDisplayStatus(status) {
-    const [label, text, isError] = DISPLAY_STATUS[status] || ['', '', false];
+    displayStatus = status;
+    const isError = DISPLAY_ERRORS.includes(status);
     $('display-pill').dataset.status = isError ? 'error' : status;
-    $('display-pill-text').textContent = label;
-    showMessage('display-status', text, isError);
-    $('open-display').textContent = status === 'open' ? 'Pokaż ekran graczy' : 'Otwórz ekran graczy';
+    $('display-pill-text').textContent = t('display.pill.' + status);
+    showMessage('display-status', status === 'closed' ? '' : t('display.banner.' + status), isError);
+    $('open-display').textContent = t(status === 'open' ? 'display.show' : 'display.open');
   }
 
   // ---------- sound effects and music ----------
 
+  let musicPlaying = false;
+
   function renderMusic(playing) {
+    musicPlaying = playing;
     for (const b of document.querySelectorAll('.music-toggle')) {
-      b.textContent = playing ? '⏹ Zatrzymaj muzykę' : '🎵 Muzyka';
+      b.textContent = t(playing ? 'sounds.stopMusic' : 'sounds.music');
       b.classList.toggle('playing', playing);
     }
   }
@@ -535,7 +533,7 @@
     const slot = $('big-slot');
     slot.textContent = '';
     const frame = el('iframe', 'big-frame');
-    frame.title = 'Duży podgląd ekranu graczy';
+    frame.title = t('big.frameTitle');
     slot.append(frame);
     $('big-preview').hidden = false;
     frame.focus();
@@ -555,7 +553,8 @@
     $('set-sound').checked = settings.sound;
     $('set-hide').checked = settings.hideAnswer;
     $('set-volume').value = settings.volume;
-    showMessage('sound-note', settings.sound ? '' : 'Dźwięk jest wyłączony — przełącznik „Dźwięk” na górze.');
+    $('set-language').value = Floor.i18n.getLanguage();
+    showMessage('sound-note', settings.sound ? '' : t('sounds.off'));
     $('set-volume').disabled = !settings.sound;
   }
 
@@ -565,6 +564,7 @@
     Object.assign($('set-duel'), { min: duelMin, max: duelMax });
     Object.assign($('set-pass'), { min: passMin, max: passMax });
     Object.assign($('set-volume'), { min: L.SETTING_LIMITS.volume[0], max: L.SETTING_LIMITS.volume[1] });
+    for (const [code, name] of Object.entries(Floor.i18n.LANGUAGE_NAMES)) $('set-language').append(new Option(name, code));
     const dialog = $('settings-dialog');
     $('settings-open').addEventListener('click', () => dialog.showModal());
     // Sound controls sit in the top bar, the rest in the settings dialog.
@@ -574,15 +574,26 @@
       sound: $('set-sound').checked,
       hideAnswer: $('set-hide').checked,
       volume: $('set-volume').value,
+      language: $('set-language').value,
     });
-    for (const id of ['set-duel', 'set-pass', 'set-sound', 'set-hide', 'set-volume']) $(id).addEventListener('change', emit);
+    for (const id of ['set-duel', 'set-pass', 'set-sound', 'set-hide', 'set-volume', 'set-language']) {
+      $(id).addEventListener('change', emit);
+    }
     $('category-filter').addEventListener('input', applyCategoryFilter);
     // Live volume while dragging; the final value is saved on 'change'.
     $('set-volume').addEventListener('input', () => Floor.sound.setVolume(Number($('set-volume').value)));
   }
 
+  // After a language change: redraws every text that isn't marked with data-i18n.
+  function relabel() {
+    renderCategories(shownLibrary);
+    renderPlayers(players, library);
+    showDisplayStatus(displayStatus);
+    renderMusic(musicPlaying);
+  }
+
   Floor.operator = {
-    plural,
+    relabel,
     showAppMessage,
     showFolderMessage,
     renderCategories,

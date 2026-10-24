@@ -1,132 +1,164 @@
-# The Floor — wersja domowa
+# Floor Duel
 
-Domowa wersja teleturnieju **The Floor**: dwóch graczy rozpoznaje zdjęcia z jednej kategorii, każdy ma swój zegar (domyślnie 45 s), a operator zatwierdza odpowiedzi klawiaturą.
+**A party game for the living room: two players, one photo category, a chess clock each.**
+Players name what they see in the photos, the host judges the answers with the keyboard, and whoever runs out of time first loses the duel.
 
-Działa **bez instalacji i bez internetu** — w Microsoft Edge albo Google Chrome na Windows 10/11.
+Floor Duel runs **in the browser, with no installation, no server and no internet** — just double-click `app/index.html` in Microsoft Edge or Google Chrome. Put the players screen on the TV and keep the host panel (with the answers) on your laptop.
 
----
+🇵🇱 [Polska wersja README](README.pl.md)
 
-## 1. Przygotuj zdjęcia
+> Floor Duel is a fan-made home game inspired by TV photo-quiz game shows such as *The Floor*. It is not affiliated with, endorsed by or connected to the show or its owners. All trademarks belong to their respective owners.
 
-Utwórz folder główny, np. `D:\TheFloor\Kategorie`. **Każdy podfolder to jedna kategoria**, a zdjęcia leżą bezpośrednio w nim:
+## Features
+
+- **Two windows:** a host panel with the correct answers and a full-screen players screen for the TV — or a single-screen mode with the answer hidden.
+- **Chess clock** per player (45 s by default), a pass costs 3 s and briefly reveals the answer.
+- **Your own photos:** each folder is a category, each file name is the answer. Optional difficulty levels as folders.
+- **Players and scores** saved in the browser, ranking on the TV between duels.
+- **Synthesized sound** (Web Audio, no sound files): 3-2-1 countdown, suspense music in the last 12 s, ticks, buzzer, applause, fanfare, drumroll and more.
+- **English and Polish UI** — picked from the browser language, switchable in the top bar.
+- Plain HTML + CSS + JavaScript: no build step, no dependencies, works offline from `file://`.
+
+## Requirements
+
+- Windows 10/11 with a current **Microsoft Edge** or **Google Chrome** (other Chromium browsers and systems: best effort).
+- Optional: a TV or second monitor.
+
+## Quick start
+
+1. Download the repository (**Code → Download ZIP**) and unzip it.
+2. Double-click `app/index.html`.
+3. Click **Choose folder…** and pick `samples/categories-en` to try it out.
+4. Add two players, choose them in the **Duel** column and press **START** (or Enter).
+
+## 1. Prepare the photos
+
+Create a main folder, e.g. `D:\FloorDuel\Categories`. **Each subfolder is one category**, with the photos directly inside:
 
 ```
-Kategorie\
-  Zwierzęta\
-    Słoń.jpg
-    Żyrafa.png
-    Wieloryb_błękitny.webp
-  Stolice\
-    Wieża_Eiffla.jpg
+Categories\
+  Animals\
+    Elephant.jpg
+    Giraffe.png
+    Blue_whale.webp
+  Landmarks\
+    Eiffel_Tower.jpg
     Big_Ben.jpg
 ```
 
-**Nazwa pliku = poprawna odpowiedź**, którą zobaczy operator (i gracze po „pasie”):
+**The file name is the correct answer** shown to the host (and to the players after a pass):
 
-| Nazwa pliku | Odpowiedź |
+| File name | Answer |
 |---|---|
-| `Wieża_Eiffla.jpg` | Wieża Eiffla (`_` zamienia się na spację) |
-| `Słoń (2).png` | Słoń (dopisek ` (2)` jest usuwany) |
-| `Słoń__3.webp` | Słoń (dopisek `__3` jest usuwany) |
+| `Eiffel_Tower.jpg` | Eiffel Tower (`_` becomes a space) |
+| `Elephant (2).png` | Elephant (the ` (2)` suffix is removed) |
+| `Elephant__3.webp` | Elephant (the `__3` suffix is removed) |
 | `F-16.jpg` | F-16 |
-| `10.jpg` | 10 — **źle**: nazwij plik odpowiedzią! |
+| `10.jpg` | 10 — **wrong**: name the file after the answer! |
 
-- Obsługiwane formaty: **JPG, PNG, WEBP, GIF, BMP, AVIF, SVG**.
-- Podfoldery wewnątrz kategorii, pliki ukryte i inne formaty są pomijane (wyjątek: foldery poziomów, patrz niżej).
-- **Zdjęcia z iPhone'a (HEIC)** nie są obsługiwane — aplikacja pokaże ostrzeżenie. Przekonwertuj je na JPG (np. w aplikacji Zdjęcia: *Zapisz jako* → JPG, albo w ustawieniach iPhone'a: *Aparat → Formaty → Najbardziej zgodne*).
-- Do pojedynku przyda się **co najmniej 30 zdjęć** w kategorii — przy mniejszej liczbie zdjęcia zaczną się powtarzać (panel ostrzega).
+- Supported formats: **JPG, PNG, WEBP, GIF, BMP, AVIF, SVG**.
+- Subfolders inside a category, hidden files and other formats are skipped (except level folders, see below).
+- **iPhone photos (HEIC)** are not supported — the panel shows a warning. Convert them to JPG (e.g. in the Photos app: *Save as* → JPG, or on the iPhone: *Settings → Camera → Formats → Most Compatible*).
+- A duel can easily use **30 or more photos** — with fewer, photos start repeating (the panel warns you).
 
-**Poziomy trudności (opcjonalnie).** Kategorie można pogrupować w foldery poziomów — panel pokaże je w grupach, a gracze zobaczą tylko nazwę kategorii:
+**Difficulty levels (optional).** Group categories into level folders — the panel shows them in groups, the players only see the category name:
 
 ```
-Kategorie\
-  Łatwe\
-    Zwierzęta\
-    Owoce\
-  Trudne\
-    Samoloty\
-  Flagi\          ← kategoria bez poziomu też działa
+Categories\
+  Easy\
+    Animals\
+    Fruits\
+  Hard\
+    Airplanes\
+  Flags\          ← a category without a level works too
 ```
 
-Folder bez zdjęć, za to z podfolderami, to poziom. Poziomy układają się w kolejności: łatwe → normalne/średnie → trudne → eksperckie (inne nazwy na końcu). Jeśli ta sama nazwa kategorii jest w dwóch poziomach, panel dopisze poziom w nawiasie, np. „Flagi (Trudne)”.
+A folder with no photos but with subfolders is a level. Levels are ordered easy → normal/medium → hard → expert (Polish names work too; other names go last). If the same category name appears in two levels, the panel adds the level in brackets, e.g. “Flags (Hard)”.
 
-Do wypróbowania aplikacji są gotowe przykładowe kategorie w `samples\Kategorie`.
+Sample categories for trying the app: `samples/categories-en` (English names) and `samples/categories-pl` (Polish names).
 
-## 2. Uruchom
+## 2. Start
 
-1. Kliknij dwukrotnie `app\index.html` (otworzy się w domyślnej przeglądarce — jeśli to nie Edge ani Chrome, kliknij prawym przyciskiem → *Otwórz za pomocą*).
-2. W kolumnie **Kategorie** kliknij **Wybierz folder…** i wskaż folder główny. Przeglądarka zapyta o zgodę na odczyt — zezwól.
-3. Przy następnym uruchomieniu (i po odświeżeniu) ostatni folder wczyta się sam. Jeśli przeglądarka zażąda ponownej zgody, panel to napisze — wtedy kliknij **Wczytaj ostatni folder** i zezwól.
+1. Double-click `app\index.html` (it opens in your default browser — if that isn't Edge or Chrome, right-click → *Open with*).
+2. In the **Categories** column click **Choose folder…** and pick the main folder. Allow the browser to read it.
+3. Next time (and after a refresh) the last folder loads by itself. If the browser asks for permission again, the panel says so — click **Load last folder** and allow it.
 
-## 3. Dodaj graczy
+The language follows your browser; change it with the selector in the top bar (it is remembered).
 
-W kolumnie **Gracze** wpisz imię, ewentualnie wybierz kategorię gracza (jak w TV — to jego „pole”) i kliknij **Dodaj gracza**. Kolor przydziela się sam; można go zmienić.
+## 3. Add players
 
-Gracze i wyniki zapisują się w przeglądarce i **przetrwają zamknięcie i odświeżenie** strony. Przyciski `+1 / −1` poprawiają liczbę wygranych, **Wyzeruj wyniki** zaczyna turniej od nowa.
+In the **Players** column type a name, optionally pick the player's category (their “home” category, as on TV) and click **Add player**. A color is assigned automatically; you can change it.
 
-## 4. Ekran graczy na telewizorze
+Players and scores are saved in the browser and **survive closing and refreshing** the page. The `+1 / −1` buttons correct the number of wins, **Reset scores** starts a new tournament.
 
-1. Podłącz telewizor i naciśnij **Win + P → Rozszerz**.
-2. W panelu kliknij **Otwórz ekran graczy** — otworzy się nowe okno.
-3. Przeciągnij je na telewizor i naciśnij **F11** (pełny ekran).
-4. Panel operatora zostaje na laptopie — tylko tam widać poprawne odpowiedzi.
+## 4. Players screen on the TV
 
-Nie odświeżaj panelu (F5) w trakcie gry — okno graczy straci połączenie i trzeba je otworzyć ponownie (przeglądarka zapyta o potwierdzenie). Gracze i wyniki zostają, przepada tylko trwający pojedynek.
+1. Connect the TV and press **Win + P → Extend**.
+2. In the panel click **Open players screen** — a new window opens.
+3. Drag it to the TV and press **F11** (full screen).
+4. The host panel stays on the laptop — only there can you see the correct answers.
 
-### Tylko jeden ekran?
+Don't refresh the panel (F5) during the game — the players window loses its connection and has to be opened again (the browser asks for confirmation). Players and scores stay; only the duel in progress is lost.
 
-Włącz w **Ustawieniach** opcję **Ukrywaj odpowiedź** i kliknij **Duży podgląd** — ekran graczy wypełni cały panel. Odpowiedź na górnym pasku jest zamazana; operator podgląda ją, **przytrzymując H**.
+### Only one screen?
 
-## 5. Pojedynek
+Turn on **Hide the answer** in **Settings** and click **Big preview** — the players screen fills the whole panel. The answer in the top bar is blurred; the host peeks at it by **holding H**.
 
-1. W kolumnie **Pojedynek** wybierz **wyzywającego** (albo **🎲 Losuj**) i **rywala**. Kategoria ustawi się na kategorię rywala — możesz ją zmienić.
-2. Wybierz, kto zaczyna. Na telewizorze pojawi się „Przygotujcie się!”.
-3. **START** albo **Enter**.
-4. Gracz mówi odpowiedź, operator ocenia:
+## 5. The duel
 
-| Klawisz | Akcja |
+1. In the **Duel** column choose the **challenger** (or **🎲** for a random one) and the **opponent**. The category switches to the opponent's category — you can change it.
+2. Choose who answers first. The TV shows “Get ready!”.
+3. **START** or **Enter**.
+4. The player says the answer, the host judges:
+
+| Key | Action |
 |---|---|
-| **Spacja** | dobra odpowiedź — nowe zdjęcie, zegar przechodzi na rywala |
-| **P** | pas — przez 3 s wszyscy widzą odpowiedź, zegar pasującego biegnie, potem nowe zdjęcie dla tego samego gracza |
-| **Esc** | pauza / wznowienie |
+| **Space** | correct — new photo, the clock passes to the opponent |
+| **P** | pass — everyone sees the answer for 3 s while the passing player's clock keeps running, then a new photo for the same player |
+| **Esc** | pause / resume |
 | **Enter** | START |
-| **H** (przytrzymaj) | pokaż ukrytą odpowiedź |
+| **H** (hold) | show the hidden answer |
 
-Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy), ale nie w polach tekstowych.
+The shortcuts work in both windows (also if you accidentally click the players window), but not in text fields.
 
-5. Gdy czas gracza dojdzie do zera — przegrywa. Kliknij **Zatwierdź wynik** (zwycięzca +1 wygrana, przegrany +1 porażka) albo **Unieważnij** (nic się nie zmienia).
+5. When a player's clock reaches zero, they lose. Click **Confirm result** (winner +1 win, loser +1 loss) or **Cancel** (nothing changes).
 
-### Muzyka i efekty
+### Music and effects
 
-- **🎵 Muzyka** (przy START i w sekcji *Efekty dźwiękowe*) — podkład na czas przygotowania. Wycisza się sama po START.
-- Po **START** jest odliczanie **3, 2, 1** (piknięcia i duże cyfry na TV) — zegar rusza po sygnale.
-- **Muzyka napięcia** włącza się sama, gdy na tablicy pierwszy raz pojawi się **12 sekund**, i narasta, im mniej czasu ma odpowiadający gracz. Przycisk 💓 Napięcie to osobny, krótki efekt na żądanie.
-- **Efekty dźwiękowe**: 🥁 Werble, 🎺 Fanfara, 👏 Brawa, 💓 Napięcie, 🔔 Gong, 😬 Pudło — do użycia w dowolnej chwili.
-- Głośność i przełącznik **Dźwięk** (wycisza wszystko) są na górnym pasku panelu.
+- **🎵 Music** (next to START and in *Sound effects*) — background music while getting ready. It fades out on START.
+- After **START** there is a **3, 2, 1** countdown (beeps and big digits on the TV) — the clock starts on the signal.
+- **Suspense music** starts by itself the first time **12 seconds** appear on the clock and builds up as the answering player's time runs out. The 💓 Suspense button is a separate short effect.
+- **Sound effects**: 🥁 Drumroll, 🎺 Fanfare, 👏 Applause, 💓 Suspense, 🔔 Gong, 😬 Miss — use them any time.
+- Volume and the **Sound** switch (mutes everything) are in the top bar.
 
-## 6. Zasady w skrócie
+## 6. Rules in short
 
-- Czas biegnie tylko temu, kto odpowiada; każdy ma osobny zegar (domyślnie 45 s, zmiana w Ustawieniach).
-- Pas kosztuje 3 s (zmiana w Ustawieniach).
-- Ranking: najwięcej wygranych, przy remisie mniej porażek, potem alfabetycznie.
-- Nikt nie odpada — po pojedynku wszyscy grają dalej.
+- Only the answering player's clock runs; each player has their own clock (45 s by default, change it in Settings).
+- A pass costs 3 s (change it in Settings).
+- Ranking: most wins, then fewer losses, then alphabetical.
+- Nobody is eliminated — after a duel everyone keeps playing.
 
 ## FAQ
 
-**Nie widzę przycisku „Wczytaj ostatni folder”.** Pojawia się tylko w Edge i Chrome po wybraniu folderu przyciskiem *Wybierz folder…*. Jeśli folder został przeniesiony, wybierz go ponownie.
+**I don't see “Load last folder”.** It appears only in Edge and Chrome after choosing a folder with *Choose folder…*. If the folder was moved, choose it again.
 
-**Przeglądarka zablokowała okno graczy.** Kliknij ikonę zablokowanego okna w pasku adresu → *Zawsze zezwalaj na wyskakujące okna*, potem **Otwórz ekran graczy** jeszcze raz.
+**The browser blocked the players window.** Click the blocked pop-up icon in the address bar → *Always allow pop-ups*, then click **Open players screen** again.
 
-**Okno graczy jest białe / pusty ekran.** Zamknij je i kliknij **Otwórz ekran graczy** (czasem trzeba kliknąć dwa razy — panel to podpowie).
+**The players window is white / empty.** Close it and click **Open players screen** (sometimes twice — the panel tells you).
 
-**Nie ma dźwięku.** Sprawdź opcję **Dźwięk** w Ustawieniach i głośność systemu. Dźwięk włącza się po pierwszym kliknięciu START.
+**No sound.** Check the **Sound** switch and the system volume. Sound starts after the first click on START.
 
-**Jakieś zdjęcie się nie wyświetla.** Uszkodzone pliki są pomijane automatycznie — panel pokazuje ich licznik. Sprawdź je w przeglądarce zdjęć.
+**A photo doesn't show.** Broken files are skipped automatically — the panel shows how many. Check them in a photo viewer.
 
-**Zdjęcia się powtarzają.** Kategoria ma za mało zdjęć — gdy pula się wyczerpie, zdjęcia są tasowane ponownie (panel pokazuje „pula wyczerpana — powtórki”).
+**Photos repeat.** The category has too few photos — when the pool runs out the photos are reshuffled (the panel shows “pool used up — repeats”).
 
-**Gdzie są zapisane wyniki?** W pamięci przeglądarki (localStorage) — osobno dla Edge i Chrome. Wyczyszczenie danych przeglądarki je usunie.
+**Where are the scores saved?** In the browser storage (localStorage) — separately for Edge and Chrome. Clearing browser data deletes them.
 
----
+## For developers
 
-Dla programistów: specyfikacja w `docs/SPEC.md`, plan i dziennik decyzji w `docs/PLAN.md`, testy logiki: `node tests/run-node.js` albo `tests/tests.html` w przeglądarce.
+- No build and no dependencies: classic `<script>` files sharing the `window.Floor` namespace, so everything works from `file://`.
+- Game logic (rules, clock, shuffling, file name parsing, ranking) is DOM-free in `app/js/logic.js`; translations live in `app/js/i18n.js`.
+- Tests: `node tests/run-node.js`, or open `tests/tests.html` in the browser.
+- Specification: [`docs/SPEC.md`](docs/SPEC.md), plan and decision log: [`docs/PLAN.md`](docs/PLAN.md), browser spike results: [`docs/SPIKE.md`](docs/SPIKE.md). Polish versions: `*.pl.md`.
+
+**Adding a language:** copy the `en` block in `app/js/i18n.js`, translate the values, add the language to `LANGUAGE_NAMES` and run the tests (they check that all languages have the same keys and placeholders).

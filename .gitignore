@@ -1,4 +1,4 @@
-# Prawdziwe zdjęcia użytkownika — nie commitujemy
+# The user's real photos — not committed
 /Kategorie/
 /categories/
 
@@ -7,10 +7,10 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
-# Edytory
+# Editors
 .vscode/*
 !.vscode/extensions.json
 *.swp
 
-# Node (opcjonalne testy)
+# Node (optional tests)
 node_modules/

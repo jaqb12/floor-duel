@@ -1,66 +1,72 @@
-# CLAUDE.md — The Floor (domowa wersja)
+# CLAUDE.md — Floor Duel
 
-## Czym jest projekt
-Prosta, domowa wersja teleturnieju **The Floor**: pojedynki dwóch graczy na rozpoznawanie zdjęć z kategorii, zegar szachowy 45 s na gracza, operator zatwierdza odpowiedzi. Aplikacja działa **lokalnie na Windows w Edge/Chrome**, uruchamiana dwuklikiem w `app/index.html`.
+## What the project is
+**Floor Duel** — a simple home party game inspired by TV photo-quiz shows (such as *The Floor*; not affiliated — don't use that name for the project): duels of two players recognizing photos from a category, a 45 s chess clock per player, the operator approves the answers. The app runs **locally on Windows in Edge/Chrome**, started by double-clicking `app/index.html`. UI in English and Polish.
 
-Pełna specyfikacja: `docs/SPEC.md`. Plan prac z fazami i checkboxami: `docs/PLAN.md`. **Przeczytaj oba przed jakąkolwiek zmianą.**
+Full specification: `docs/SPEC.md`. Work plan with phases and checkboxes: `docs/PLAN.md`. **Read both before any change.**
 
-## Twarde ograniczenia (nie łam ich bez zgody użytkownika)
-- **Zero build stepu i zero zależności w runtime.** Czysty HTML + CSS + vanilla JS. Brak npm, bundlera, frameworka, CDN (gra ma działać offline na imprezie).
-- **Działa z `file://`.** Dlatego:
-  - **Bez ES modules** (`type="module"` nie działa z `file://` w Chromium). Używaj klasycznych `<script src="...">` w ustalonej kolejności i jednej przestrzeni nazw `window.Floor`.
-  - **Bez `fetch()` lokalnych plików.** Style okna graczy trzymaj w `<style id="display-css" media="not all">` w `index.html` i kopiuj do okna graczy.
-  - Okno graczy otwieraj jako `window.open('', 'floor-display', ...)` (about:blank, dziedziczy origin) i buduj jego DOM z okna operatora. Nie otwieraj osobnego pliku `display.html` — Chromium blokuje skrypty między różnymi plikami `file://`.
-- **Docelowe przeglądarki:** aktualny Microsoft Edge i Google Chrome na Windows 10/11. Inne przeglądarki — best effort.
-- **Logika gry bez DOM.** Wszystko, co dotyczy zasad, zegara, tasowania, parsowania nazw plików i rankingu, siedzi w `app/js/logic.js` jako czyste funkcje / klasy z **wstrzykiwanym zegarem (`now`)**. Ma się dać testować w Node i w przeglądarce.
+## Hard constraints (don't break them without the user's consent)
+- **No build step and no runtime dependencies.** Plain HTML + CSS + vanilla JS. No npm, bundler, framework or CDN (the game has to work offline at a party).
+- **Works from `file://`.** Therefore:
+  - **No ES modules** (`type="module"` doesn't work from `file://` in Chromium). Use classic `<script src="...">` in a fixed order and one namespace `window.Floor`.
+  - **No `fetch()` of local files.** Keep the players window styles in `<style id="display-css" media="not all">` in `index.html` and copy them into the players window.
+  - Open the players window as `window.open('', 'floor-display', ...)` (about:blank, inherits the origin) and build its DOM from the operator window. Don't open a separate `display.html` — Chromium blocks scripts between different `file://` files.
+- **Target browsers:** current Microsoft Edge and Google Chrome on Windows 10/11. Other browsers — best effort.
+- **Game logic without DOM.** Everything about rules, clock, shuffling, file name parsing and ranking lives in `app/js/logic.js` as pure functions / classes with an **injected clock (`now`)**. It must be testable in Node and in the browser. The logic is also language-free: it returns problems as `{ key, params }`, translated by the UI.
 
-## Struktura repo
+## Repo structure
 ```
 CLAUDE.md
-README.md                 # instrukcja dla użytkownika (powstaje w fazie 6)
+README.md / README.pl.md  # user guide (English / Polish)
 .gitignore
 docs/
-  SPEC.md                 # specyfikacja funkcjonalna i techniczna (źródło prawdy)
-  PLAN.md                 # fazy, zadania, kryteria odbioru, dziennik decyzji
-  SPIKE.md                # wyniki fazy 0 (powstaje w trakcie)
+  SPEC.md                 # functional and technical specification (source of truth)
+  PLAN.md                 # phases, tasks, acceptance criteria, decision log
+  SPIKE.md                # phase 0 results
+  KICKOFF.md              # historical first prompts
+  *.pl.md                 # Polish translations of the above
 app/
-  index.html              # panel operatora + <style id="display-css"> dla okna graczy
+  index.html              # operator panel + <style id="display-css"> for the players window
   css/operator.css
-  js/logic.js             # czysta logika (testowalna)
-  js/storage.js           # localStorage (gracze, ustawienia) + IndexedDB (uchwyt folderu)
-  js/categories.js        # odczyt folderu kategorii
-  js/sound.js             # WebAudio, bez plików dźwiękowych
-  js/display.js           # budowa i aktualizacja DOM okna graczy
-  js/operator.js          # UI operatora, obsługa klawiatury
-  js/main.js              # spina wszystko, start aplikacji
+  js/logic.js             # pure logic (testable)
+  js/i18n.js              # translations (en, pl), t(), language detection
+  js/storage.js           # localStorage (players, settings) + IndexedDB (folder handle)
+  js/categories.js        # reading the categories folder
+  js/sound.js             # Web Audio, no sound files
+  js/display.js           # building and updating the players window DOM
+  js/operator.js          # operator UI, keyboard handling
+  js/main.js              # wires everything together, starts the app
 tests/
-  tests.html              # uruchamia testy logiki w przeglądarce
-  logic.test.js           # testy (mini-runner bez bibliotek)
-  run-node.js             # opcjonalnie: `node tests/run-node.js`, jeśli Node jest zainstalowany
-samples/Kategorie/        # małe testowe kategorie (SVG/PNG) — commitowane
+  tests.html              # runs the logic tests in the browser
+  logic.test.js           # tests (mini runner without libraries)
+  run-node.js             # `node tests/run-node.js`
+samples/
+  categories-en/          # small test categories with English names (SVG) — committed
+  categories-pl/          # the same with Polish names
 ```
-Prawdziwe zdjęcia użytkownika leżą poza repo albo w `Kategorie/` (ignorowane przez git).
+The user's real photos live outside the repo or in `Kategorie/` / `categories/` (ignored by git).
 
-## Konwencje
-- **UI po polsku**, kod, nazwy i komentarze po angielsku.
-- Pliki JS: IIFE dopisujące do `window.Floor` (np. `Floor.logic`, `Floor.display`). W `logic.js` dodatkowo `if (typeof module !== 'undefined') module.exports = ...` dla Node.
-- Kolejność skryptów w `index.html`: logic → storage → categories → sound → display → operator → main.
-- Czas liczymy **z timestampów** (`performance.now()`), nigdy przez odejmowanie stałej co tick.
-- Bez `innerHTML` z nazwami graczy/plików — używaj `textContent` (nazwy plików mogą zawierać cokolwiek).
-- Małe, czytelne funkcje; bez przedwczesnych abstrakcji. To aplikacja na imprezę, nie platforma.
+## Conventions
+- **Code, names, comments and documentation in English.** UI texts only in `app/js/i18n.js` — every new text gets a key in **all** languages (tests check it). In `index.html` mark static texts with `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, `data-i18n-label`.
+- English docs are the source of truth; when changing them, update the Polish `*.pl.md` copies too.
+- JS files: IIFEs adding to `window.Floor` (e.g. `Floor.logic`, `Floor.display`). In `logic.js` and `i18n.js` also `if (typeof module !== 'undefined') module.exports = ...` for Node.
+- Script order in `index.html`: logic → i18n → storage → categories → sound → display → operator → main.
+- Time is computed **from timestamps** (`performance.now()`), never by subtracting a constant every tick.
+- No `innerHTML` with player or file names — use `textContent` (file names can contain anything).
+- Small, readable functions; no premature abstractions. It's a party app, not a platform.
 
-## Sposób pracy
-1. Pracuj **fazami z `docs/PLAN.md`**, po kolei. Nie zaczynaj kolejnej fazy, dopóki poprzednia nie spełnia kryteriów odbioru.
-2. Po każdej fazie: uruchom testy logiki (`node tests/run-node.js`, jeśli jest Node; inaczej poproś użytkownika o otwarcie `tests/tests.html`), odhacz checkboxy w `PLAN.md`, zrób **commit** `phase N: <krótki opis>`.
-3. Rzeczy, których nie da się sprawdzić automatycznie (wygląd, dwa ekrany, dźwięk), wypisz użytkownikowi jako krótką listę do ręcznego sprawdzenia na koniec fazy.
-4. Jeśli spec jest niejasny albo coś z niego nie działa w przeglądarce — **nie zgaduj po cichu**. Wybierz najprostsze rozsądne rozwiązanie, zapisz je w sekcji „Dziennik decyzji” w `PLAN.md` i powiedz o tym użytkownikowi.
-5. Nie dodawaj funkcji spoza `SPEC.md` (sekcja „Poza zakresem”) bez pytania.
+## How to work
+1. Work **in phases from `docs/PLAN.md`**, in order. Don't start the next phase until the previous one meets its acceptance criteria.
+2. After each phase: run the logic tests (`node tests/run-node.js` if Node is available; otherwise ask the user to open `tests/tests.html`), check the boxes in `PLAN.md`, make a **commit** `phase N: <short description>`.
+3. Things that can't be checked automatically (look, two screens, sound) — list them for the user as a short manual checklist at the end of the phase.
+4. If the spec is unclear or something from it doesn't work in the browser — **don't guess silently**. Choose the simplest reasonable solution, record it in the “Decision log” in `PLAN.md` and tell the user.
+5. Don't add features from the “Out of scope” section of `SPEC.md` without asking.
 
-## Definicja „gotowe”
-- Dwuklik w `app/index.html` w Edge lub Chrome → wybór folderu → dodanie graczy → pełny pojedynek z zegarem, pasem i wynikiem, bez błędów w konsoli.
-- Wyniki graczy przetrwają odświeżenie strony.
-- Testy logiki przechodzą.
-- `README.md` opisuje użytkowanie po polsku.
+## Definition of “done”
+- Double-click `app/index.html` in Edge or Chrome → choose a folder → add players → a full duel with the clock, pass and result, without console errors.
+- Players' scores survive a page refresh.
+- Logic tests pass.
+- `README.md` (English) and `README.pl.md` (Polish) describe how to use the app.
 
-# Dodatkow
-- odpowiadaj po polsku w konsoli
+# Additional
+- answer in Polish in the console

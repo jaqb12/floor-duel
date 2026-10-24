@@ -5,6 +5,7 @@
 (function () {
   'use strict';
   window.Floor = window.Floor || {};
+  const t = (key, params) => Floor.i18n.t(key, params);
 
   const NAME = 'floor-display';
   const FEATURES = 'popup,width=1280,height=720';
@@ -36,7 +37,6 @@
 
   function build(doc) {
     const css = document.getElementById('display-css').textContent;
-    doc.title = 'The Floor — ekran graczy';
     doc.head.textContent = '';
     doc.body.textContent = '';
     const style = doc.createElement('style');
@@ -52,7 +52,7 @@
     const root = make('div', 'floor', doc.body);
 
     const board = make('section', 'board', root);
-    make('h1', 'logo', board).textContent = 'THE FLOOR';
+    make('h1', 'logo', board).textContent = 'FLOOR DUEL';
     const ranking = make('ol', 'ranking', board);
 
     const duel = make('section', 'duel', root);
@@ -61,7 +61,7 @@
     const photo = make('img', 'photo', stage);
     photo.alt = '';
     const reveal = make('div', 'reveal', stage);
-    make('span', 'reveal-tag', reveal).textContent = 'PAS';
+    const revealTag = make('span', 'reveal-tag', reveal);
     const revealAnswer = make('span', 'reveal-answer', reveal);
     const message = make('div', 'message', stage);
     const messageTitle = make('div', 'message-title', message);
@@ -74,7 +74,6 @@
     const left = panel('left');
     const right = panel('right');
     const paused = make('div', 'paused', root);
-    paused.textContent = 'PAUZA';
 
     doc.addEventListener('keydown', e => {
       if (isReloadKey(e)) {
@@ -85,7 +84,7 @@
     });
     doc.addEventListener('keyup', e => onKey(e));
     return {
-      doc, root, ranking, category, photo, reveal, revealAnswer, messageTitle, messageName,
+      doc, root, ranking, category, photo, reveal, revealTag, revealAnswer, messageTitle, messageName, paused,
       left, right, rankingKey: null,
       image: { shown: null, loading: null, failed: null, cache: new Map() },
     };
@@ -168,8 +167,19 @@
         });
     }
 
+    // Texts follow the operator's language, which can change at any time.
+    function renderLabels() {
+      const title = t('app.displayTitle');
+      if (doc.title !== title) doc.title = title;
+      const lang = Floor.i18n.getLanguage();
+      if (doc.documentElement.lang !== lang) doc.documentElement.lang = lang;
+      setText(dom.revealTag, t('screen.pass'));
+      setText(dom.paused, t('screen.paused'));
+    }
+
     // Cheap enough for every frame: writes only what changed.
     function render(view) {
+      renderLabels();
       dom.root.dataset.screen = view.screen;
       if (view.screen === 'board') {
         renderRanking(view.ranking);
@@ -194,10 +204,10 @@
         }
         setText(dom.messageName, '');
       } else if (view.screen === 'ready') {
-        setText(dom.messageTitle, 'Przygotujcie się!');
+        setText(dom.messageTitle, t('screen.ready'));
         setText(dom.messageName, '');
       } else if (view.screen === 'finished') {
-        setText(dom.messageTitle, 'Wygrywa');
+        setText(dom.messageTitle, t('screen.winner'));
         setText(dom.messageName, view.winner ? view.winner.name : '');
         setColor(dom.messageName, 'color', view.winner ? view.winner.color : '#ffffff');
       }

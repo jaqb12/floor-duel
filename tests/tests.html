@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>The Floor — testy logiki</title>
+  <title>Floor Duel — logic tests</title>
   <style>
     body { font-family: "Segoe UI", system-ui, sans-serif; margin: 24px auto; padding: 0 16px; max-width: 900px; background: #16181d; color: #e8e8e8; }
     #summary { font-size: 22px; font-weight: 700; }
@@ -13,18 +13,19 @@
   </style>
 </head>
 <body>
-  <h1>Testy logiki</h1>
-  <p id="summary">Uruchamianie…</p>
+  <h1>Logic tests</h1>
+  <p id="summary">Running…</p>
   <ul id="list"></ul>
 
   <script src="../app/js/logic.js"></script>
+  <script src="../app/js/i18n.js"></script>
   <script src="logic.test.js"></script>
   <script>
     (function () {
       'use strict';
       const { results, passed, failed } = FloorTests.run();
       const summary = document.getElementById('summary');
-      summary.textContent = passed + ' zaliczonych, ' + failed + ' niezaliczonych';
+      summary.textContent = passed + ' passed, ' + failed + ' failed';
       summary.className = failed ? 'fail' : 'ok';
       const list = document.getElementById('list');
       for (const r of results) {

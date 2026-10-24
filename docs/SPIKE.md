@@ -1,22 +1,24 @@
-# SPIKE — faza 0: API przeglądarki z `file://`
+# SPIKE — phase 0: browser APIs from `file://`
 
-Strona testowa: `app/spike.html` — usunięta w fazie 6, dostępna w historii git (`git show 0dca6ad:app/spike.html`). Próbki: `samples/Kategorie` (Kolory 9, Kształty 9 + `notatka.txt`, Owoce 8).
+Polish translation: [`SPIKE.pl.md`](SPIKE.pl.md).
 
-## Wyniki
+Test page: `app/spike.html` — removed in phase 6, available in git history (`git show 0dca6ad:app/spike.html`). Samples: the sample categories (Colors 9, Shapes 9 + a `.txt` note, Fruits 8; at the time in `samples/Kategorie`).
+
+## Results
 
 | Test | Edge 155.0.4283.62 | Chrome 155.0.8059.85 |
 |---|---|---|
-| `showDirectoryPicker` z `file://` | OK | OK |
-| Uchwyt w IndexedDB + `requestPermission` po restarcie | OK (`granted` od razu) | OK (po restarcie `queryPermission` = `granted` od razu) |
-| Fallback `<input webkitdirectory>` | OK (118 plików) | OK (118 plików, `webkitRelativePath` wszędzie) |
-| `localStorage` po restarcie przeglądarki | OK (znacznik z 18:19:18 odczytany po restarcie) | OK |
+| `showDirectoryPicker` from `file://` | OK | OK |
+| Handle in IndexedDB + `requestPermission` after a restart | OK (`granted` right away) | OK (after a restart `queryPermission` = `granted` right away) |
+| `<input webkitdirectory>` fallback | OK (118 files) | OK (118 files, `webkitRelativePath` everywhere) |
+| `localStorage` after a browser restart | OK (a marker from 18:19:18 read after the restart) | OK |
 | `window.open('', 'floor-display')` + DOM + blob URL | OK (SVG 640×360, `decode()` OK) | OK (`10.webp` 1280×640) |
-| Klawiatura w oknie graczy | OK (Spacja, P) | OK (Spacja) |
-| Odzyskanie okna po F5 operatora | **FAIL**: `SecurityError` (origin `"null"`), okno robi się białe; bez kliknięcia `window.open` zwraca `null` | nierozstrzygnięte (próby najpewniej bez F5) |
-| Przejęcie okna nawigacją do `about:blank` | FAIL (po 3 s brak dostępu) | FAIL (po 3 s brak dostępu) |
+| Keyboard in the players window | OK (Space, P) | OK (Space) |
+| Recovering the window after the operator's F5 | **FAIL**: `SecurityError` (origin `"null"`), the window turns white; without a click `window.open` returns `null` | undecided (attempts most likely without F5) |
+| Taking over the window by navigating to `about:blank` | FAIL (no access after 3 s) | FAIL (no access after 3 s) |
 
-## Wnioski
-- Edge nadaje stronie z `file://` origin `"null"`, nowy przy każdym załadowaniu. Po F5 panel operatora traci dostęp do okna graczy, a okno traci zawartość.
-- Bez gestu użytkownika `window.open('', 'floor-display')` zwraca `null` (blokada wyskakujących okien) — automatyczne odzyskiwanie przy starcie odpada.
-- Wybór folderu, IndexedDB, `webkitdirectory`, `localStorage`, okno graczy z blob URL i klawiatura działają w obu przeglądarkach.
-- → Decyzja (SPEC §7.3): okna nie odzyskujemy. Ostrzeżenie `beforeunload` chroni przed przypadkowym F5; po F5 „Otwórz ekran graczy” zamyka stare okno i otwiera nowe.
+## Conclusions
+- Edge gives a `file://` page the origin `"null"`, a new one on every load. After F5 the operator panel loses access to the players window, and the window loses its content.
+- Without a user gesture `window.open('', 'floor-display')` returns `null` (pop-up blocker) — automatic recovery on start is not possible.
+- Folder choice, IndexedDB, `webkitdirectory`, `localStorage`, the players window with blob URLs and the keyboard work in both browsers.
+- → Decision (SPEC §7.3): the window is not recovered. A `beforeunload` warning protects against an accidental F5; after F5 “Open players screen” closes the old window and opens a new one.

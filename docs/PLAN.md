@@ -1,161 +1,182 @@
-# PLAN — The Floor (domowa wersja)
+# PLAN — Floor Duel
 
-Pracuj fazami po kolei. Po każdej fazie: testy → odhaczone checkboxy → commit `phase N: ...` → lista rzeczy do ręcznego sprawdzenia dla użytkownika.
-
----
-
-## Faza 0 — Szkielet repo i spike `file://`
-Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Edge i Chrome na Windows), zanim zbudujemy resztę.
-
-- [x] Struktura katalogów z `CLAUDE.md`, pusty `app/index.html` z kolejnością skryptów, `operator.css`, puste moduły JS na `window.Floor`.
-- [x] `samples/Kategorie/` — 3 kategorie po ~8 plików SVG (proste kształty/tekst, nazwy plików z polskimi znakami, jeden z `(2)`, jeden z `__2`, jeden plik `.txt` do pominięcia).
-- [x] Strona spike (`app/spike.html`, usunąć po fazie) sprawdzająca i wypisująca na ekranie OK/FAIL:
-  - [x] `showDirectoryPicker` dostępny i działa z `file://`,
-  - [x] zapis/odczyt uchwytu folderu w IndexedDB i `requestPermission` po restarcie,
-  - [x] fallback `<input webkitdirectory>` zwraca pliki z `webkitRelativePath`,
-  - [x] `localStorage` przetrwa zamknięcie przeglądarki,
-  - [x] `window.open('', 'floor-display')` + zapis do jego DOM + wyświetlenie blob URL obrazka,
-  - [x] odzyskanie referencji do okna po odświeżeniu operatora (czy dostęp do `document` działa, czy rzuca).
-- [x] Wyniki w `docs/SPIKE.md` (przeglądarka, wersja, wynik, wnioski). Jeśli coś nie działa — propozycja obejścia w „Dzienniku decyzji”, **zatrzymaj się i zapytaj użytkownika** przed fazą 1.
-
-**Odbiór:** użytkownik otworzył spike w Edge i Chrome i potwierdził wyniki.
+Work through the phases in order. After each phase: tests → checked boxes → commit `phase N: ...` → a list of things for the user to check by hand. Polish translation: [`PLAN.pl.md`](PLAN.pl.md).
 
 ---
 
-## Faza 1 — Rdzeń logiki + testy (bez UI)
-- [x] `logic.js`: `normalizeAnswer(filename)`, `isSupportedImage(name)`, `isHeic(name)`, `shuffle(arr, rng)` (Fisher–Yates, wstrzykiwany RNG), `rankPlayers(players)`.
-- [x] `logic.js`: pojedynek wg SPEC §5 — `createDuel`, `start`, `markCorrect`, `markPass`, `togglePause`, `tick`, `getClock`, `nextImage` (talia z ponownym tasowaniem bez natychmiastowej powtórki). Wszystkie metody przyjmują `now`.
-- [x] Mini-runner testów (`tests/logic.test.js`) + `tests/tests.html` + `tests/run-node.js`.
-- [x] Testy co najmniej:
-  - [x] normalizacja nazw (przykłady z SPEC §3 + puste/dziwne nazwy),
-  - [x] zegar: czas biegnie tylko aktywnemu; po `markCorrect` tura przechodzi, czas zamrożony poprawnie,
-  - [x] pas: odsłona trwa 3 s, zegar w tym czasie leci, Spacja/P ignorowane, po odsłonie ta sama osoba,
-  - [x] timeout w trakcie `running` i w trakcie `reveal` → `finished` z poprawnym zwycięzcą,
-  - [x] pauza zatrzymuje zegar i odsłonę, wznowienie kontynuuje,
-  - [x] talia: brak powtórek do wyczerpania; po przetasowaniu pierwsze ≠ ostatnie,
-  - [x] ranking: wygrane ↓, porażki ↑, imię.
+## Phase 0 — Repo skeleton and `file://` spike
+Goal: confirm that the key APIs work when `app/index.html` is opened by double-click (Edge and Chrome on Windows) before building the rest.
 
-**Odbiór:** wszystkie testy zielone w Node (jeśli jest) i w `tests/tests.html`.
+- [x] Directory structure from `CLAUDE.md`, an empty `app/index.html` with the script order, `operator.css`, empty JS modules on `window.Floor`.
+- [x] Sample categories — 3 categories with ~8 SVG files each (simple shapes/text, file names with Polish letters, one with `(2)`, one with `__2`, one `.txt` file to be skipped).
+- [x] Spike page (`app/spike.html`, removed after the phase) checking and printing OK/FAIL:
+  - [x] `showDirectoryPicker` available and working from `file://`,
+  - [x] saving/reading the folder handle in IndexedDB and `requestPermission` after a restart,
+  - [x] the `<input webkitdirectory>` fallback returns files with `webkitRelativePath`,
+  - [x] `localStorage` survives closing the browser,
+  - [x] `window.open('', 'floor-display')` + writing to its DOM + showing a blob URL image,
+  - [x] recovering the window reference after the operator refresh (does access to `document` work or throw).
+- [x] Results in `docs/SPIKE.md` (browser, version, result, conclusions). If something doesn't work — a workaround proposal in the “Decision log”, **stop and ask the user** before phase 1.
 
----
-
-## Faza 2 — Kategorie z folderu
-- [x] `categories.js`: wybór folderu (`showDirectoryPicker` lub fallback wg wyników spike), lista bezpośrednich podfolderów i plików wg SPEC §3.
-- [x] Zapamiętanie folderu (IndexedDB) i przycisk „Wczytaj ostatni folder”.
-- [x] Lista kategorii w panelu: nazwa, liczba zdjęć, ostrzeżenie < 30, info o pominiętych HEIC.
-- [x] Zarządzanie blob URL-ami (tworzenie na żądanie, zwalnianie przy zmianie folderu/kategorii).
-
-**Odbiór (ręcznie):** wskazanie `samples/Kategorie` pokazuje 3 kategorie z poprawnymi liczbami; `.txt` pominięty; po restarcie przeglądarki „Wczytaj ostatni folder” działa.
+**Acceptance:** the user opened the spike in Edge and Chrome and confirmed the results.
 
 ---
 
-## Faza 3 — Gracze i persistencja
-- [x] `storage.js`: odczyt/zapis `localStorage['thefloor.v1']` (gracze, ustawienia) z bezpiecznym fallbackiem przy uszkodzonych danych.
-- [x] Panel: dodawanie, edycja, usuwanie (potwierdzenie), auto-kolor z palety, przypisanie kategorii, korekty `+1/−1`, „Wyzeruj wyniki”, lista w kolejności rankingu z `W–P`.
-- [x] Ustawienia: czas pojedynku, kara za pas, dźwięk, ukrywanie odpowiedzi.
+## Phase 1 — Logic core + tests (no UI)
+- [x] `logic.js`: `normalizeAnswer(filename)`, `isSupportedImage(name)`, `isHeic(name)`, `shuffle(arr, rng)` (Fisher–Yates, injected RNG), `rankPlayers(players)`.
+- [x] `logic.js`: the duel per SPEC §5 — `createDuel`, `start`, `markCorrect`, `markPass`, `togglePause`, `tick`, `getClock`, `nextImage` (deck with reshuffling without an immediate repeat). All methods take `now`.
+- [x] Mini test runner (`tests/logic.test.js`) + `tests/tests.html` + `tests/run-node.js`.
+- [x] Tests at least for:
+  - [x] name normalization (examples from SPEC §3 + empty/odd names),
+  - [x] clock: time runs only for the active player; after `markCorrect` the turn passes, time frozen correctly,
+  - [x] pass: the reveal lasts 3 s, the clock keeps running, Space/P ignored, after the reveal the same player,
+  - [x] timeout during `running` and during `reveal` → `finished` with the right winner,
+  - [x] pause stops the clock and the reveal, resume continues,
+  - [x] deck: no repeats until exhausted; after a reshuffle the first ≠ the last,
+  - [x] ranking: wins ↓, losses ↑, name.
 
-**Odbiór (ręcznie):** dodanie 4 graczy, zmiana wyników, F5 — wszystko zostaje.
-
----
-
-## Faza 4 — Ekran graczy
-- [x] `display.js`: otwieranie/odzyskiwanie okna, kopiowanie CSS z `#display-css`, budowa DOM.
-- [x] Widoki: plansza startowa z rankingiem, `ready`, `running`, odsłona po pasie, `paused`, `finished` (SPEC §6).
-- [x] Pętla renderująca na `requestAnimationFrame` okna graczy + zapasowy `setInterval` (SPEC §7.3).
-- [x] Komunikaty przy zamkniętym/nieodzyskanym oknie; po F5 „Otwórz ekran graczy” zamyka stare okno i otwiera nowe (SPEC §7.3).
-- [x] Ostrzeżenie `beforeunload`, gdy okno graczy jest otwarte albo trwa pojedynek. *(2026-10-24: w ręcznym teście brak pytania i komunikatu — najpewniej F5 trafiło do okna graczy, które ma fokus po otwarciu. Poprawka w fazie 6: okno graczy blokuje F5/Ctrl+R, a panel wykrywa odświeżone okno. Do ponownego sprawdzenia.)*
-
-**Odbiór (ręcznie):** okno przeciągnięte na TV, F11, czytelne z 3 m; zamknięcie okna nie psuje panelu.
+**Acceptance:** all tests green in Node (if available) and in `tests/tests.html`.
 
 ---
 
-## Faza 5 — Pełny przebieg pojedynku
-- [x] Panel „Pojedynek”: wybór challengera/rywala, domyślna kategoria rywala, kto zaczyna, „🎲 Losuj wyzywającego”, START.
-- [x] Skróty klawiszowe wg SPEC §7.2 w obu oknach (repeat, debounce, pola tekstowe).
-- [x] Podgląd zdjęcia + duża odpowiedź dla operatora, ukrywanie odpowiedzi z H.
-- [x] Preload + `decode()` następnego zdjęcia; pomijanie uszkodzonych plików.
-- [x] Koniec: „Zatwierdź wynik” (wins/losses) / „Unieważnij”.
-- [x] `sound.js` wg SPEC §8.
-- [x] Blokady z SPEC §9.
+## Phase 2 — Categories from a folder
+- [x] `categories.js`: folder choice (`showDirectoryPicker` or the fallback per the spike results), list of direct subfolders and files per SPEC §3.
+- [x] Remembering the folder (IndexedDB) and the “Load last folder” button.
+- [x] Category list in the panel: name, photo count, warning < 30, info about skipped HEIC.
+- [x] Blob URL management (created on demand, released on a folder/category change).
 
-**Odbiór (ręcznie):** pełny pojedynek na `samples/Kategorie`: kilka dobrych odpowiedzi, pas z odsłoną, timeout, zatwierdzenie wyniku — liczniki i ranking poprawne, zero błędów w konsoli.
+**Acceptance (manual):** choosing the sample categories shows 3 categories with correct counts; `.txt` skipped; after a browser restart “Load last folder” works.
 
 ---
 
-## Faza 6 — Szlif i dokumentacja
-- [x] Usunięcie `spike.html`, porządek w kodzie, brak `console.log` poza błędami.
-- [x] Tryb jednego ekranu (SPEC §7.4) z „Dużym podglądem”.
-- [x] Wygląd: spójne kolory, duże fonty na TV, czytelne stany przycisków.
-- [x] `README.md` po polsku: przygotowanie folderu i nazw plików, uruchomienie, dwa ekrany (Win+P → Rozszerz, przeciągnięcie okna, F11), skróty klawiszowe, zasady, HEIC → JPG, FAQ.
-- [ ] Test na prawdziwym folderze użytkownika (duże zdjęcia z telefonu).
+## Phase 3 — Players and persistence
+- [x] `storage.js`: reading/writing `localStorage['thefloor.v1']` (players, settings) with a safe fallback for corrupted data.
+- [x] Panel: add, edit, delete (confirmation), auto color from the palette, category assignment, `+1/−1` corrections, “Reset scores”, list in ranking order with `W–L`.
+- [x] Settings: duel time, pass penalty, sound, hiding the answer.
 
-**Odbiór:** definicja „gotowe” z `CLAUDE.md` spełniona.
+**Acceptance (manual):** add 4 players, change scores, F5 — everything stays.
 
 ---
 
-## Rozszerzenie — poziomy trudności kategorii (prośba użytkownika, 2026-10-24)
-- [x] `logic.js`: `groupRelativePaths` zwraca dwa poziomy folderów; `resolveCategories` rozpoznaje poziomy, sortuje i rozwiązuje powtórzone nazwy (SPEC §3).
-- [x] `categories.js`: odczyt dwóch poziomów folderów (uchwyt i fallback `webkitdirectory`), `Category.level`.
-- [x] Panel: nagłówki poziomów na liście kategorii, `<optgroup>` w wyborze kategorii gracza i pojedynku.
-- [x] Testy `resolveCategories` i nowego `groupRelativePaths`.
-- [ ] Ręcznie: folder z podfolderami `Łatwe` / `Trudne` → kategorie pogrupowane; pojedynek z kategorii z poziomu działa; na TV sama nazwa kategorii.
+## Phase 4 — Players screen
+- [x] `display.js`: opening/recovering the window, copying the CSS from `#display-css`, building the DOM.
+- [x] Views: start board with the ranking, `ready`, `running`, pass reveal, `paused`, `finished` (SPEC §6).
+- [x] Render loop on the players window's `requestAnimationFrame` + fallback `setInterval` (SPEC §7.3).
+- [x] Messages for a closed/unrecovered window; after F5 “Open players screen” closes the old window and opens a new one (SPEC §7.3).
+- [x] `beforeunload` warning while the players window is open or a duel is in progress. *(2026-10-24: in the manual test no question and no message — most likely F5 went to the players window, which has focus after opening. Fixed in phase 6: the players window blocks F5/Ctrl+R and the panel detects a refreshed window. To be checked again.)*
+
+**Acceptance (manual):** window dragged to the TV, F11, readable from 3 m; closing the window doesn't break the panel.
 
 ---
 
-## Lista ręcznego testu (na koniec)
-1. Dwuklik `app/index.html` w Edge → brak błędów w konsoli.
-2. Wybór folderu → kategorie z liczbami, ostrzeżenia działają.
-3. Dodanie 3 graczy z kategoriami.
-4. Otwórz ekran graczy → przeciągnij na drugi ekran → F11.
-5. Pojedynek: Spacja ×3, P ×1 (odpowiedź widoczna 3 s), czekaj do końca czasu.
-6. Zatwierdź wynik → ranking na ekranie TV i w panelu.
-7. Esc w trakcie pojedynku → pauza na obu ekranach.
-8. F5 panelu → gracze i wyniki zostają; okno graczy odzyskane albo czytelny komunikat.
-9. Tryb „Ukrywaj odpowiedź” + H.
+## Phase 5 — Full duel
+- [x] “Duel” panel: challenger/opponent choice, the opponent's default category, who starts, “🎲 random challenger”, START.
+- [x] Keyboard shortcuts per SPEC §7.2 in both windows (repeat, debounce, text fields).
+- [x] Photo preview + big answer for the operator, hiding the answer with H.
+- [x] Preload + `decode()` of the next photo; skipping broken files.
+- [x] End: “Confirm result” (wins/losses) / “Cancel”.
+- [x] `sound.js` per SPEC §8.
+- [x] Locks from SPEC §9.
+
+**Acceptance (manual):** a full duel on the sample categories: a few correct answers, a pass with the reveal, timeout, confirming the result — counters and ranking correct, zero console errors.
 
 ---
 
-## Dziennik decyzji
-| Data | Decyzja | Powód |
+## Phase 6 — Polish and documentation
+- [x] Removing `spike.html`, code cleanup, no `console.log` except errors.
+- [x] Single-screen mode (SPEC §7.4) with “Big preview”.
+- [x] Look: consistent colors, big fonts on the TV, readable button states.
+- [x] `README.md`: preparing the folder and file names, starting, two screens (Win+P → Extend, dragging the window, F11), keyboard shortcuts, rules, HEIC → JPG, FAQ.
+- [ ] Test on the user's real folder (big phone photos).
+
+**Acceptance:** the “done” definition from `CLAUDE.md` is met.
+
+---
+
+## Extension — difficulty levels for categories (user request, 2026-10-24)
+- [x] `logic.js`: `groupRelativePaths` returns two folder levels; `resolveCategories` recognizes levels, sorts them and resolves repeated names (SPEC §3).
+- [x] `categories.js`: reading two folder levels (handle and the `webkitdirectory` fallback), `Category.level`.
+- [x] Panel: level headers in the category list, `<optgroup>` in the player and duel category selects.
+- [x] Tests for `resolveCategories` and the new `groupRelativePaths`.
+- [ ] Manual: a folder with `Easy` / `Hard` subfolders → categories grouped; a duel from a level category works; the TV shows only the category name.
+
+---
+
+## Extension — English project, languages, new name (user request, 2026-10-24)
+- [x] New name **Floor Duel** (instead of “The Floor”, a TV show trademark); disclaimer in the README.
+- [x] `app/js/i18n.js`: English and Polish dictionaries, `t()` with placeholders and plural forms, language detection, `applyToDocument()`.
+- [x] `logic.js` returns problems as `{ key, params }` instead of Polish sentences; `settings.language`; English level names (`easy`, `medium`, `hard`).
+- [x] Panel and players screen fully translated; language selector in the top bar, changes apply immediately in both windows.
+- [x] Tests: the same keys/placeholders/plural forms in every language, `t()`, `detectLanguage`, translations of logic problems.
+- [x] Samples: `samples/categories-en` (English names) and `samples/categories-pl` (Polish names, moved from `samples/Kategorie`).
+- [x] Documentation in English (`README.md`, `docs/*.md`, `CLAUDE.md`); Polish copies next to it (`*.pl.md`).
+- [ ] Manual: switch the language during a duel → the panel and the TV change texts; F5 → the language is remembered.
+
+---
+
+## Manual test checklist (at the end)
+1. Double-click `app/index.html` in Edge → no console errors.
+2. Choose a folder → categories with counts, warnings work.
+3. Add 3 players with categories.
+4. Open the players screen → drag it to the second screen → F11.
+5. Duel: Space ×3, P ×1 (answer visible for 3 s), wait until the time runs out.
+6. Confirm the result → ranking on the TV and in the panel.
+7. Esc during a duel → pause on both screens.
+8. F5 on the panel → players and scores stay; players window recovered or a clear message.
+9. “Hide the answer” mode + H.
+10. Switch the language EN ↔ PL → all texts change in the panel and on the TV.
+
+---
+
+## Decision log
+| Date | Decision | Reason |
 |---|---|---|
-| 2026-10-24 | Vanilla JS, klasyczne skrypty, `file://`, bez builda | Uruchamianie dwuklikiem na Windows, offline |
-| 2026-10-24 | Okno graczy jako about:blank sterowane z operatora | Chromium blokuje skrypty między plikami `file://` |
-| 2026-10-24 | Pas = 3 s odsłony odpowiedzi przy biegnącym zegarze | Zgodne z TV, efekt = −3 s |
-| 2026-10-24 | Punktacja tylko dodatnia, porażki informacyjnie, bez eliminacji | Prosta wersja na imprezę |
-| 2026-10-24 | `.gitignore`: `Kategorie/` → `/Kategorie/` | Wzorzec bez `/` ignorował też `samples/Kategorie/`, które mają być commitowane |
-| 2026-10-24 | Po F5 operatora okna graczy nie odzyskujemy — tylko komunikat „Zamknij okno graczy i otwórz je ponownie” (SPEC §7.3) | Spike, Edge 155: nowy origin `"null"` przy każdym załadowaniu → `SecurityError`; nawigacja do `about:blank` też nie przywraca dostępu |
-| 2026-10-24 | Ostrzeżenie `beforeunload` przy otwartym oknie graczy / trwającym pojedynku; „Otwórz ekran graczy” zamyka stare, niedostępne okno | Zamiast odzyskiwania okna po F5 — zapobieganie przypadkowemu F5 (decyzja użytkownika) |
-| 2026-10-24 | Akcje pojedynku (`start`, `markCorrect`, `markPass`, `togglePause`, `tick`) zwracają tablicę zdarzeń; pusta = zignorowane. Każda akcja najpierw wywołuje `tick(now)` | Spóźniona Spacja po upływie czasu kończy pojedynek zamiast zaliczać odpowiedź |
-| 2026-10-24 | `lowTime` = raz na każdą pełną sekundę (5,4,3,2,1) aktywnego gracza | Pod „tyk” z SPEC §8 |
-| 2026-10-24 | Odsłona kończąca się dokładnie w chwili końca czasu = przegrana na czas | Jednoznaczna kolejność zdarzeń |
-| 2026-10-24 | Stan `setup` żyje w UI; `createDuel` zwraca pojedynek w stanie `ready` | Wybór graczy/kategorii to formularz, nie logika |
-| 2026-10-24 | Nazwa, która po normalizacji byłaby pusta (np. `(2).jpg`), zostaje jako nazwa bez rozszerzenia | Operator zawsze widzi jakąś odpowiedź |
-| 2026-10-24 | Dodane `applyResult(players, duel)` i `clockSeconds(ms)` w `logic.js` | Zatwierdzanie wyniku i zaokrąglanie zegara testowalne bez DOM |
-| 2026-10-24 | Kolejność kategorii i zdjęć: naturalna, polska (`2.jpg` przed `10.jpg`); ukryte podfoldery (`.git`) pomijane | Przewidywalna lista w panelu |
-| 2026-10-24 | Kategorie z 0 zdjęć widoczne na liście (wyszarzone), z adnotacją, że nie można ich wybrać | Operator widzi, że folder istnieje, ale jest pusty |
-| 2026-10-24 | Imiona graczy unikalne (bez względu na wielkość liter), maks. 24 znaki | Jednoznaczny ranking i wybór graczy do pojedynku |
-| 2026-10-24 | Zakresy ustawień: czas pojedynku 10–300 s, kara za pas 1–10 s; wartości spoza zakresu przycinane | Ochrona przed literówką typu 450 zamiast 45 |
-| 2026-10-24 | Uszkodzony JSON w `thefloor.v1` → start od zera + kopia surowych danych w `thefloor.v1.corrupt` + komunikat w panelu | Bezpieczny fallback bez utraty danych |
-| 2026-10-24 | Paleta 12 jasnych kolorów (czytelnych na czarnym ekranie TV) | SPEC §7.1, tło ekranu graczy jest czarne |
-| 2026-10-24 | Widok ekranu graczy liczony czystą funkcją `displayView({ duel, players, now })` w `logic.js`; `display.js` tylko rysuje | Widoki testowalne w Node |
-| 2026-10-24 | Przy zamykaniu/odświeżaniu panelu (`pagehide`) panel sam zamyka okno graczy | Po F5 i tak jest bezużyteczne (białe); nie zostaje sierota na TV |
-| 2026-10-24 | Jeśli „Otwórz ekran graczy” trafi na stare, niedostępne okno i nie da się od razu otworzyć nowego — zamyka stare i prosi o drugie kliknięcie | Przeglądarka pozwala na jedno wyskakujące okno na kliknięcie |
-| 2026-10-24 | Ranking na planszy startowej w dwóch kolumnach przy > 8 graczach; zegar ≤ 10 s czerwony u obu graczy, pulsuje tylko u aktywnego | Czytelność z kanapy |
-| 2026-10-24 | Stan `ready` = szkic pojedynku tworzony automatycznie, gdy wybór graczy i kategorii jest poprawny; ekran graczy od razu pokazuje „Przygotujcie się!” | SPEC §5: setup → ready po wybraniu 2 graczy i kategorii |
-| 2026-10-24 | Zmiana rywala ustawia jego kategorię (jeśli ma zdjęcia); operator może ją potem zmienić | SPEC §2.3 |
-| 2026-10-24 | Przy „Ukrywaj odpowiedź” odpowiedź w panelu jest odsłonięta w trakcie pasa i po końcu pojedynku | W trybie jednego ekranu gracze mają ją zobaczyć jak na TV |
-| 2026-10-24 | Uszkodzone zdjęcie jest sprawdzane (`decode()`) w panelu, pomijane i usuwane z puli pojedynku; licznik w panelu | SPEC §9; nie wraca po przetasowaniu |
-| 2026-10-24 | „Unieważnij” zawsze z potwierdzeniem | Ochrona przed przypadkowym kliknięciem w trakcie gry |
-| 2026-10-24 | Okno graczy (i duży podgląd) blokuje F5 / Ctrl+R; panel wykrywa okno odświeżone przyciskiem przeglądarki (status „odświeżone — otwórz ponownie”) | Po otwarciu fokus jest w oknie graczy, więc F5 trafiało tam i robiło biały ekran bez żadnego komunikatu |
-| 2026-10-24 | „Duży podgląd” = ten sam renderer ekranu graczy w `<iframe>` na całym panelu + pasek z odpowiedzią (zamazaną bez H); `display.js` udostępnia `createRenderer(doc)` | SPEC §7.4; jeden kod widoku dla TV i jednego ekranu |
-| 2026-10-24 | Globalna reguła CSS `[hidden] { display: none !important }` | `display: flex` w klasach nadpisywało `hidden`: po zatwierdzeniu wyniku sekcja pojedynku z aktywnymi przyciskami zostawała na ekranie (zgłoszenie użytkownika) |
-| 2026-10-24 | Muzyka na przygotowanie + efekty dźwiękowe dla operatora + suwak głośności (SPEC §8) — syntezowane w WebAudio, bez plików | Prośba użytkownika; zachowany wymóg „bez plików dźwiękowych”, działa offline |
-| 2026-10-24 | Muzyka wycisza się sama po START; efekty tylko jako przyciski, bez skrótów | „Przygotowanie do gry”; skróty kolidowałyby ze Spacją/P/Esc |
-| 2026-10-24 | ~~„Napięcie” automatycznie przy 12 s, raz na gracza~~ → zastąpione: muzyka napięcia raz na pojedynek (pierwsze 12 s na tablicy), gra do końca i narasta wg czasu aktywnego gracza | Prośba użytkownika: ma budować napięcie, niezależnie od przycisku |
-| 2026-10-24 | Odliczanie 3 s po START jako stan `countdown` w `Duel` (`countdownSeconds`, domyślnie 0 w logice, 3 w aplikacji); zegar startuje od `countdownUntil`, nie od najbliższego ticka | Prośba użytkownika („3 piknięcia jak w programie”); czas z timestampów |
-| 2026-10-24 | Muzyka napięcia cichnie przy pauzie, wraca po wznowieniu; po zmianie tury intensywność spada, jeśli rywal ma ≥ 12 s | Napięcie zależy od tego, kto teraz odpowiada |
-| 2026-10-24 | Nowe brawa: ~28 „osób” z własną barwą, tempem i pozycją stereo, różne momenty końca + tło szumu | Poprzednie brawa brzmiały sztucznie (zgłoszenie użytkownika) |
-| 2026-10-24 | Poziomy trudności jako foldery pośrednie (`Kategorie\Łatwe\Zwierzęta`); folder ze zdjęciami albo bez podfolderów pozostaje kategorią | Wybór użytkownika (zamiast nawiasu w nazwie folderu); stary układ działa bez zmian |
-| 2026-10-24 | Kategoria nadal identyfikowana nazwą folderu; powtórzona nazwa z poziomem → „Nazwa (Poziom)” | Gracze mają zapisaną kategorię jako tekst — przeniesienie folderu do poziomu nie psuje przypisań |
-| 2026-10-24 | Ostatni folder wczytuje się automatycznie przy starcie, ale tylko bez pytania o zgodę (`queryPermission` = granted); inaczej komunikat i przycisk | Prośba użytkownika; `requestPermission` wymaga kliknięcia, więc przy starcie nie da się poprosić o zgodę |
-| 2026-10-24 | Nowy układ panelu: mieści się w oknie (listy przewijają się w kartach), górny pasek = ekran graczy + dźwięk/głośność + ⚙ Ustawienia w oknie dialogowym; prawa kolumna = efekty nad kategoriami; filtr kategorii od 9 kategorii; ściąga skrótów | Zgłoszenie użytkownika: długa lista kategorii spychała ekran graczy, dźwięki i ustawienia poza ekran |
+| 2026-10-24 | Vanilla JS, classic scripts, `file://`, no build | Starting by double-click on Windows, offline |
+| 2026-10-24 | Players window as about:blank driven from the operator | Chromium blocks scripts between `file://` files |
+| 2026-10-24 | Pass = 3 s answer reveal with the clock running | As on TV, effect = −3 s |
+| 2026-10-24 | Positive scoring only, losses informational, no elimination | Simple version for a party |
+| 2026-10-24 | `.gitignore`: `Kategorie/` → `/Kategorie/` | The pattern without `/` also ignored the sample categories, which are meant to be committed |
+| 2026-10-24 | After the operator's F5 the players window isn't recovered — only the message “Close the players window and open it again” (SPEC §7.3) | Spike, Edge 155: a new `"null"` origin on every load → `SecurityError`; navigating to `about:blank` doesn't restore access either |
+| 2026-10-24 | `beforeunload` warning with the players window open / a duel in progress; “Open players screen” closes the old, unreachable window | Instead of recovering the window after F5 — preventing an accidental F5 (user's decision) |
+| 2026-10-24 | Duel actions (`start`, `markCorrect`, `markPass`, `togglePause`, `tick`) return an array of events; empty = ignored. Every action calls `tick(now)` first | A late Space after the time ran out ends the duel instead of counting the answer |
+| 2026-10-24 | `lowTime` = once per full second (5,4,3,2,1) of the active player | For the “tick” from SPEC §8 |
+| 2026-10-24 | A reveal ending exactly when the time runs out = loss on time | Unambiguous order of events |
+| 2026-10-24 | The `setup` state lives in the UI; `createDuel` returns a duel in the `ready` state | Choosing players/category is a form, not logic |
+| 2026-10-24 | A name that would be empty after normalization (e.g. `(2).jpg`) stays as the name without the extension | The operator always sees some answer |
+| 2026-10-24 | Added `applyResult(players, duel)` and `clockSeconds(ms)` in `logic.js` | Confirming the result and rounding the clock testable without DOM |
+| 2026-10-24 | Order of categories and photos: natural, Polish-aware (`2.jpg` before `10.jpg`); hidden subfolders (`.git`) skipped | Predictable list in the panel |
+| 2026-10-24 | Categories with 0 photos visible in the list (greyed out), with a note that they can't be chosen | The operator sees the folder exists but is empty |
+| 2026-10-24 | Player names unique (case-insensitive), max 24 characters | Unambiguous ranking and player choice for a duel |
+| 2026-10-24 | Setting ranges: duel time 10–300 s, pass penalty 1–10 s; out-of-range values clamped | Protection against a typo like 450 instead of 45 |
+| 2026-10-24 | Corrupted JSON in `thefloor.v1` → start from scratch + a copy of the raw data in `thefloor.v1.corrupt` + a message in the panel | Safe fallback without losing data |
+| 2026-10-24 | Palette of 12 bright colors (readable on the black TV screen) | SPEC §7.1, the players screen background is black |
+| 2026-10-24 | The players screen view computed by the pure function `displayView({ duel, players, now })` in `logic.js`; `display.js` only draws | Views testable in Node |
+| 2026-10-24 | When the panel closes/refreshes (`pagehide`) it closes the players window itself | After F5 it is useless anyway (white); no orphan left on the TV |
+| 2026-10-24 | If “Open players screen” hits the old, unreachable window and can't open a new one right away — it closes the old one and asks for a second click | The browser allows one pop-up per click |
+| 2026-10-24 | Ranking on the start board in two columns with > 8 players; clock ≤ 10 s red for both players, pulsing only for the active one | Readable from the couch |
+| 2026-10-24 | The `ready` state = a draft duel created automatically when the player and category choice is valid; the players screen immediately shows “Get ready!” | SPEC §5: setup → ready after choosing 2 players and a category |
+| 2026-10-24 | Changing the opponent sets their category (if it has photos); the operator can change it afterwards | SPEC §2.3 |
+| 2026-10-24 | With “Hide the answer” the answer in the panel is uncovered during a pass and after the duel ends | In single-screen mode the players should see it as on the TV |
+| 2026-10-24 | A broken photo is checked (`decode()`) in the panel, skipped and removed from the duel pool; counter in the panel | SPEC §9; it doesn't come back after a reshuffle |
+| 2026-10-24 | “Cancel” always asks for confirmation | Protection against an accidental click during the game |
+| 2026-10-24 | The players window (and the big preview) blocks F5 / Ctrl+R; the panel detects a window refreshed with the browser button (status “disconnected — open again”) | After opening, the focus is in the players window, so F5 went there and made a white screen without any message |
+| 2026-10-24 | “Big preview” = the same players screen renderer in an `<iframe>` over the whole panel + a bar with the answer (blurred without H); `display.js` exposes `createRenderer(doc)` | SPEC §7.4; one view code for the TV and the single screen |
+| 2026-10-24 | Global CSS rule `[hidden] { display: none !important }` | `display: flex` in classes overrode `hidden`: after confirming the result the duel section with active buttons stayed on screen (user report) |
+| 2026-10-24 | Music for getting ready + sound effects for the operator + volume slider (SPEC §8) — synthesized in Web Audio, no files | User request; keeps the “no sound files” requirement, works offline |
+| 2026-10-24 | The music fades out on START; effects only as buttons, no shortcuts | “Getting ready for the game”; shortcuts would clash with Space/P/Esc |
+| 2026-10-24 | ~~“Suspense” automatically at 12 s, once per player~~ → replaced: suspense music once per duel (first 12 s on the clock), plays to the end and builds with the active player's time | User request: it should build tension, independent of the button |
+| 2026-10-24 | 3 s countdown after START as the `countdown` state in `Duel` (`countdownSeconds`, 0 by default in the logic, 3 in the app); the clock starts from `countdownUntil`, not from the next tick | User request (“3 beeps like on the show”); time from timestamps |
+| 2026-10-24 | Suspense music goes quiet on pause, returns on resume; after a turn change the intensity drops if the opponent has ≥ 12 s | Tension depends on who is answering now |
+| 2026-10-24 | New applause: ~28 “people” with their own timbre, tempo and stereo position, different end times + a noise background | The previous applause sounded artificial (user report) |
+| 2026-10-24 | Difficulty levels as intermediate folders (`Categories\Easy\Animals`); a folder with photos or without subfolders stays a category | User's choice (instead of a bracket in the folder name); the old layout works unchanged |
+| 2026-10-24 | A category is still identified by its folder name; a repeated name with a level → “Name (Level)” | Players store their category as text — moving a folder into a level doesn't break assignments |
+| 2026-10-24 | The last folder loads automatically on start, but only without asking for permission (`queryPermission` = granted); otherwise a message and the button | User request; `requestPermission` needs a click, so permission can't be asked for on start |
+| 2026-10-24 | New panel layout: fits the window (lists scroll inside cards), top bar = players screen + sound/volume + ⚙ Settings in a dialog; right column = effects above categories; category filter from 9 categories; shortcut cheat sheet | User report: a long category list pushed the players screen, sounds and settings off screen |
+| 2026-10-24 | Project renamed to **Floor Duel**; “The Floor” is mentioned only in a disclaimer as the inspiration | “The Floor” is the name (trademark) of a TV format; the game rules themselves aren't protected, the name is. “The Floor Party” would still contain the whole mark |
+| 2026-10-24 | Storage keys stay `thefloor.v1` / IndexedDB `thefloor` | Invisible to players; renaming would lose saved players and the remembered folder |
+| 2026-10-24 | Own `i18n.js` (no library): dictionaries + `t()` + `Intl.PluralRules`; language in `settings.language` (null = browser) | No dependencies, works from `file://`; Polish needs three plural forms |
+| 2026-10-24 | The logic returns `{ key, params }` instead of texts | `logic.js` stays DOM- and language-free, testable in Node |
+| 2026-10-24 | HTML contains English texts as defaults; `applyToDocument()` overwrites them on start and on a language change | The page is readable even before the scripts run; one mechanism for both cases |
+| 2026-10-24 | The language selector sits in the top bar, language names in their own language (“English”, “Polski”) | Easy to find for someone who doesn't know the current language |
+| 2026-10-24 | English documentation is the source of truth, Polish copies `*.pl.md` are translations | Public repository on GitHub; the user wanted to keep the Polish documentation |
+| 2026-10-24 | Samples: `samples/categories-en` and `samples/categories-pl` (the same images, names in two languages) | The images have no text, so only file names differ; Polish samples still test diacritics |

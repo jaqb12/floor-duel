@@ -3,6 +3,7 @@
   'use strict';
   window.Floor = window.Floor || {};
   const L = Floor.logic;
+  const t = (key, params) => Floor.i18n.t(key, params);
   const ui = () => Floor.operator;
 
   const COUNTDOWN_SECONDS = 3;
@@ -25,7 +26,7 @@
   }
 
   function persist() {
-    if (!Floor.storage.saveState(state)) ui().showAppMessage('Nie udało się zapisać danych w przeglądarce.', true);
+    if (!Floor.storage.saveState(state)) ui().showAppMessage(t('storage.saveFailed'), true);
   }
 
   // Started and not yet confirmed or cancelled.
@@ -61,7 +62,7 @@
     adjustWins: (id, delta) => setPlayers(L.adjustWins(state.players, id, delta)),
     removePlayer(id) {
       if (inDuel(id)) {
-        ui().showAppMessage('Nie można usunąć gracza, który bierze udział w pojedynku.', true);
+        ui().showAppMessage(t('players.cannotRemove'), true);
         return;
       }
       setPlayers(state.players.filter(p => p.id !== id));
@@ -69,9 +70,19 @@
     resetScores: () => setPlayers(L.resetScores(state.players)),
   };
 
+  // settings.language null = follow the browser.
+  function applyLanguage() {
+    Floor.i18n.setLanguage(state.settings.language || Floor.i18n.detectLanguage(navigator.languages));
+    document.title = t('app.operatorTitle');
+    Floor.i18n.applyToDocument(document);
+  }
+
   function changeSettings(raw) {
+    const previousLanguage = Floor.i18n.getLanguage();
     state.settings = L.sanitizeSettings(raw);
     persist();
+    applyLanguage();
+    if (Floor.i18n.getLanguage() !== previousLanguage) ui().relabel();
     ui().renderSettings(state.settings);
     Floor.sound.setEnabled(state.settings.sound);
     Floor.sound.setVolume(state.settings.volume);
@@ -85,17 +96,16 @@
   }
 
   function folderErrorText(e) {
-    if (e && e.name === 'NotFoundError') return 'Folder nie istnieje — został przeniesiony lub usunięty? Wybierz go ponownie.';
-    if (e && e.name === 'NotAllowedError') return 'Brak zgody na odczyt folderu.';
-    if (e && e.name === 'PermissionNeeded') {
-      return 'Nie udało się automatycznie wczytać ostatniego folderu — przeglądarka wymaga zgody. Kliknij „Wczytaj ostatni folder”.';
-    }
-    return 'Nie udało się wczytać folderu: ' + (e && e.message ? e.message : e);
+    if (e && e.name === 'NotFoundError') return t('folder.notFound');
+    if (e && e.name === 'NotAllowedError') return t('folder.notAllowed');
+    if (e && e.name === 'PermissionNeeded') return t('folder.permissionNeeded');
+    if (e && e.name === 'PermissionDenied') return t('folder.permissionDenied', { name: e.folderName });
+    return t('folder.loadFailed', { error: e && e.message ? e.message : e });
   }
 
   async function loadLibrary(loader) {
     if (isDuelLive()) {
-      ui().showFolderMessage('Najpierw zakończ albo unieważnij pojedynek.', true);
+      ui().showFolderMessage(t('folder.finishDuelFirst'), true);
       return;
     }
     try {
@@ -273,7 +283,8 @@
   async function init() {
     const loaded = Floor.storage.loadState();
     state = { players: loaded.players, settings: loaded.settings };
-    if (loaded.warning) ui().showAppMessage(loaded.warning, true);
+    applyLanguage();
+    if (loaded.warning) ui().showAppMessage(Floor.i18n.problemText(loaded.warning), true);
     Floor.sound.setEnabled(state.settings.sound);
     Floor.sound.setVolume(state.settings.volume);
     Floor.sound.setMusicListener(playing => ui().renderMusic(playing));
@@ -288,6 +299,7 @@
     ui().renderPlayers(state.players, library);
     ui().renderSettings(state.settings);
     ui().renderCategories(null);
+    ui().renderMusic(false);
     rebuildDraft();
 
     Floor.display.setStatusListener(status => ui().showDisplayStatus(status));

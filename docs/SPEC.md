@@ -1,142 +1,153 @@
-# SPEC — The Floor (domowa wersja)
+# SPEC — Floor Duel
 
-Źródło prawdy dla zachowania aplikacji. Zmiany zasad wpisujemy tutaj.
+The source of truth for how the app behaves. Rule changes go here. Polish translation: [`SPEC.pl.md`](SPEC.pl.md).
 
-## 1. Cel
-Prowadzenie domowych pojedynków w stylu teleturnieju The Floor. Jeden komputer z Windows, dwa okna przeglądarki:
-- **Panel operatora** — na laptopie, widzi go tylko operator (tu są poprawne odpowiedzi).
-- **Ekran graczy** — na telewizorze/drugim monitorze, pełny ekran (F11).
+## 1. Goal
+Running home duels in the style of TV photo-quiz game shows (e.g. *The Floor*; the project is not affiliated with it). One Windows computer, two browser windows:
+- **Operator panel** — on the laptop, seen only by the host (the correct answers are here).
+- **Players screen** — on the TV / second monitor, full screen (F11).
 
-Działa też na jednym ekranie (patrz 7.4 — ukrywanie odpowiedzi).
+Works on a single screen too (see 7.4 — hiding the answer).
 
-## 2. Zasady gry
-1. Gracze mają: imię, kolor, opcjonalnie przypisaną kategorię, licznik **wygranych** i **porażek**.
-2. Operator wybiera gracza, który **wyzywa** (challenger). Challenger wskazuje **rywala** (opponent).
-3. **Kategoria pojedynku:** domyślnie kategoria przypisana rywalowi (jak w TV). Jeśli rywal nie ma kategorii albo jej folder nie istnieje — operator musi wybrać kategorię z listy. Operator zawsze może zmienić kategorię przed startem.
-4. **Kto zaczyna odpowiadać:** domyślnie challenger; operator może przełączyć przed startem.
-5. **Zegar szachowy:** każdy gracz ma `duelSeconds` (domyślnie **45 s**). Czas biegnie tylko graczowi, który aktualnie odpowiada.
-6. **Dobra odpowiedź** (operator: Spacja): nowe zdjęcie, tura i zegar przechodzą na rywala.
-7. **Pas** (operator: P, gdy gracz mówi „pas”): przez `passPenaltySeconds` (domyślnie **3 s**) na ekranie graczy widać poprawną odpowiedź pod zdjęciem; zegar pasującego **biegnie** w tym czasie. Potem nowe zdjęcie dla **tego samego** gracza. W trakcie odsłony klawisze Spacja/P są ignorowane. Efekt = utrata 3 s (tak jak w TV).
-8. **Koniec:** gdy zegar gracza dojdzie do 0 (także w trakcie odsłony po pasie) — ten gracz przegrywa. Ekran graczy pokazuje zwycięzcę.
-9. **Punktacja tylko dodatnia:** zwycięzca `wins +1`, przegrany `losses +1` (informacyjnie). Wynik zapisuje się dopiero po kliknięciu „Zatwierdź wynik”; operator może zamiast tego „Unieważnij pojedynek” (nic się nie zmienia).
-10. **Ranking:** sortowanie po `wins` malejąco, potem `losses` rosnąco, potem imię.
-11. Nikt nie odpada — po pojedynku wszyscy grają dalej (prostsza wersja niż TV).
+## 2. Game rules
+1. Players have: a name, a color, optionally an assigned category, counters of **wins** and **losses**.
+2. The operator chooses the player who **challenges** (challenger). The challenger picks an **opponent**.
+3. **Duel category:** by default the category assigned to the opponent (as on TV). If the opponent has no category, or its folder doesn't exist, the operator must choose one from the list. The operator can always change the category before the start.
+4. **Who answers first:** the challenger by default; the operator can switch it before the start.
+5. **Chess clock:** each player has `duelSeconds` (default **45 s**). Time runs only for the player who is currently answering.
+6. **Correct answer** (operator: Space): new photo, the turn and the clock pass to the opponent.
+7. **Pass** (operator: P, when the player says “pass”): for `passPenaltySeconds` (default **3 s**) the players screen shows the correct answer under the photo; the passing player's clock **keeps running** meanwhile. Then a new photo for the **same** player. During the reveal Space/P are ignored. Effect = losing 3 s (as on TV).
+8. **End:** when a player's clock reaches 0 (also during a pass reveal), that player loses. The players screen shows the winner.
+9. **Positive scoring only:** winner `wins +1`, loser `losses +1` (informational). The result is saved only after clicking “Confirm result”; instead, the operator can “Cancel duel” (nothing changes).
+10. **Ranking:** by `wins` descending, then `losses` ascending, then name.
+11. Nobody is eliminated — after a duel everyone keeps playing (simpler than TV).
 
-## 3. Kategorie i zdjęcia
-- Użytkownik wskazuje **folder główny** (np. `D:\TheFloor\Kategorie`).
-- **Każdy bezpośredni podfolder = kategoria.** Nazwa kategorii = nazwa podfolderu.
-- **Poziomy trudności** (dodane na prośbę użytkownika, 2026-10-24): podfolder, który nie ma bezpośrednio żadnego zdjęcia, ale ma podfoldery, to **poziom** (np. `Kategorie\Łatwe\Zwierzęta\`); jego podfoldery są kategoriami tego poziomu. Głębiej nie szukamy. Oba układy można mieszać — kategoria bez poziomu działa jak dotąd.
-  - Kolejność poziomów: łatwe → normalne/średnie → trudne → eksperckie (rozpoznawane po początku nazwy, bez względu na wielkość liter: `łatw`, `norm`/`śred`, `trud`, `eksp`/`exp`); inne nazwy poziomów na końcu, alfabetycznie. Kategorie bez poziomu na początku listy.
-  - Nazwa kategorii to nazwa jej folderu (graczom nie pokazujemy poziomu). Gdy ta sama nazwa występuje w kilku miejscach, kategorie z poziomem dostają dopisek „Nazwa (Poziom)”.
-  - Panel operatora pokazuje kategorie pogrupowane według poziomów (nagłówki na liście, grupy w listach wyboru).
-- **Zdjęcia = pliki bezpośrednio w folderze kategorii** (bez rekurencji). Obsługiwane rozszerzenia (bez względu na wielkość liter): `jpg, jpeg, png, webp, gif, bmp, avif, svg`.
-- Pomijane: pliki ukryte (zaczynające się od `.`), `Thumbs.db`, `desktop.ini`, inne rozszerzenia. **HEIC/HEIF** są pomijane z czytelnym ostrzeżeniem („X plików HEIC — przekonwertuj na JPG”).
-- **Poprawna odpowiedź = nazwa pliku** po normalizacji:
-  1. usuń rozszerzenie,
-  2. usuń sufiks duplikatu: ` (2)` na końcu (regex `\s*\(\d+\)$`) oraz `__2` na końcu (regex `__\d+$`),
-  3. zamień `_` na spację, zredukuj wielokrotne spacje, `trim`, normalizacja Unicode NFC.
-  Przykłady: `Wieża_Eiffla.jpg` → „Wieża Eiffla”; `Słoń (2).png` → „Słoń”; `Słoń__3.webp` → „Słoń”; `F-16.jpg` → „F-16”.
-- Lista kategorii w panelu operatora pokazuje liczbę zdjęć. **Ostrzeżenie**, gdy kategoria ma < 30 zdjęć (pojedynek potrafi zużyć 30+).
-- **Pula pojedynku:** na starcie pojedynku tasowanie Fisher–Yates wszystkich zdjęć kategorii; zdjęcia bez powtórzeń. Gdy pula się wyczerpie — przetasuj ponownie (unikając zdjęcia, które właśnie było) i pokaż operatorowi dyskretną informację „pula wyczerpana — powtórki”.
-- Zapamiętanie folderu: jeśli działa `showDirectoryPicker`, uchwyt zapisujemy w IndexedDB; przy kolejnym uruchomieniu/odświeżeniu aplikacja sama próbuje go wczytać (tylko gdy zgoda przeglądarki wciąż obowiązuje — `queryPermission`); jeśli się nie uda, pokazuje komunikat, a przycisk „Wczytaj ostatni folder” prosi o zgodę (wymaga kliknięcia — `requestPermission`). Fallback: `<input type="file" webkitdirectory>` (bez zapamiętywania; po odświeżeniu trzeba wskazać ponownie).
-- Zdjęcia ładujemy jako `URL.createObjectURL(file)`; przy zmianie folderu/kategorii zwalniamy (`revokeObjectURL`). **Następne zdjęcie preloadujemy** i czekamy na `img.decode()` przed pokazaniem, żeby duże zdjęcia z telefonu nie migały.
+## 3. Categories and photos
+- The user points to a **main folder** (e.g. `D:\FloorDuel\Categories`).
+- **Each direct subfolder = a category.** Category name = subfolder name.
+- **Difficulty levels** (added at the user's request, 2026-10-24): a subfolder with no photos directly inside but with subfolders is a **level** (e.g. `Categories\Easy\Animals\`); its subfolders are that level's categories. We don't look deeper. Both layouts can be mixed — a category without a level works as before.
+  - Level order: easy → normal/medium → hard → expert (recognized by the start of the name, case-insensitive, English or Polish: `easy`/`łatw`, `norm`/`medium`/`śred`, `hard`/`trud`, `exp`/`eksp`); other level names last, alphabetically. Categories without a level come first.
+  - The category name is its folder's name (players don't see the level). When the same name occurs in several places, categories with a level get the suffix “Name (Level)”.
+  - The operator panel shows categories grouped by level (headers in the list, groups in the selects).
+- **Photos = files directly in the category folder** (no recursion). Supported extensions (case-insensitive): `jpg, jpeg, png, webp, gif, bmp, avif, svg`.
+- Skipped: hidden files (starting with `.`), `Thumbs.db`, `desktop.ini`, other extensions. **HEIC/HEIF** are skipped with a clear warning (“X HEIC files — convert to JPG”).
+- **Correct answer = file name** after normalization:
+  1. remove the extension,
+  2. remove a duplicate suffix: ` (2)` at the end (regex `\s*\(\d+\)$`) and `__2` at the end (regex `__\d+$`),
+  3. replace `_` with a space, collapse multiple spaces, `trim`, Unicode NFC normalization.
+  Examples: `Eiffel_Tower.jpg` → “Eiffel Tower”; `Elephant (2).png` → “Elephant”; `Elephant__3.webp` → “Elephant”; `F-16.jpg` → “F-16”; `Wieża_Eiffla.jpg` → “Wieża Eiffla”.
+- The category list in the operator panel shows the number of photos. **Warning** when a category has < 30 photos (a duel can use 30+).
+- **Duel pool:** at the start of a duel, a Fisher–Yates shuffle of all the category's photos; photos without repeats. When the pool runs out — reshuffle (avoiding the photo just shown) and show the operator a discreet “pool used up — repeats” note.
+- Remembering the folder: if `showDirectoryPicker` works, the handle is stored in IndexedDB; on the next start/refresh the app tries to load it by itself (only while the browser permission is still valid — `queryPermission`); if that fails, it shows a message and the “Load last folder” button asks for permission (requires a click — `requestPermission`). Fallback: `<input type="file" webkitdirectory>` (not remembered; after a refresh the folder must be chosen again).
+- Photos are loaded as `URL.createObjectURL(file)`; on a folder/category change they are released (`revokeObjectURL`). **The next photo is preloaded** and we wait for `img.decode()` before showing it, so big phone photos don't flash.
 
-## 4. Model danych
+## 4. Data model
 ```js
 Player   = { id, name, color, category /* string|null */, wins, losses }
-Settings = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false, volume: 80 }
+Settings = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false, volume: 80,
+             language: null /* 'en' | 'pl' | null = follow the browser */ }
 
-// Stan pojedynku (w logic.js, bez DOM):
+// Duel state (in logic.js, no DOM):
 Duel = {
-  state,             // 'setup' | 'ready' | 'running' | 'reveal' | 'paused' | 'finished'
+  state,             // 'setup' | 'ready' | 'countdown' | 'running' | 'reveal' | 'paused' | 'finished'
   challengerId, opponentId, category,
-  activeId,          // kto teraz odpowiada
-  remainingMs: { [playerId]: number },  // stan zegara w chwili turnStartedAt
-  turnStartedAt,     // timestamp (ms) startu bieżącego odcinka czasu aktywnego gracza
-  revealUntil,       // timestamp końca odsłony po pasie
-  deck: string[],    // klucze zdjęć w kolejności
-  deckPos, current,  // bieżące zdjęcie
+  activeId,          // who is answering now
+  remainingMs: { [playerId]: number },  // clock value at turnStartedAt
+  turnStartedAt,     // timestamp (ms) when the active player's current time segment started
+  revealUntil,       // timestamp when the pass reveal ends
+  deck: string[],    // photo keys in order
+  deckPos, current,  // current photo
   winnerId, loserId,
   stats: { [playerId]: { correct, passes } }
 }
 ```
-Czas pozostały aktywnego gracza = `remainingMs[activeId] - (now - turnStartedAt)`. Przy zmianie tury/pauzie „zamrażamy” wynik do `remainingMs`.
+Active player's remaining time = `remainingMs[activeId] - (now - turnStartedAt)`. On a turn change / pause the value is “frozen” into `remainingMs`.
 
-**Persistencja:** `localStorage['thefloor.v1'] = { players, settings, lastCategoryRoot? }`. Uchwyt folderu: IndexedDB `thefloor` / store `handles` / klucz `root`.
+**Persistence:** `localStorage['thefloor.v1'] = { players, settings }`. Folder handle: IndexedDB `thefloor` / store `handles` / key `root`. (The storage keys keep the project's original working name so existing saved players and folders keep working.)
 
-## 5. Maszyna stanów pojedynku
+## 5. Duel state machine
 ```
-setup ──(wybrano 2 graczy + kategorię)──> ready
-ready ──START──> countdown (3 s: 3, 2, 1) ──> running   (zegar rusza dokładnie w chwili końca odliczania)
-running ──Spacja──> running (nowe zdjęcie, tura → rywal)
-running ──P──> reveal ──(po passPenaltySeconds)──> running (nowe zdjęcie, ta sama osoba)
-running/reveal ──czas aktywnego = 0──> finished
-running ──Esc──> paused ──Esc──> running   (pauza zatrzymuje też odliczanie odsłony)
-finished ──„Zatwierdź wynik”──> (aktualizacja liczników) ──> brak pojedynku
-dowolny ──„Anuluj/Unieważnij”──> brak pojedynku (bez zmian liczników)
+setup ──(2 players + category chosen)──> ready
+ready ──START──> countdown (3 s: 3, 2, 1) ──> running   (the clock starts exactly when the countdown ends)
+running ──Space──> running (new photo, turn → opponent)
+running ──P──> reveal ──(after passPenaltySeconds)──> running (new photo, same player)
+running/reveal ──active clock = 0──> finished
+running ──Esc──> paused ──Esc──> running   (pause also stops the reveal countdown)
+finished ──“Confirm result”──> (counters updated) ──> no duel
+any ──“Cancel”──> no duel (counters unchanged)
 ```
-API logiki (propozycja, wszystkie metody przyjmują `now`):
-`createDuel({...})`, `start(now)`, `markCorrect(now)`, `markPass(now)`, `togglePause(now)`, `tick(now) → events[]` (np. `'timeout'`, `'revealEnd'`, `'lowTime'`), `getClock(id, now)`, `nextImage()`.
+Logic API (all methods take `now`):
+`createDuel({...})`, `start(now)`, `markCorrect(now)`, `markPass(now)`, `togglePause(now)`, `tick(now) → events[]` (e.g. `'timeout'`, `'revealEnd'`, `'lowTime'`), `getClock(id, now)`, `nextImage()`.
 
-## 6. Ekran graczy (okno TV)
-- Tło czarne/ciemne, wysoki kontrast, czytelne z kanapy.
-- **Góra:** nazwa kategorii.
-- **Środek:** zdjęcie, `object-fit: contain`, maksymalnie duże.
-- **Dół:** dwa panele graczy (lewy = challenger, prawy = rywal): imię w kolorze gracza i duży zegar w sekundach (zaokrąglenie w górę). Aktywny panel wyraźnie podświetlony, nieaktywny przygaszony. ≤ 10 s — zegar czerwony/pulsujący.
-- **Odsłona po pasie:** pasek z poprawną odpowiedzią na zdjęciu + napis „PAS”.
-- **Stany:** brak pojedynku → plansza „THE FLOOR” + ranking; `ready` → imiona, kategoria, „Przygotujcie się”; `countdown` → duże cyfry 3, 2, 1; `paused` → nakładka „PAUZA”; `finished` → duży napis ze zwycięzcą.
-- Brak jakichkolwiek elementów sterujących i kursora (`cursor: none`).
+## 6. Players screen (TV window)
+- Black/dark background, high contrast, readable from the couch.
+- **Top:** category name.
+- **Middle:** the photo, `object-fit: contain`, as big as possible.
+- **Bottom:** two player panels (left = challenger, right = opponent): name in the player's color and a big clock in seconds (rounded up). The active panel clearly highlighted, the inactive one dimmed. ≤ 10 s — the clock is red/pulsing.
+- **Pass reveal:** a bar with the correct answer over the photo + a “PASS” tag.
+- **States:** no duel → “FLOOR DUEL” board + ranking; `ready` → names, category, “Get ready!”; `countdown` → big digits 3, 2, 1; `paused` → “PAUSED” overlay; `finished` → big winner announcement.
+- No controls and no cursor at all (`cursor: none`).
+- Texts follow the operator panel's language (§11).
 
-## 7. Panel operatora
-### 7.1 Układ
-- **Kolumna Gracze:** formularz dodawania (imię, kategoria z listy — opcjonalnie; kolor przydzielany automatycznie z palety 12 kontrastowych kolorów, edytowalny), lista graczy w kolejności rankingu z `W–P`, przyciski `+1/−1` do ręcznej korekty wygranych, edycja, usuwanie (z potwierdzeniem), „Wyzeruj wyniki” (z potwierdzeniem).
-- **Kolumna Pojedynek:** wybór challengera i rywala (dwie listy albo kliknięcia na liście graczy), przycisk „🎲 Losuj wyzywającego” (losuje challengera z graczy), wybór kategorii, kto zaczyna, START. W trakcie: podgląd bieżącego zdjęcia (miniatura) i **duża poprawna odpowiedź**, oba zegary, przyciski DOBRZE / PAS / PAUZA, statystyki (poprawne/pasy). Po zakończeniu: „Zatwierdź wynik” / „Unieważnij”.
-- **Kolumna Kategorie i ustawienia:** wybór/wczytanie folderu, lista kategorii z liczbą zdjęć i ostrzeżeniami, przycisk „Otwórz ekran graczy”, ustawienia (czas pojedynku, kara za pas, dźwięk, ukrywanie odpowiedzi).
+## 7. Operator panel
+### 7.1 Layout
+- **Players column:** add form (name, category from the list — optional; color assigned automatically from a palette of 12 contrasting colors, editable), player list in ranking order with `W–L`, `+1/−1` buttons for manual win corrections, edit, delete (with confirmation), “Reset scores” (with confirmation).
+- **Duel column:** challenger and opponent choice, a “🎲” button (random challenger), category choice, who starts, START. During the duel: preview of the current photo (thumbnail) and the **big correct answer**, both clocks, CORRECT / PASS / PAUSE buttons, statistics (correct/passes). After the end: “Confirm result” / “Cancel”.
+- **Side column:** sound effects, folder choice/loading, category list with photo counts and warnings.
+- **Top bar:** “Open players screen”, “Big preview”, sound switch and volume, language selector, “⚙ Settings” (dialog: duel time, pass penalty, hiding the answer).
 
-### 7.2 Klawiatura (aktywna w obu oknach)
-| Klawisz | Akcja |
+### 7.2 Keyboard (active in both windows)
+| Key | Action |
 |---|---|
-| Spacja | dobra odpowiedź |
-| P | pas |
-| Esc | pauza / wznowienie |
-| Enter | START (w stanie `ready`) |
-| H (przytrzymaj) | pokaż odpowiedź, gdy włączone „ukrywanie odpowiedzi” |
+| Space | correct answer |
+| P | pass |
+| Esc | pause / resume |
+| Enter | START (in the `ready` state) |
+| H (hold) | show the answer when “Hide the answer” is on |
 
-- Ignoruj `event.repeat` i dodatkowo debounce 250 ms dla Spacji i P.
-- Gdy fokus jest w polu tekstowym — skróty wyłączone.
-- `preventDefault` dla Spacji (żeby nie „klikała” przycisku z fokusem).
-- Ten sam handler podpinamy do `document` okna graczy (operator może przypadkiem kliknąć w okno TV).
+- Ignore `event.repeat`, plus a 250 ms debounce for Space and P.
+- Shortcuts are off while the focus is in a text field.
+- `preventDefault` for Space (so it doesn't “click” the focused button).
+- The same handler is attached to the players window's `document` (the operator may accidentally click the TV window).
 
-### 7.3 Okno graczy — techniczne
-- Otwierane przyciskiem: `window.open('', 'floor-display', 'popup,width=1280,height=720')`. DOM budowany przez `display.js`, CSS kopiowany z `<style id="display-css" media="not all">`.
-- Blob URL-e zdjęć działają w tym oknie, bo about:blank dziedziczy origin operatora.
-- **Po odświeżeniu panelu operatora okna graczy nie da się odzyskać** (spike, `docs/SPIKE.md`: strona z `file://` dostaje nowy origin `"null"` przy każdym załadowaniu → `SecurityError`; bez kliknięcia `window.open` zwraca `null`). Dlatego:
-  - Panel zapamiętuje w `localStorage`, że okno graczy było otwarte; po odświeżeniu pokazuje komunikat „Okno graczy straciło połączenie — kliknij »Otwórz ekran graczy«”.
-  - „Otwórz ekran graczy”: jeśli `window.open('', 'floor-display', ...)` zwróci stare okno bez dostępu do `document` — wywołaj na nim `close()` i otwórz nowe. Jeśli zamknięcie się nie uda — komunikat „Zamknij okno graczy i otwórz je ponownie”.
-- **Ostrzeżenie przed F5/zamknięciem:** gdy okno graczy jest otwarte albo trwa pojedynek, panel operatora rejestruje `beforeunload` (standardowe pytanie przeglądarki „Opuścić stronę?”).
-- Pętla renderująca: `requestAnimationFrame` **okna graczy** (jest widoczne na TV, więc nie jest dławione), zapasowo `setInterval(100)` w oknie operatora. Poprawność nie zależy od częstotliwości ticków (czas z timestampów).
+### 7.3 Players window — technical
+- Opened with a button: `window.open('', 'floor-display', 'popup,width=1280,height=720')`. The DOM is built by `display.js`, the CSS copied from `<style id="display-css" media="not all">`.
+- Photo blob URLs work in that window because about:blank inherits the operator's origin.
+- **After the operator panel is refreshed, the players window can't be recovered** (spike, `docs/SPIKE.md`: a `file://` page gets a new `"null"` origin on every load → `SecurityError`; without a click `window.open` returns `null`). Therefore:
+  - The panel remembers in `localStorage` that the players window was open; after a refresh it shows “The players window closed when the panel was refreshed — click »Open players screen«”.
+  - “Open players screen”: if `window.open('', 'floor-display', ...)` returns the old window without access to `document` — call `close()` on it and open a new one. If closing fails — the message “Close the players window and open it again”.
+- **Warning before F5/close:** while the players window is open or a duel is in progress, the operator panel registers `beforeunload` (the browser's standard “Leave site?” question).
+- Render loop: `requestAnimationFrame` of the **players window** (it is visible on the TV, so it isn't throttled), with a fallback `setInterval(100)` in the operator window. Correctness doesn't depend on the tick rate (time from timestamps).
 
-### 7.4 Tryb jednego ekranu
-Ustawienie „Ukrywaj odpowiedź”: w panelu operatora odpowiedź jest zamazana i pokazuje się tylko przy przytrzymanym **H**. Okno graczy można wtedy pominąć i grać na samym panelu operatora z dużym podglądem zdjęcia (przycisk „Duży podgląd” powiększa miniaturę na cały panel).
+### 7.4 Single-screen mode
+The “Hide the answer” setting: in the operator panel the answer is blurred and shows only while **H** is held. The players window can then be skipped and the game played on the operator panel alone with a big photo preview (the “Big preview” button enlarges it to the whole panel).
 
-## 8. Dźwięk (WebAudio, bez plików)
-- Krótkie „tyk” co sekundę w ostatnich 5 s aktywnego gracza.
-- **Odliczanie przed rundą:** po START trzy krótkie piknięcia (3, 2, 1) i długi wysoki sygnał w chwili startu zegara.
-- **Muzyka napięcia** (niezależna od przycisku „Napięcie”): włącza się raz w pojedynku, gdy na tablicy po raz pierwszy pojawi się 12 s (zdarzenie `suspense`; brak, gdy czas pojedynku ≤ 12 s), i gra do końca pojedynku. Intensywność = 1 − (czas aktywnego gracza / 12 s): szybszy puls, wyższy i jaśniejszy dron, kolejne warstwy (ostinato, werbel). Pauza ją wycisza, wznowienie przywraca, koniec czasu/unieważnienie kończy.
-- Krótki „ding” przy dobrej odpowiedzi, niski ton przy pasie.
-- Długi buzzer przy końcu czasu.
-- `AudioContext` tworzony/wznawiany przy kliknięciu START albo dowolnego przycisku dźwięku (wymóg przeglądarek). Wyłącznik i suwak głośności (0–100, domyślnie 80) w ustawieniach; wyłączony dźwięk wycisza wszystko, także muzykę.
-- **Muzyka na przygotowanie** (dodane na prośbę użytkownika, 2026-10-24): przycisk „🎵 Muzyka” przy START i w sekcji efektów — zapętlony, syntezowany podkład; wycisza się sama po START, można ją też zatrzymać ręcznie.
-- **Efekty dla operatora** (sekcja „Efekty dźwiękowe”): werble, fanfara, brawa, napięcie, gong, „pudło”. Tylko przyciski, bez skrótów klawiszowych (żeby nie kolidowały z grą).
+## 8. Sound (Web Audio, no files)
+- A short “tick” every second in the active player's last 5 s.
+- **Countdown before the round:** after START three short beeps (3, 2, 1) and a long high tone when the clock starts.
+- **Suspense music** (independent of the “Suspense” button): starts once per duel, the first time 12 s appear on the clock (event `suspense`; none when the duel time is ≤ 12 s), and plays until the end of the duel. Intensity = 1 − (active player's time / 12 s): faster pulse, higher and brighter drone, extra layers (ostinato, snare). Pause silences it, resume brings it back, timeout/cancel ends it.
+- A short “ding” on a correct answer, a low tone on a pass.
+- A long buzzer at timeout.
+- `AudioContext` created/resumed on a click on START or any sound button (browser requirement). Switch and volume slider (0–100, default 80) in the top bar; sound off mutes everything, including music.
+- **Music for getting ready** (added at the user's request, 2026-10-24): the “🎵 Music” button next to START and in the effects section — a looped, synthesized background; fades out on START, can also be stopped manually.
+- **Effects for the operator** (“Sound effects” section): drumroll, fanfare, applause, suspense, gong, “miss”. Buttons only, no keyboard shortcuts (so they don't clash with the game).
 
-## 9. Przypadki brzegowe
-- Mniej niż 2 graczy → START nieaktywny. Challenger ≠ rywal.
-- Kategoria z 0 zdjęć → nie można jej wybrać.
-- Zmiana/ponowne wczytanie folderu w trakcie pojedynku → zablokowane (najpierw zakończ/unieważnij).
-- Usunięcie gracza biorącego udział w trwającym pojedynku → zablokowane.
-- Uszkodzony plik (błąd `decode()`) → pomiń, weź następne, zaloguj w konsoli, pokaż operatorowi licznik pominiętych.
-- Zamknięte okno graczy w trakcie pojedynku → gra toczy się dalej w panelu operatora, panel pokazuje „Okno graczy zamknięte — Otwórz ponownie”.
-- Odświeżenie strony w trakcie pojedynku → pojedynek przepada (nie persistujemy pojedynku), gracze i wyniki zostają.
+## 9. Edge cases
+- Fewer than 2 players → START disabled. Challenger ≠ opponent.
+- A category with 0 photos → can't be chosen.
+- Changing/reloading the folder during a duel → blocked (finish/cancel first).
+- Deleting a player taking part in the current duel → blocked.
+- A broken file (`decode()` error) → skip it, take the next one, log it to the console, show the operator a counter of skipped files.
+- Players window closed during a duel → the game continues in the operator panel, the panel shows “Players screen: closed — open it again”.
+- Page refreshed during a duel → the duel is lost (duels aren't persisted), players and scores stay.
 
-## 10. Poza zakresem (nie robić bez pytania)
-Plansza z terytoriami, eliminacja graczy, złoty blok, przejmowanie kategorii, sterowanie z telefonu, sieć/serwer, rozpoznawanie mowy, edytor zdjęć/kategorii, eksport wyników, wersje językowe.
+## 10. Out of scope (don't build without asking)
+Territory board, player elimination, golden block, taking over categories, phone control, network/server, speech recognition, photo/category editor, score export.
+
+## 11. Languages (added at the user's request, 2026-10-24)
+- UI languages: **English** and **Polish**. Default: the first supported language in `navigator.languages`, otherwise English. The operator can change it with the selector in the top bar; the choice is saved in `settings.language`.
+- All texts live in `app/js/i18n.js` (`Floor.i18n`): dictionaries per language, `t(key, params)` with `{placeholder}` substitution and plural forms via `Intl.PluralRules`. A missing key falls back to English, then to the key itself.
+- `logic.js` stays language-free: validation returns problems as `{ key, params }`, translated by the UI.
+- Static texts in `index.html` are marked with `data-i18n` (text), `data-i18n-title`, `data-i18n-placeholder`, `data-i18n-label` (`aria-label`). A language change takes effect immediately in both windows, without a reload.
+- Category names and answers come from folder and file names and are never translated.
+- Tests check that every language has the same keys, placeholders and plural forms.

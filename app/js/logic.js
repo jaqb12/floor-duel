@@ -13,9 +13,11 @@
   // Bright colors that stay readable on the black players screen.
   const PLAYER_COLORS = ['#ff5a5a', '#4ade80', '#facc15', '#60a5fa', '#fb923c', '#c084fc',
     '#22d3ee', '#f472b6', '#a3e635', '#fda4af', '#2dd4bf', '#d4a373'];
-  const DEFAULT_SETTINGS = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false, volume: 80 };
+  // language: null = follow the browser (see i18n.js).
+  const DEFAULT_SETTINGS = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false, volume: 80, language: null };
   const SETTING_LIMITS = { duelSeconds: [10, 300], passPenaltySeconds: [1, 10], volume: [0, 100] };
   const COLOR_RE = /^#[0-9a-f]{6}$/i;
+  const LANGUAGE_RE = /^[a-z]{2}$/;
 
   // ---------- file names ----------
 
@@ -51,7 +53,7 @@
     return (answer || base.trim()).normalize('NFC');
   }
 
-  // Natural, Polish-aware order: "2.jpg" before "10.jpg", "Łoś" after "Lis".
+  // Natural order that also handles Polish letters: "2.jpg" before "10.jpg", "Łoś" after "Lis".
   function compareNames(a, b) {
     return a.localeCompare(b, 'pl', { numeric: true, sensitivity: 'base' });
   }
@@ -94,8 +96,8 @@
     return { rootName, folders: Array.from(folders.values(), plain) };
   }
 
-  // Difficulty folders sort by these name stems ("Łatwe", "łatwy", ...); other names go last.
-  const LEVEL_STEMS = [['łatw'], ['norm', 'śred'], ['trud'], ['eksp', 'exp']];
+  // Difficulty folders sort by these name stems ("Easy", "Łatwe", ...); other names go last.
+  const LEVEL_STEMS = [['easy', 'łatw'], ['norm', 'medium', 'śred'], ['hard', 'trud'], ['exp', 'eksp']];
 
   function levelRank(level) {
     const name = level.normalize('NFC').toLowerCase();
@@ -166,13 +168,18 @@
     return String(name == null ? '' : name).replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
   }
 
-  // Returns an error message for the operator, or null when the name is fine.
+  // Problems are { key, params } for Floor.i18n.t(), so the logic stays language-free.
+  function problem(key, params) {
+    return params ? { key, params } : { key };
+  }
+
+  // Returns a problem for the operator, or null when the name is fine.
   function validatePlayerName(name, players, exceptId = null) {
     const clean = cleanName(name);
-    if (!clean) return 'Podaj imię gracza.';
+    if (!clean) return problem('players.nameEmpty');
     const lower = clean.toLocaleLowerCase('pl');
     const taken = players.some(p => p.id !== exceptId && p.name.toLocaleLowerCase('pl') === lower);
-    return taken ? 'Gracz „' + clean + '” już istnieje.' : null;
+    return taken ? problem('players.nameTaken', { name: clean }) : null;
   }
 
   // First palette color nobody uses yet; cycles when all are taken.
@@ -205,6 +212,7 @@
       sound: bool('sound'),
       hideAnswer: bool('hideAnswer'),
       volume: int('volume'),
+      language: typeof s.language === 'string' && LANGUAGE_RE.test(s.language) ? s.language : null,
     };
   }
 
@@ -434,17 +442,17 @@
 
   // ---------- duel setup (SPEC §2, §9) ----------
 
-  // categories: [{ name, count }]. Returns why START is not possible, or null.
+  // categories: [{ name, count }]. Returns why START is not possible (a problem), or null.
   function duelSetupProblem({ players, categories, challengerId, opponentId, category }) {
-    if (players.length < 2) return 'Dodaj co najmniej 2 graczy.';
-    if (!categories) return 'Wczytaj folder z kategoriami.';
+    if (players.length < 2) return problem('setup.needPlayers');
+    if (!categories) return problem('setup.needFolder');
     const exists = id => players.some(p => p.id === id);
-    if (!challengerId || !exists(challengerId)) return 'Wybierz wyzywającego.';
-    if (!opponentId || !exists(opponentId)) return 'Wybierz rywala.';
-    if (challengerId === opponentId) return 'Wyzywający i rywal muszą być różnymi graczami.';
-    if (!category) return 'Wybierz kategorię pojedynku.';
+    if (!challengerId || !exists(challengerId)) return problem('setup.needChallenger');
+    if (!opponentId || !exists(opponentId)) return problem('setup.needOpponent');
+    if (challengerId === opponentId) return problem('setup.samePlayer');
+    if (!category) return problem('setup.needCategory');
     const cat = categories.find(c => c.name === category);
-    if (!cat || !cat.count) return 'Kategoria „' + category + '” nie ma zdjęć.';
+    if (!cat || !cat.count) return problem('setup.categoryEmpty', { category });
     return null;
   }
 

@@ -107,15 +107,16 @@
 
   // From a click it may ask for permission (requestPermission needs a user gesture).
   // On page load (ask = false) it only reads when permission is still granted,
-  // otherwise it throws an error named 'PermissionNeeded'.
+  // otherwise it throws an error named 'PermissionNeeded'. A refusal after asking is 'PermissionDenied'.
   async function restoreLastFolder(ask = true) {
     const root = await Floor.storage.loadRootHandle();
     if (!root) return null;
     let permission = await root.queryPermission({ mode: 'read' });
     if (permission !== 'granted' && ask) permission = await root.requestPermission({ mode: 'read' });
     if (permission !== 'granted') {
-      const e = new Error('Brak zgody na odczyt folderu „' + root.name + '”.');
-      if (!ask) e.name = 'PermissionNeeded';
+      const e = new Error('No permission to read folder ' + root.name);
+      e.name = ask ? 'PermissionDenied' : 'PermissionNeeded';
+      e.folderName = root.name;
       throw e;
     }
     return readHandle(root);

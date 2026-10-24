@@ -5,6 +5,7 @@
 
   const isNode = typeof module !== 'undefined' && module.exports;
   const L = isNode ? require('../app/js/logic.js') : root.Floor.logic;
+  const I = isNode ? require('../app/js/i18n.js') : root.Floor.i18n;
 
   const tests = [];
   const test = (name, fn) => tests.push({ name, fn });
@@ -139,6 +140,12 @@
     eq(r.map(c => c.level), ['ŁATWE', 'Normalne', 'Średnie', 'trudny', 'Eksperckie', 'Expert', 'Bonus', 'Własne']);
   });
 
+  test('resolveCategories: English level names are ordered too', () => {
+    const levels = ['Expert', 'hard', 'Medium', 'Easy'];
+    const r = L.resolveCategories(levels.map(l => folder(l, [], [folder('K ' + l, ['a.jpg'])])));
+    eq(r.map(c => c.level), ['Easy', 'Medium', 'hard', 'Expert']);
+  });
+
   test('resolveCategories: a name repeated across levels gets the level in brackets', () => {
     eq(resolved([
       folder('Flagi', ['a.jpg']),
@@ -249,7 +256,7 @@
       { id: 'p1', name: 'Ala', color: '#ff0000', category: 'Owoce', wins: 3, losses: 0 },
       { id: 'p3', name: 'Bartek', color: L.PLAYER_COLORS[0], category: null, wins: 2, losses: 0 },
     ]);
-    eq(s.settings, { duelSeconds: 300, passPenaltySeconds: 1, sound: true, hideAnswer: true, volume: 100 });
+    eq(s.settings, { duelSeconds: 300, passPenaltySeconds: 1, sound: true, hideAnswer: true, volume: 100, language: null });
   });
 
   // ---------- duel: setup ----------
@@ -593,6 +600,69 @@
     const v = L.displayView({ duel: d, players: viewPlayers, now: 46000 });
     eq([v.screen, v.winner, v.left.active, v.right.active, v.left.winner, v.right.winner, v.left.seconds],
       ['finished', { name: 'Bartek', color: '#4ade80' }, false, false, false, true, 0]);
+  });
+
+  // ---------- i18n ----------
+
+  const placeholders = text => (typeof text === 'object' ? Object.values(text).join(' ') : text)
+    .match(/\{\w+\}/g) || [];
+
+  test('i18n: every language has the same keys, placeholders and plural forms', () => {
+    const base = I.MESSAGES[I.DEFAULT_LANGUAGE];
+    for (const [lang, messages] of Object.entries(I.MESSAGES)) {
+      eq(Object.keys(messages).sort(), Object.keys(base).sort(), lang + ' keys');
+      for (const key of Object.keys(base)) {
+        eq(Array.from(new Set(placeholders(messages[key]))).sort(), Array.from(new Set(placeholders(base[key]))).sort(), lang + ' ' + key);
+        if (typeof messages[key] === 'object') {
+          const needed = new Intl.PluralRules(lang).resolvedOptions().pluralCategories;
+          for (const form of needed) ok(messages[key][form] || messages[key].other, lang + ' ' + key + ' missing ' + form);
+        }
+      }
+      ok(I.LANGUAGE_NAMES[lang], lang + ' has a name in the picker');
+    }
+  });
+
+  test('i18n: t() interpolates, picks plural forms and falls back', () => {
+    I.setLanguage('pl');
+    eq([1, 3, 5, 12, 22, 0].map(n => I.t('categories.photos', { n })),
+      ['1 zdjęcie', '3 zdjęcia', '5 zdjęć', '12 zdjęć', '22 zdjęcia', '0 zdjęć']);
+    eq(I.t('players.nameTaken', { name: 'Ola' }), 'Gracz „Ola” już istnieje.');
+    I.setLanguage('en');
+    eq([1, 2].map(n => I.t('categories.count', { n })), ['1 category', '2 categories']);
+    eq(I.t('no.such.key'), 'no.such.key');
+    eq(I.setLanguage('xx'), 'en', 'unknown language falls back to English');
+  });
+
+  test('i18n: detectLanguage takes the first supported browser language', () => {
+    eq(I.detectLanguage(['pl-PL', 'en']), 'pl');
+    eq(I.detectLanguage(['de-DE', 'en-US', 'pl']), 'en');
+    eq(I.detectLanguage(['de']), 'en');
+    eq(I.detectLanguage(undefined), 'en');
+  });
+
+  test('i18n: problems returned by the logic have translations', () => {
+    const players = [{ id: 'a', name: 'Ala' }, { id: 'b', name: 'Bartek' }];
+    const problems = [
+      L.validatePlayerName('', players),
+      L.validatePlayerName('ala', players),
+      L.duelSetupProblem({ players: [], categories: null }),
+      L.duelSetupProblem({ players, categories: null }),
+      L.duelSetupProblem({ players, categories: [], challengerId: null }),
+      L.duelSetupProblem({ players, categories: [], challengerId: 'a', opponentId: null }),
+      L.duelSetupProblem({ players, categories: [], challengerId: 'a', opponentId: 'a' }),
+      L.duelSetupProblem({ players, categories: [], challengerId: 'a', opponentId: 'b', category: '' }),
+      L.duelSetupProblem({ players, categories: [], challengerId: 'a', opponentId: 'b', category: 'X' }),
+    ];
+    for (const lang of Object.keys(I.MESSAGES)) {
+      for (const p of problems) ok(I.MESSAGES[lang][p.key], lang + ' ' + p.key);
+    }
+    eq(L.validatePlayerName('ala', players), { key: 'players.nameTaken', params: { name: 'ala' } });
+  });
+
+  test('sanitizeSettings: language must be a two-letter code', () => {
+    eq(L.sanitizeSettings({ language: 'pl' }).language, 'pl');
+    eq(L.sanitizeSettings({ language: 'polski' }).language, null);
+    eq(L.sanitizeSettings({}).language, null);
   });
 
   // ---------- runner ----------

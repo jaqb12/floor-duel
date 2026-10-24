@@ -7,14 +7,14 @@
   const STATE_KEY = 'thefloor.v1';
   const CORRUPT_KEY = 'thefloor.v1.corrupt';
 
-  // Always returns a valid { players, settings, warning }; warning is a message for the operator or null.
+  // Always returns a valid { players, settings, warning }; warning is { key, params } for Floor.i18n or null.
   function loadState() {
     let raw;
     try {
       raw = localStorage.getItem(STATE_KEY);
     } catch (e) {
       console.error(e);
-      return Object.assign(L.sanitizeState(null), { warning: 'Przeglądarka blokuje zapis danych — wyniki nie przetrwają odświeżenia.' });
+      return Object.assign(L.sanitizeState(null), { warning: { key: 'storage.blocked' } });
     }
     if (raw === null) return Object.assign(L.sanitizeState(null), { warning: null });
     try {
@@ -23,7 +23,7 @@
       console.error('Stored data is corrupt', e);
       try { localStorage.setItem(CORRUPT_KEY, raw); } catch (_) { /* nothing more to do */ }
       return Object.assign(L.sanitizeState(null), {
-        warning: 'Zapisane dane były uszkodzone — zaczynamy od zera (kopia: localStorage „' + CORRUPT_KEY + '”).',
+        warning: { key: 'storage.corrupt', params: { key: CORRUPT_KEY } },
       });
     }
   }

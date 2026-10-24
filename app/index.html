@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>The Floor — panel operatora</title>
+  <title>Floor Duel — operator panel</title>
   <link rel="stylesheet" href="css/operator.css">
   <!-- Players window styles: copied into the about:blank players window by display.js. -->
   <style id="display-css" media="not all">
@@ -62,22 +62,25 @@
 <body>
   <header class="top">
     <div class="brand">
-      <h1>The Floor</h1>
-      <span class="subtitle">panel operatora</span>
+      <h1>Floor Duel</h1>
+      <span class="subtitle" data-i18n="top.subtitle">operator panel</span>
     </div>
 
-    <div class="top-group" aria-label="Ekran graczy">
-      <span id="display-pill" class="pill" data-status="closed"><span class="dot"></span><span id="display-pill-text">Ekran graczy: zamknięty</span></span>
-      <button type="button" id="open-display" class="primary">Otwórz ekran graczy</button>
-      <button type="button" id="big-open" title="Tryb jednego ekranu: ekran graczy na całym panelu">Duży podgląd</button>
+    <div class="top-group" data-i18n-label="top.displayGroup">
+      <span id="display-pill" class="pill" data-status="closed"><span class="dot"></span><span id="display-pill-text"></span></span>
+      <button type="button" id="open-display" class="primary"></button>
+      <button type="button" id="big-open" data-i18n="top.bigOpen" data-i18n-title="top.bigOpenTitle">Big preview</button>
     </div>
 
-    <div class="top-group" aria-label="Dźwięk">
-      <label class="toggle" title="Włącz / wyłącz wszystkie dźwięki"><input type="checkbox" id="set-sound"><span>🔊 Dźwięk</span></label>
-      <input type="range" id="set-volume" step="5" aria-label="Głośność" title="Głośność">
+    <div class="top-group" data-i18n-label="top.soundGroup">
+      <label class="toggle" data-i18n-title="top.soundTitle"><input type="checkbox" id="set-sound"><span data-i18n="top.sound">🔊 Sound</span></label>
+      <input type="range" id="set-volume" step="5" data-i18n-label="top.volume" data-i18n-title="top.volume">
     </div>
 
-    <button type="button" id="settings-open" class="icon-button" title="Ustawienia">⚙ Ustawienia</button>
+    <div class="top-group">
+      <select id="set-language" data-i18n-label="top.language" data-i18n-title="top.language"></select>
+      <button type="button" id="settings-open" class="icon-button" data-i18n="top.settings" data-i18n-title="settings.title">⚙ Settings</button>
+    </div>
   </header>
   <p id="app-message" class="message banner"></p>
   <p id="display-status" class="message banner"></p>
@@ -85,55 +88,55 @@
   <main class="columns">
     <section class="col card" id="col-players">
       <div class="card-head">
-        <h2>Gracze</h2>
+        <h2 data-i18n="players.title">Players</h2>
         <span id="players-count" class="badge"></span>
       </div>
       <form id="player-form" class="player-form" autocomplete="off">
         <div class="row">
-          <input type="text" id="player-name" placeholder="Imię gracza" aria-label="Imię gracza">
-          <input type="color" id="player-color" title="Kolor gracza" aria-label="Kolor gracza">
+          <input type="text" id="player-name" data-i18n-placeholder="players.name" data-i18n-label="players.name">
+          <input type="color" id="player-color" data-i18n-title="players.color" data-i18n-label="players.color">
         </div>
         <div class="row">
-          <select id="player-category" aria-label="Kategoria gracza"></select>
-          <button type="submit" id="player-submit" class="primary">Dodaj gracza</button>
-          <button type="button" id="player-cancel" hidden>Anuluj</button>
+          <select id="player-category" data-i18n-label="players.category"></select>
+          <button type="submit" id="player-submit" class="primary"></button>
+          <button type="button" id="player-cancel" data-i18n="players.cancel" hidden>Cancel</button>
         </div>
         <p id="player-message" class="message"></p>
       </form>
       <div class="scroll">
         <ol id="player-list" class="player-list"></ol>
-        <p id="players-empty" class="placeholder">Brak graczy — dodaj pierwszego.</p>
+        <p id="players-empty" class="placeholder" data-i18n="players.empty">No players yet — add the first one.</p>
       </div>
-      <button type="button" id="reset-scores" class="danger subtle" hidden>Wyzeruj wyniki</button>
+      <button type="button" id="reset-scores" class="danger subtle" data-i18n="players.resetScores" hidden>Reset scores</button>
     </section>
 
     <section class="col card" id="col-duel">
       <div class="card-head">
-        <h2>Pojedynek</h2>
+        <h2 data-i18n="duel.title">Duel</h2>
       </div>
 
       <form id="duel-setup" class="duel-setup" autocomplete="off">
         <div class="versus">
-          <label>Wyzywający
+          <label><span data-i18n="duel.challenger">Challenger</span>
             <span class="inline">
               <select id="duel-challenger"></select>
-              <button type="button" id="duel-random" title="Losuj wyzywającego">🎲</button>
+              <button type="button" id="duel-random" data-i18n-title="duel.random">🎲</button>
             </span>
           </label>
           <span class="vs">VS</span>
-          <label>Rywal <select id="duel-opponent"></select></label>
+          <label><span data-i18n="duel.opponent">Opponent</span> <select id="duel-opponent"></select></label>
         </div>
-        <label>Kategoria <select id="duel-category"></select></label>
+        <label><span data-i18n="duel.category">Category</span> <select id="duel-category"></select></label>
         <fieldset class="starts">
-          <legend>Zaczyna odpowiadać</legend>
-          <label class="check"><input type="radio" name="duel-first" value="challenger" checked> wyzywający</label>
-          <label class="check"><input type="radio" name="duel-first" value="opponent"> rywal</label>
+          <legend data-i18n="duel.first">Answers first</legend>
+          <label class="check"><input type="radio" name="duel-first" value="challenger" checked> <span data-i18n="duel.firstChallenger">challenger</span></label>
+          <label class="check"><input type="radio" name="duel-first" value="opponent"> <span data-i18n="duel.firstOpponent">opponent</span></label>
         </fieldset>
         <p id="duel-problem" class="message"></p>
         <div class="buttons start-row">
-          <button type="submit" id="duel-start" class="primary big" disabled>START <kbd>Enter</kbd></button>
-          <button type="button" class="music-toggle" title="Muzyka na przygotowanie — wycisza się sama po START">🎵 Muzyka</button>
-          <button type="button" id="duel-clear" class="subtle">Wyczyść</button>
+          <button type="submit" id="duel-start" class="primary big" disabled><span data-i18n="duel.start">START</span> <kbd>Enter</kbd></button>
+          <button type="button" class="music-toggle" data-i18n-title="duel.musicTitle"></button>
+          <button type="button" id="duel-clear" class="subtle" data-i18n="duel.clear">Clear</button>
         </div>
       </form>
 
@@ -150,57 +153,57 @@
           <div id="live-right" class="clock-box"><span class="c-name"></span><span class="c-time"></span><span class="c-stats note"></span></div>
         </div>
         <div class="buttons live-buttons">
-          <button type="button" id="live-correct" class="primary">DOBRZE (Spacja)</button>
-          <button type="button" id="live-pass">PAS (P)</button>
-          <button type="button" id="live-pause">PAUZA (Esc)</button>
+          <button type="button" id="live-correct" class="primary" data-i18n="live.correct">CORRECT (Space)</button>
+          <button type="button" id="live-pass" data-i18n="live.pass">PASS (P)</button>
+          <button type="button" id="live-pause"></button>
         </div>
         <div id="live-result" class="live-result" hidden>
           <p id="live-winner" class="live-winner"></p>
           <div class="buttons">
-            <button type="button" id="live-confirm" class="primary">Zatwierdź wynik</button>
+            <button type="button" id="live-confirm" class="primary" data-i18n="live.confirm">Confirm result</button>
           </div>
         </div>
-        <button type="button" id="live-cancel" class="danger subtle">Unieważnij pojedynek</button>
+        <button type="button" id="live-cancel" class="danger subtle"></button>
       </div>
 
-      <dl class="shortcuts" aria-label="Skróty klawiszowe">
-        <div><dt><kbd>Enter</kbd></dt><dd>START</dd></div>
-        <div><dt><kbd>Spacja</kbd></dt><dd>dobrze</dd></div>
-        <div><dt><kbd>P</kbd></dt><dd>pas</dd></div>
-        <div><dt><kbd>Esc</kbd></dt><dd>pauza</dd></div>
-        <div><dt><kbd>H</kbd></dt><dd>pokaż odpowiedź (przytrzymaj)</dd></div>
+      <dl class="shortcuts" data-i18n-label="shortcuts.title">
+        <div><dt><kbd>Enter</kbd></dt><dd data-i18n="shortcuts.start">START</dd></div>
+        <div><dt><kbd data-i18n="shortcuts.space">Space</kbd></dt><dd data-i18n="shortcuts.correct">correct</dd></div>
+        <div><dt><kbd>P</kbd></dt><dd data-i18n="shortcuts.pass">pass</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd data-i18n="shortcuts.pause">pause</dd></div>
+        <div><dt><kbd>H</kbd></dt><dd data-i18n="shortcuts.hold">show answer (hold)</dd></div>
       </dl>
     </section>
 
     <div class="col side">
       <section class="card" id="col-sounds">
         <div class="card-head">
-          <h2>Efekty dźwiękowe</h2>
+          <h2 data-i18n="sounds.title">Sound effects</h2>
         </div>
         <div class="soundboard">
-          <button type="button" class="music-toggle wide">🎵 Muzyka</button>
-          <button type="button" data-sound="drumroll">🥁 Werble</button>
-          <button type="button" data-sound="fanfare">🎺 Fanfara</button>
-          <button type="button" data-sound="applause">👏 Brawa</button>
-          <button type="button" data-sound="suspense">💓 Napięcie</button>
-          <button type="button" data-sound="gong">🔔 Gong</button>
-          <button type="button" data-sound="wrong">😬 Pudło</button>
+          <button type="button" class="music-toggle wide"></button>
+          <button type="button" data-sound="drumroll" data-i18n="sounds.drumroll">🥁 Drumroll</button>
+          <button type="button" data-sound="fanfare" data-i18n="sounds.fanfare">🎺 Fanfare</button>
+          <button type="button" data-sound="applause" data-i18n="sounds.applause">👏 Applause</button>
+          <button type="button" data-sound="suspense" data-i18n="sounds.suspense">💓 Suspense</button>
+          <button type="button" data-sound="gong" data-i18n="sounds.gong">🔔 Gong</button>
+          <button type="button" data-sound="wrong" data-i18n="sounds.wrong">😬 Miss</button>
         </div>
         <p id="sound-note" class="message"></p>
       </section>
 
       <section class="card grow" id="col-categories">
         <div class="card-head">
-          <h2>Kategorie</h2>
+          <h2 data-i18n="categories.title">Categories</h2>
           <span id="categories-count" class="badge"></span>
         </div>
         <p id="folder-name" class="folder-name"></p>
         <div class="buttons">
-          <button type="button" id="restore-folder" hidden>Wczytaj ostatni folder</button>
-          <button type="button" id="pick-folder">Wybierz folder…</button>
+          <button type="button" id="restore-folder" hidden></button>
+          <button type="button" id="pick-folder"></button>
         </div>
         <p id="folder-message" class="message"></p>
-        <input type="search" id="category-filter" class="filter" placeholder="Szukaj kategorii…" aria-label="Szukaj kategorii" hidden>
+        <input type="search" id="category-filter" class="filter" data-i18n-placeholder="categories.filter" data-i18n-label="categories.filter" hidden>
         <ul id="category-list" class="category-list scroll"></ul>
       </section>
     </div>
@@ -208,22 +211,22 @@
 
   <dialog id="settings-dialog" class="settings-dialog">
     <form id="settings-form" class="settings" method="dialog">
-      <h2>Ustawienia</h2>
-      <label>Czas pojedynku na gracza (s) <input type="number" id="set-duel" step="1"></label>
-      <label>Kara za pas (s) <input type="number" id="set-pass" step="1"></label>
-      <label class="check"><input type="checkbox" id="set-hide"> Ukrywaj odpowiedź (tryb jednego ekranu — podgląd: przytrzymaj H)</label>
-      <p class="note">Zmiany zapisują się od razu i obowiązują od następnego pojedynku.</p>
+      <h2 data-i18n="settings.title">Settings</h2>
+      <label><span data-i18n="settings.duelSeconds">Duel time per player (s)</span> <input type="number" id="set-duel" step="1"></label>
+      <label><span data-i18n="settings.passPenalty">Pass penalty (s)</span> <input type="number" id="set-pass" step="1"></label>
+      <label class="check"><input type="checkbox" id="set-hide"> <span data-i18n="settings.hideAnswer">Hide the answer</span></label>
+      <p class="note" data-i18n="settings.note">Changes are saved right away and apply from the next duel.</p>
       <div class="buttons end">
-        <button type="submit" class="primary">Gotowe</button>
+        <button type="submit" class="primary" data-i18n="settings.done">Done</button>
       </div>
     </form>
   </dialog>
 
   <div id="big-preview" class="big-preview" hidden>
     <div class="big-bar">
-      <span class="note">Odpowiedź:</span>
+      <span class="note" data-i18n="big.answer">Answer:</span>
       <span id="big-answer" class="big-answer"></span>
-      <button type="button" id="big-close">Zamknij podgląd</button>
+      <button type="button" id="big-close" data-i18n="big.close">Close preview</button>
     </div>
     <div id="big-slot" class="big-slot"></div>
   </div>
@@ -231,6 +234,7 @@
   <input type="file" id="folder-input" webkitdirectory multiple hidden>
 
   <script src="js/logic.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/categories.js"></script>
   <script src="js/sound.js"></script>
