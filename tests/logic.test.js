@@ -151,6 +151,65 @@
     eq(players[0].losses, 0, 'input mutated');
   });
 
+  // ---------- players and settings ----------
+
+  test('cleanName collapses spaces and limits length', () => {
+    eq(L.cleanName('  Ala   ma  kota '), 'Ala ma kota');
+    eq(L.cleanName('x'.repeat(40)).length, L.MAX_NAME_LENGTH);
+    eq([L.cleanName(null), L.cleanName(undefined)], ['', '']);
+  });
+
+  test('validatePlayerName: empty, duplicate (case-insensitive, Polish), editing self', () => {
+    const players = [{ id: 'p1', name: 'Łukasz' }, { id: 'p2', name: 'Ola' }];
+    ok(L.validatePlayerName('   ', players), 'blank');
+    ok(L.validatePlayerName('łukasz', players), 'duplicate');
+    ok(L.validatePlayerName(' OLA ', players), 'duplicate with spaces');
+    eq(L.validatePlayerName('łukasz', players, 'p1'), null, 'rename self');
+    eq(L.validatePlayerName('Zosia', players), null);
+  });
+
+  test('nextColor: first unused, cycles when all are taken', () => {
+    eq(L.nextColor([]), L.PLAYER_COLORS[0]);
+    eq(L.nextColor([{ color: L.PLAYER_COLORS[0].toUpperCase() }]), L.PLAYER_COLORS[1]);
+    const all = L.PLAYER_COLORS.map(color => ({ color }));
+    eq(L.nextColor(all), L.PLAYER_COLORS[0]);
+    eq(L.nextColor(all.concat([{ color: '#000000' }])), L.PLAYER_COLORS[1]);
+  });
+
+  test('adjustWins never goes below zero; resetScores clears both counters', () => {
+    const players = [{ id: 'a', wins: 0, losses: 3 }, { id: 'b', wins: 2, losses: 1 }];
+    eq(L.adjustWins(players, 'a', -1)[0].wins, 0);
+    eq(L.adjustWins(players, 'b', 1).map(p => p.wins), [0, 3]);
+    eq(L.resetScores(players).map(p => [p.wins, p.losses]), [[0, 0], [0, 0]]);
+    eq(players[1].wins, 2, 'input mutated');
+  });
+
+  test('sanitizeState: defaults for missing or garbage data', () => {
+    const empty = { players: [], settings: L.DEFAULT_SETTINGS };
+    eq(L.sanitizeState(null), empty);
+    eq(L.sanitizeState('tekst'), empty);
+    eq(L.sanitizeState({ players: 'x', settings: 5 }), empty);
+  });
+
+  test('sanitizeState: repairs players and clamps settings', () => {
+    const s = L.sanitizeState({
+      players: [
+        { id: 'p1', name: ' Ala ', color: '#FF0000', category: 'Owoce', wins: 3, losses: -2 },
+        { id: 'p1', name: 'Duplikat id' },
+        { id: 'p2', name: '' },
+        { name: 'Bez id' },
+        null,
+        { id: 'p3', name: 'Bartek', color: 'red', category: '', wins: '2', losses: 'x' },
+      ],
+      settings: { duelSeconds: 9999, passPenaltySeconds: '0', sound: 'tak', hideAnswer: true },
+    });
+    eq(s.players, [
+      { id: 'p1', name: 'Ala', color: '#ff0000', category: 'Owoce', wins: 3, losses: 0 },
+      { id: 'p3', name: 'Bartek', color: L.PLAYER_COLORS[0], category: null, wins: 2, losses: 0 },
+    ]);
+    eq(s.settings, { duelSeconds: 300, passPenaltySeconds: 1, sound: true, hideAnswer: true });
+  });
+
   // ---------- duel: setup ----------
 
   test('createDuel validates input', () => {

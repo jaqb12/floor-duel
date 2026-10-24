@@ -8,6 +8,13 @@
   const IGNORED_FILES = ['thumbs.db', 'desktop.ini'];
   const LOW_TIME_SECONDS = 5;
   const MIN_RECOMMENDED_IMAGES = 30;
+  const MAX_NAME_LENGTH = 24;
+  // Bright colors that stay readable on the black players screen.
+  const PLAYER_COLORS = ['#ff5a5a', '#4ade80', '#facc15', '#60a5fa', '#fb923c', '#c084fc',
+    '#22d3ee', '#f472b6', '#a3e635', '#fda4af', '#2dd4bf', '#d4a373'];
+  const DEFAULT_SETTINGS = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false };
+  const SETTING_LIMITS = { duelSeconds: [10, 300], passPenaltySeconds: [1, 10] };
+  const COLOR_RE = /^#[0-9a-f]{6}$/i;
 
   // ---------- file names ----------
 
@@ -112,6 +119,81 @@
       if (p.id === duel.loserId) return Object.assign({}, p, { losses: p.losses + 1 });
       return p;
     });
+  }
+
+  // ---------- players and settings ----------
+
+  function cleanName(name) {
+    return String(name == null ? '' : name).replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
+  }
+
+  // Returns an error message for the operator, or null when the name is fine.
+  function validatePlayerName(name, players, exceptId = null) {
+    const clean = cleanName(name);
+    if (!clean) return 'Podaj imię gracza.';
+    const lower = clean.toLocaleLowerCase('pl');
+    const taken = players.some(p => p.id !== exceptId && p.name.toLocaleLowerCase('pl') === lower);
+    return taken ? 'Gracz „' + clean + '” już istnieje.' : null;
+  }
+
+  // First palette color nobody uses yet; cycles when all are taken.
+  function nextColor(players) {
+    const used = new Set(players.map(p => String(p.color).toLowerCase()));
+    return PLAYER_COLORS.find(c => !used.has(c)) || PLAYER_COLORS[players.length % PLAYER_COLORS.length];
+  }
+
+  function adjustWins(players, id, delta) {
+    return players.map(p => (p.id === id ? Object.assign({}, p, { wins: Math.max(0, p.wins + delta) }) : p));
+  }
+
+  function resetScores(players) {
+    return players.map(p => Object.assign({}, p, { wins: 0, losses: 0 }));
+  }
+
+  function clampInt(value, min, max, fallback) {
+    if (value === null || value === undefined || value === '') return fallback;
+    const n = Math.round(Number(value));
+    return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+  }
+
+  function sanitizeSettings(raw) {
+    const s = raw && typeof raw === 'object' ? raw : {};
+    const bool = key => (typeof s[key] === 'boolean' ? s[key] : DEFAULT_SETTINGS[key]);
+    const int = key => clampInt(s[key], SETTING_LIMITS[key][0], SETTING_LIMITS[key][1], DEFAULT_SETTINGS[key]);
+    return {
+      duelSeconds: int('duelSeconds'),
+      passPenaltySeconds: int('passPenaltySeconds'),
+      sound: bool('sound'),
+      hideAnswer: bool('hideAnswer'),
+    };
+  }
+
+  // Drops entries without a name or id (or with a duplicate id), repairs the rest.
+  function sanitizePlayers(raw) {
+    if (!Array.isArray(raw)) return [];
+    const players = [];
+    const ids = new Set();
+    for (const p of raw) {
+      if (!p || typeof p !== 'object') continue;
+      const name = cleanName(p.name);
+      if (!name || typeof p.id !== 'string' || !p.id || ids.has(p.id)) continue;
+      ids.add(p.id);
+      players.push({
+        id: p.id,
+        name,
+        color: COLOR_RE.test(p.color) ? p.color.toLowerCase() : nextColor(players),
+        category: typeof p.category === 'string' && p.category ? p.category : null,
+        wins: clampInt(p.wins, 0, 9999, 0),
+        losses: clampInt(p.losses, 0, 9999, 0),
+      });
+    }
+    return players;
+  }
+
+  // Turns whatever was stored into a valid { players, settings }.
+  function sanitizeState(raw) {
+    const r = raw && typeof raw === 'object' ? raw : {};
+    return { players: sanitizePlayers(r.players), settings: sanitizeSettings(r.settings) };
   }
 
   // ---------- duel (SPEC §5) ----------
@@ -287,6 +369,17 @@
     rankPlayers,
     clockSeconds,
     applyResult,
+    MAX_NAME_LENGTH,
+    PLAYER_COLORS,
+    DEFAULT_SETTINGS,
+    SETTING_LIMITS,
+    cleanName,
+    validatePlayerName,
+    nextColor,
+    adjustWins,
+    resetScores,
+    sanitizeSettings,
+    sanitizeState,
     createDuel,
     Duel,
   };

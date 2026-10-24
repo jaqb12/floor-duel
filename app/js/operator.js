@@ -1,4 +1,4 @@
-// Operator UI and keyboard handling. Phase 2: categories column.
+// Operator UI and keyboard handling.
 (function () {
   'use strict';
   window.Floor = window.Floor || {};
@@ -20,11 +20,24 @@
     return node;
   }
 
-  function showFolderMessage(text, isError) {
-    const box = $('folder-message');
+  function button(text, action, title) {
+    const b = el('button', 'small', text);
+    b.type = 'button';
+    b.dataset.action = action;
+    if (title) b.title = title;
+    return b;
+  }
+
+  function showMessage(id, text, isError) {
+    const box = $(id);
     box.textContent = text || '';
     box.className = isError ? 'message error' : 'message';
   }
+
+  const showAppMessage = (text, isError) => showMessage('app-message', text, isError);
+  const showFolderMessage = (text, isError) => showMessage('folder-message', text, isError);
+
+  // ---------- categories ----------
 
   function categoryItem(cat) {
     const n = cat.images.length;
@@ -66,15 +79,178 @@
   }
 
   function showRestoreButton(folderName) {
-    const button = $('restore-folder');
-    button.hidden = !folderName;
-    if (folderName) button.textContent = 'Wczytaj ostatni folder: ' + folderName;
+    const b = $('restore-folder');
+    b.hidden = !folderName;
+    if (folderName) b.textContent = 'Wczytaj ostatni folder: ' + folderName;
+  }
+
+  // ---------- players ----------
+
+  let players = [];
+  let library = null;
+  let editingId = null;
+  let playerHandlers = null;
+
+  // null = no folder loaded, so we can't tell whether a category exists.
+  function categoryStatus(name) {
+    if (!name || !library) return null;
+    const cat = library.categories.find(c => c.name === name);
+    if (!cat) return 'brak w folderze';
+    return cat.images.length ? null : 'brak zdjęć';
+  }
+
+  function renderCategorySelect() {
+    const select = $('player-category');
+    const current = select.value;
+    const editing = players.find(p => p.id === editingId);
+    const names = library ? library.categories.filter(c => c.images.length).map(c => c.name) : [];
+    if (editing && editing.category && !names.includes(editing.category)) names.push(editing.category);
+    select.textContent = '';
+    select.append(new Option('— bez kategorii —', ''));
+    for (const name of names) {
+      const status = categoryStatus(name);
+      select.append(new Option(status ? name + ' (' + status + ')' : name, name));
+    }
+    select.value = names.includes(current) ? current : '';
+  }
+
+  function playerItem(p, index) {
+    const li = el('li', 'player');
+    li.dataset.id = p.id;
+    const swatch = el('span', 'swatch');
+    swatch.style.background = p.color;
+    const info = el('div', 'player-info');
+    const name = el('div', 'player-name', p.name);
+    name.style.color = p.color;
+    info.append(name);
+    if (p.category) {
+      const status = categoryStatus(p.category);
+      info.append(el('div', status ? 'note warn' : 'note', (status ? '⚠ ' : '') + p.category + (status ? ' — ' + status : '')));
+    }
+    const score = el('span', 'score', p.wins + '–' + p.losses);
+    score.title = 'wygrane–porażki';
+    const actions = el('div', 'player-actions');
+    actions.append(
+      button('+1', 'win-plus', 'Dodaj wygraną'),
+      button('−1', 'win-minus', 'Odejmij wygraną'),
+      button('Edytuj', 'edit'),
+      button('Usuń', 'delete'));
+    li.append(el('span', 'rank', (index + 1) + '.'), swatch, info, score, actions);
+    return li;
+  }
+
+  function renderPlayers(nextPlayers, nextLibrary) {
+    players = nextPlayers;
+    library = nextLibrary;
+    if (editingId && !players.some(p => p.id === editingId)) resetPlayerForm();
+    const list = $('player-list');
+    list.textContent = '';
+    L.rankPlayers(players).forEach((p, i) => list.append(playerItem(p, i)));
+    $('players-empty').hidden = players.length > 0;
+    $('reset-scores').hidden = players.length === 0;
+    renderCategorySelect();
+    if (!editingId && !$('player-name').value) $('player-color').value = L.nextColor(players);
+  }
+
+  function resetPlayerForm() {
+    editingId = null;
+    $('player-form').reset();
+    $('player-color').value = L.nextColor(players);
+    $('player-submit').textContent = 'Dodaj gracza';
+    $('player-cancel').hidden = true;
+    showMessage('player-message', '');
+    renderCategorySelect();
+  }
+
+  function startEdit(id) {
+    const p = players.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    renderCategorySelect();
+    $('player-name').value = p.name;
+    $('player-color').value = p.color;
+    $('player-category').value = p.category || '';
+    $('player-submit').textContent = 'Zapisz zmiany';
+    $('player-cancel').hidden = false;
+    showMessage('player-message', '');
+    $('player-name').focus();
+  }
+
+  function onListClick(e) {
+    const b = e.target.closest('button[data-action]');
+    if (!b) return;
+    const id = b.closest('li').dataset.id;
+    const p = players.find(x => x.id === id);
+    if (!p) return;
+    switch (b.dataset.action) {
+      case 'win-plus': playerHandlers.adjustWins(id, 1); break;
+      case 'win-minus': playerHandlers.adjustWins(id, -1); break;
+      case 'edit': startEdit(id); break;
+      case 'delete':
+        if (confirm('Usunąć gracza „' + p.name + '”? Jego wyniki przepadną.')) playerHandlers.removePlayer(id);
+        break;
+    }
+  }
+
+  // handlers: savePlayer(data) -> error message | null, adjustWins(id, delta), removePlayer(id), resetScores()
+  function bindPlayers(handlers) {
+    playerHandlers = handlers;
+    $('player-name').maxLength = L.MAX_NAME_LENGTH;
+    $('player-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const error = handlers.savePlayer({
+        id: editingId,
+        name: $('player-name').value,
+        color: $('player-color').value,
+        category: $('player-category').value || null,
+      });
+      if (error) {
+        showMessage('player-message', error, true);
+        $('player-name').focus();
+        return;
+      }
+      resetPlayerForm();
+      $('player-name').focus();
+    });
+    $('player-cancel').addEventListener('click', resetPlayerForm);
+    $('player-list').addEventListener('click', onListClick);
+    $('reset-scores').addEventListener('click', () => {
+      if (confirm('Wyzerować wygrane i porażki wszystkich graczy?')) handlers.resetScores();
+    });
+  }
+
+  // ---------- settings ----------
+
+  function renderSettings(settings) {
+    $('set-duel').value = settings.duelSeconds;
+    $('set-pass').value = settings.passPenaltySeconds;
+    $('set-sound').checked = settings.sound;
+    $('set-hide').checked = settings.hideAnswer;
+  }
+
+  function bindSettings(onChange) {
+    const [duelMin, duelMax] = L.SETTING_LIMITS.duelSeconds;
+    const [passMin, passMax] = L.SETTING_LIMITS.passPenaltySeconds;
+    Object.assign($('set-duel'), { min: duelMin, max: duelMax });
+    Object.assign($('set-pass'), { min: passMin, max: passMax });
+    $('settings-form').addEventListener('submit', e => e.preventDefault());
+    $('settings-form').addEventListener('change', () => onChange({
+      duelSeconds: $('set-duel').value,
+      passPenaltySeconds: $('set-pass').value,
+      sound: $('set-sound').checked,
+      hideAnswer: $('set-hide').checked,
+    }));
   }
 
   Floor.operator = {
     plural,
-    renderCategories,
+    showAppMessage,
     showFolderMessage,
+    renderCategories,
     showRestoreButton,
+    renderPlayers,
+    bindPlayers,
+    renderSettings,
+    bindSettings,
   };
 })();

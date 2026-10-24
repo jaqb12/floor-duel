@@ -14,11 +14,26 @@
     <h1>The Floor</h1>
     <span class="subtitle">panel operatora</span>
   </header>
+  <p id="app-message" class="message"></p>
 
   <main class="columns">
     <section class="col" id="col-players">
       <h2>Gracze</h2>
-      <p class="placeholder">Lista graczy — faza 3.</p>
+      <form id="player-form" class="player-form" autocomplete="off">
+        <div class="row">
+          <input type="text" id="player-name" placeholder="Imię gracza" aria-label="Imię gracza">
+          <input type="color" id="player-color" title="Kolor gracza" aria-label="Kolor gracza">
+        </div>
+        <select id="player-category" aria-label="Kategoria gracza"></select>
+        <div class="buttons">
+          <button type="submit" id="player-submit">Dodaj gracza</button>
+          <button type="button" id="player-cancel" hidden>Anuluj</button>
+        </div>
+        <p id="player-message" class="message"></p>
+      </form>
+      <ol id="player-list" class="player-list"></ol>
+      <p id="players-empty" class="placeholder">Brak graczy — dodaj pierwszego.</p>
+      <button type="button" id="reset-scores" class="danger" hidden>Wyzeruj wyniki</button>
     </section>
 
     <section class="col" id="col-duel">
@@ -35,6 +50,14 @@
       <p id="folder-name" class="folder-name"></p>
       <p id="folder-message" class="message"></p>
       <ul id="category-list" class="category-list"></ul>
+
+      <h2 class="section-gap">Ustawienia</h2>
+      <form id="settings-form" class="settings">
+        <label>Czas pojedynku (s) <input type="number" id="set-duel" step="1"></label>
+        <label>Kara za pas (s) <input type="number" id="set-pass" step="1"></label>
+        <label class="check"><input type="checkbox" id="set-sound"> Dźwięk</label>
+        <label class="check"><input type="checkbox" id="set-hide"> Ukrywaj odpowiedź (tryb jednego ekranu)</label>
+      </form>
     </section>
   </main>
 

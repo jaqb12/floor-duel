@@ -77,3 +77,54 @@ button:hover { border-color: var(--accent); }
 .category-empty .category-name { color: var(--muted); }
 .note { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .note.warn { color: var(--warn); }
+
+#app-message { margin: 0 0 12px; }
+.section-gap { margin-top: 24px !important; }
+
+input[type="text"], input[type="number"], select {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #121418;
+  color: var(--text);
+}
+input[type="color"] {
+  width: 40px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #121418;
+  cursor: pointer;
+}
+button.small { font-size: 12px; padding: 3px 7px; }
+button.danger { margin-top: 12px; color: var(--error); }
+
+.player-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.player-form .row { display: flex; gap: 8px; }
+.player-form .row input[type="text"] { flex: 1; min-width: 0; }
+
+.player-list { list-style: none; margin: 0; padding: 0; }
+.player {
+  display: grid;
+  grid-template-columns: 24px 12px 1fr auto;
+  grid-template-areas: "rank swatch info score" ". . actions actions";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 4px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.rank { grid-area: rank; color: var(--muted); text-align: right; }
+.swatch { grid-area: swatch; width: 12px; height: 12px; border-radius: 50%; }
+.player-info { grid-area: info; min-width: 0; }
+.player-name { font-weight: 700; overflow-wrap: anywhere; }
+.score { grid-area: score; font-weight: 700; font-variant-numeric: tabular-nums; }
+.player-actions { grid-area: actions; display: flex; flex-wrap: wrap; gap: 4px; }
+
+.settings { display: flex; flex-direction: column; gap: 8px; }
+.settings label { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.settings label input[type="number"] { width: 80px; }
+.settings label.check { justify-content: flex-start; }

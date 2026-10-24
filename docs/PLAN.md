@@ -50,9 +50,9 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 ---
 
 ## Faza 3 — Gracze i persistencja
-- [ ] `storage.js`: odczyt/zapis `localStorage['thefloor.v1']` (gracze, ustawienia) z bezpiecznym fallbackiem przy uszkodzonych danych.
-- [ ] Panel: dodawanie, edycja, usuwanie (potwierdzenie), auto-kolor z palety, przypisanie kategorii, korekty `+1/−1`, „Wyzeruj wyniki”, lista w kolejności rankingu z `W–P`.
-- [ ] Ustawienia: czas pojedynku, kara za pas, dźwięk, ukrywanie odpowiedzi.
+- [x] `storage.js`: odczyt/zapis `localStorage['thefloor.v1']` (gracze, ustawienia) z bezpiecznym fallbackiem przy uszkodzonych danych.
+- [x] Panel: dodawanie, edycja, usuwanie (potwierdzenie), auto-kolor z palety, przypisanie kategorii, korekty `+1/−1`, „Wyzeruj wyniki”, lista w kolejności rankingu z `W–P`.
+- [x] Ustawienia: czas pojedynku, kara za pas, dźwięk, ukrywanie odpowiedzi.
 
 **Odbiór (ręcznie):** dodanie 4 graczy, zmiana wyników, F5 — wszystko zostaje.
 
@@ -124,3 +124,7 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Dodane `applyResult(players, duel)` i `clockSeconds(ms)` w `logic.js` | Zatwierdzanie wyniku i zaokrąglanie zegara testowalne bez DOM |
 | 2026-10-24 | Kolejność kategorii i zdjęć: naturalna, polska (`2.jpg` przed `10.jpg`); ukryte podfoldery (`.git`) pomijane | Przewidywalna lista w panelu |
 | 2026-10-24 | Kategorie z 0 zdjęć widoczne na liście (wyszarzone), z adnotacją, że nie można ich wybrać | Operator widzi, że folder istnieje, ale jest pusty |
+| 2026-10-24 | Imiona graczy unikalne (bez względu na wielkość liter), maks. 24 znaki | Jednoznaczny ranking i wybór graczy do pojedynku |
+| 2026-10-24 | Zakresy ustawień: czas pojedynku 10–300 s, kara za pas 1–10 s; wartości spoza zakresu przycinane | Ochrona przed literówką typu 450 zamiast 45 |
+| 2026-10-24 | Uszkodzony JSON w `thefloor.v1` → start od zera + kopia surowych danych w `thefloor.v1.corrupt` + komunikat w panelu | Bezpieczny fallback bez utraty danych |
+| 2026-10-24 | Paleta 12 jasnych kolorów (czytelnych na czarnym ekranie TV) | SPEC §7.1, tło ekranu graczy jest czarne |

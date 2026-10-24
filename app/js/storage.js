@@ -1,7 +1,42 @@
-// localStorage (players, settings — phase 3) + IndexedDB (folder handle).
+// localStorage (players, settings) + IndexedDB (folder handle).
 (function () {
   'use strict';
   window.Floor = window.Floor || {};
+  const L = Floor.logic;
+
+  const STATE_KEY = 'thefloor.v1';
+  const CORRUPT_KEY = 'thefloor.v1.corrupt';
+
+  // Always returns a valid { players, settings, warning }; warning is a message for the operator or null.
+  function loadState() {
+    let raw;
+    try {
+      raw = localStorage.getItem(STATE_KEY);
+    } catch (e) {
+      console.error(e);
+      return Object.assign(L.sanitizeState(null), { warning: 'Przeglądarka blokuje zapis danych — wyniki nie przetrwają odświeżenia.' });
+    }
+    if (raw === null) return Object.assign(L.sanitizeState(null), { warning: null });
+    try {
+      return Object.assign(L.sanitizeState(JSON.parse(raw)), { warning: null });
+    } catch (e) {
+      console.error('Stored data is corrupt', e);
+      try { localStorage.setItem(CORRUPT_KEY, raw); } catch (_) { /* nothing more to do */ }
+      return Object.assign(L.sanitizeState(null), {
+        warning: 'Zapisane dane były uszkodzone — zaczynamy od zera (kopia: localStorage „' + CORRUPT_KEY + '”).',
+      });
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify({ players: state.players, settings: state.settings }));
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
 
   const DB_NAME = 'thefloor';
   const STORE = 'handles';
@@ -27,6 +62,8 @@
   }
 
   Floor.storage = {
+    loadState,
+    saveState,
     saveRootHandle: handle => withStore('readwrite', s => s.put(handle, ROOT_KEY)),
     loadRootHandle: () => withStore('readonly', s => s.get(ROOT_KEY)).then(h => h || null),
   };
