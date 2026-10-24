@@ -337,6 +337,18 @@
       return this.current;
     }
 
+    // Next image in the current deck, or null when a reshuffle is due (unknown yet).
+    peekNext() {
+      return this.deckPos < this.deck.length ? this.deck[this.deckPos] : null;
+    }
+
+    // Drops a broken image from the pool (unless it's the only one) and draws the next.
+    skipCurrent() {
+      const broken = this.current;
+      if (this.images.length > 1) this.images = this.images.filter(k => k !== broken);
+      return this.nextImage();
+    }
+
     freezeClock(now) {
       this.remainingMs[this.activeId] = this.getClock(this.activeId, now);
       this.turnStartedAt = now;
@@ -353,6 +365,34 @@
 
   function createDuel(options) {
     return new Duel(options);
+  }
+
+  // ---------- duel setup (SPEC §2, §9) ----------
+
+  // categories: [{ name, count }]. Returns why START is not possible, or null.
+  function duelSetupProblem({ players, categories, challengerId, opponentId, category }) {
+    if (players.length < 2) return 'Dodaj co najmniej 2 graczy.';
+    if (!categories) return 'Wczytaj folder z kategoriami.';
+    const exists = id => players.some(p => p.id === id);
+    if (!challengerId || !exists(challengerId)) return 'Wybierz wyzywającego.';
+    if (!opponentId || !exists(opponentId)) return 'Wybierz rywala.';
+    if (challengerId === opponentId) return 'Wyzywający i rywal muszą być różnymi graczami.';
+    if (!category) return 'Wybierz kategorię pojedynku.';
+    const cat = categories.find(c => c.name === category);
+    if (!cat || !cat.count) return 'Kategoria „' + category + '” nie ma zdjęć.';
+    return null;
+  }
+
+  // Like on TV: the opponent's own category, if it exists and has images.
+  function defaultCategory(opponent, categories) {
+    if (!opponent || !opponent.category || !categories) return '';
+    const cat = categories.find(c => c.name === opponent.category);
+    return cat && cat.count ? cat.name : '';
+  }
+
+  function randomChallenger(players, excludeId, rng = Math.random) {
+    const pool = players.filter(p => p.id !== excludeId);
+    return pool.length ? pool[Math.floor(rng() * pool.length)].id : null;
   }
 
   // ---------- players screen (SPEC §6) ----------
@@ -427,6 +467,9 @@
     sanitizeState,
     createDuel,
     Duel,
+    duelSetupProblem,
+    defaultCategory,
+    randomChallenger,
     answerForKey,
     displayView,
   };

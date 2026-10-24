@@ -86,7 +86,53 @@
 
     <section class="col" id="col-duel">
       <h2>Pojedynek</h2>
-      <p class="placeholder">Pojedynek — faza 5.</p>
+
+      <form id="duel-setup" class="duel-setup" autocomplete="off">
+        <label>Wyzywający
+          <span class="inline">
+            <select id="duel-challenger"></select>
+            <button type="button" id="duel-random" title="Losuj wyzywającego">🎲 Losuj</button>
+          </span>
+        </label>
+        <label>Rywal <select id="duel-opponent"></select></label>
+        <label>Kategoria <select id="duel-category"></select></label>
+        <fieldset class="starts">
+          <legend>Zaczyna odpowiadać</legend>
+          <label class="check"><input type="radio" name="duel-first" value="challenger" checked> wyzywający</label>
+          <label class="check"><input type="radio" name="duel-first" value="opponent"> rywal</label>
+        </fieldset>
+        <div class="buttons">
+          <button type="submit" id="duel-start" class="primary" disabled>START (Enter)</button>
+          <button type="button" id="duel-clear">Wyczyść</button>
+        </div>
+        <p id="duel-problem" class="message"></p>
+      </form>
+
+      <div id="duel-live" class="duel-live" hidden>
+        <div class="live-head">
+          <span id="live-category" class="live-category"></span>
+          <span id="live-pool" class="note"></span>
+        </div>
+        <div class="preview"><img id="live-photo" alt=""></div>
+        <div id="live-answer" class="live-answer"></div>
+        <p id="live-hint" class="note"></p>
+        <div class="clocks">
+          <div id="live-left" class="clock-box"><span class="c-name"></span><span class="c-time"></span><span class="c-stats note"></span></div>
+          <div id="live-right" class="clock-box"><span class="c-name"></span><span class="c-time"></span><span class="c-stats note"></span></div>
+        </div>
+        <div class="buttons live-buttons">
+          <button type="button" id="live-correct" class="primary">DOBRZE (Spacja)</button>
+          <button type="button" id="live-pass">PAS (P)</button>
+          <button type="button" id="live-pause">PAUZA (Esc)</button>
+        </div>
+        <div id="live-result" class="live-result" hidden>
+          <p id="live-winner" class="live-winner"></p>
+          <div class="buttons">
+            <button type="button" id="live-confirm" class="primary">Zatwierdź wynik</button>
+          </div>
+        </div>
+        <button type="button" id="live-cancel" class="danger">Unieważnij pojedynek</button>
+      </div>
     </section>
 
     <section class="col" id="col-categories">

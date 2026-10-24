@@ -150,6 +150,7 @@
     $('reset-scores').hidden = players.length === 0;
     renderCategorySelect();
     if (!editingId && !$('player-name').value) $('player-color').value = L.nextColor(players);
+    renderDuelSetup();
   }
 
   function resetPlayerForm() {
@@ -219,6 +220,232 @@
     });
   }
 
+  // ---------- duel setup ----------
+
+  let duelHandlers = null;
+  let liveState = null; // duel.state from the last render, null when there is no live duel
+
+  function setText(node, text) {
+    if (node.textContent !== text) node.textContent = text;
+  }
+
+  function setupValues() {
+    return {
+      challengerId: $('duel-challenger').value || null,
+      opponentId: $('duel-opponent').value || null,
+      category: $('duel-category').value || '',
+      firstSide: document.querySelector('input[name="duel-first"]:checked').value,
+    };
+  }
+
+  function categorySummary() {
+    return library ? library.categories.map(c => ({ name: c.name, count: c.images.length })) : null;
+  }
+
+  function fillPlayerSelect(select, otherId) {
+    const current = select.value;
+    select.textContent = '';
+    select.append(new Option('— wybierz —', ''));
+    for (const p of L.rankPlayers(players)) {
+      const option = new Option(p.name + ' (' + p.wins + '–' + p.losses + ')', p.id);
+      option.disabled = p.id === otherId;
+      select.append(option);
+    }
+    select.value = players.some(p => p.id === current && p.id !== otherId) ? current : '';
+  }
+
+  // Keeps the current choices when players or categories change.
+  function renderDuelSetup() {
+    fillPlayerSelect($('duel-challenger'), $('duel-opponent').value);
+    fillPlayerSelect($('duel-opponent'), $('duel-challenger').value);
+    const select = $('duel-category');
+    const current = select.value;
+    const names = library ? library.categories.filter(c => c.images.length).map(c => c.name) : [];
+    select.textContent = '';
+    select.append(new Option(library ? '— wybierz kategorię —' : '— najpierw wczytaj folder —', ''));
+    for (const cat of library ? library.categories : []) {
+      if (cat.images.length) select.append(new Option(cat.name + ' (' + cat.images.length + ')', cat.name));
+    }
+    select.value = names.includes(current) ? current : '';
+  }
+
+  function notifySetup() {
+    renderDuelSetup();
+    duelHandlers.setupChanged(setupValues());
+  }
+
+  function resetDuelSetup() {
+    $('duel-setup').reset();
+    renderDuelSetup();
+  }
+
+  function showSetupProblem(problem) {
+    showMessage('duel-problem', problem || 'Gotowe — START albo Enter.', !!problem);
+    $('duel-start').disabled = !!problem;
+  }
+
+  // ---------- live duel ----------
+
+  function renderClock(box, player, id, info) {
+    const { duel, now } = info;
+    const ms = duel.getClock(id, now);
+    setText(box.querySelector('.c-name'), player ? player.name : '?');
+    setText(box.querySelector('.c-time'), String(L.clockSeconds(ms)));
+    const s = duel.stats[id];
+    setText(box.querySelector('.c-stats'), '✓ ' + s.correct + ' · pas ' + s.passes);
+    if (player && box.style.getPropertyValue('--player') !== player.color) box.style.setProperty('--player', player.color);
+    box.classList.toggle('active', duel.state !== 'finished' && duel.activeId === id);
+    box.querySelector('.c-time').classList.toggle('low', ms <= 10000);
+  }
+
+  let previewKey = null;
+
+  function renderPreview(key) {
+    if (key === previewKey) return;
+    previewKey = key;
+    const img = $('live-photo');
+    img.removeAttribute('src');
+    if (!key) return;
+    duelHandlers.imageUrl(key).then(url => {
+      if (previewKey === key) img.src = url;
+    }, () => { /* broken image: skipped by the app */ });
+  }
+
+  function poolText(duel, skipped) {
+    const parts = ['zdjęcie ' + duel.deckPos + ' z ' + duel.deck.length];
+    if (duel.reshuffles) parts.push('pula wyczerpana — powtórki');
+    if (skipped) parts.push('pominięte uszkodzone: ' + skipped);
+    return parts.join(' · ');
+  }
+
+  // info: { duel, now, answer, hideAnswer, holdingAnswer, skipped }. Cheap enough to call every frame.
+  function renderDuel(info) {
+    const { duel } = info;
+    const live = !!duel && duel.state !== 'ready';
+    liveState = live ? duel.state : null;
+    $('duel-setup').hidden = live;
+    $('duel-live').hidden = !live;
+    if (!live) {
+      renderPreview(null);
+      return;
+    }
+    const state = duel.state;
+    const revealing = state === 'reveal' || (state === 'paused' && duel.pausedFrom === 'reveal');
+    const find = id => players.find(p => p.id === id);
+    setText($('live-category'), duel.category);
+    setText($('live-pool'), poolText(duel, info.skipped));
+    renderPreview(duel.current);
+    setText($('live-answer'), info.answer || '');
+    $('live-answer').classList.toggle('hidden-answer', info.hideAnswer && !info.holdingAnswer && !revealing && state !== 'finished');
+    let hint = '';
+    if (state === 'paused') hint = 'Pauza — Esc, żeby wznowić.';
+    else if (state === 'reveal') hint = 'Pas — gracze widzą odpowiedź, zegar biegnie.';
+    else if (info.hideAnswer && state === 'running') hint = 'Odpowiedź ukryta — przytrzymaj H, żeby ją zobaczyć.';
+    setText($('live-hint'), hint);
+    renderClock($('live-left'), find(duel.challengerId), duel.challengerId, info);
+    renderClock($('live-right'), find(duel.opponentId), duel.opponentId, info);
+
+    const finished = state === 'finished';
+    $('live-correct').disabled = state !== 'running';
+    $('live-pass').disabled = state !== 'running';
+    $('live-pause').disabled = finished;
+    setText($('live-pause'), state === 'paused' ? 'WZNÓW (Esc)' : 'PAUZA (Esc)');
+    $('live-result').hidden = !finished;
+    $('live-correct').parentElement.hidden = finished;
+    if (finished) {
+      const winner = find(duel.winnerId);
+      const loser = find(duel.loserId);
+      setText($('live-winner'), 'Wygrywa ' + (winner ? winner.name : '?') + '! ' + (loser ? loser.name : '?') + ' — koniec czasu.');
+      setText($('live-cancel'), 'Unieważnij (nie zapisuj wyniku)');
+    } else {
+      setText($('live-cancel'), 'Unieważnij pojedynek');
+    }
+  }
+
+  // ---------- keyboard (SPEC §7.2), shared by both windows ----------
+
+  const DEBOUNCE_MS = 250;
+  const lastPress = {};
+
+  function isTyping(target) {
+    if (!target || !target.tagName) return false;
+    if (target.isContentEditable || target.tagName === 'TEXTAREA') return true;
+    return target.tagName === 'INPUT' && ['text', 'number', 'search'].includes(target.type);
+  }
+
+  function debounced(code) {
+    const now = performance.now();
+    if (now - (lastPress[code] || 0) < DEBOUNCE_MS) return true;
+    lastPress[code] = now;
+    return false;
+  }
+
+  function handleKey(e) {
+    if (!duelHandlers || isTyping(e.target) || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (e.type === 'keyup') {
+      if (e.code === 'KeyH') duelHandlers.holdAnswer(false);
+      if (e.code === 'Space') e.preventDefault();
+      return;
+    }
+    switch (e.code) {
+      case 'Space':
+        e.preventDefault();
+        if (!e.repeat && !debounced('Space')) duelHandlers.correct();
+        break;
+      case 'KeyP':
+        if (!e.repeat && !debounced('KeyP')) duelHandlers.pass();
+        break;
+      case 'Escape':
+        if (!e.repeat) duelHandlers.togglePause();
+        break;
+      case 'Enter':
+        if (!e.repeat && duelHandlers.start()) e.preventDefault();
+        break;
+      case 'KeyH':
+        duelHandlers.holdAnswer(true);
+        break;
+    }
+  }
+
+  // handlers: setupChanged(setup) , start() -> bool, correct(), pass(), togglePause(),
+  // holdAnswer(on), confirm(), cancel(), imageUrl(key) -> Promise<url>
+  function bindDuel(handlers) {
+    duelHandlers = handlers;
+    const form = $('duel-setup');
+    $('duel-challenger').addEventListener('change', notifySetup);
+    $('duel-opponent').addEventListener('change', () => {
+      const opponent = players.find(p => p.id === $('duel-opponent').value);
+      renderDuelSetup();
+      $('duel-category').value = L.defaultCategory(opponent, categorySummary());
+      notifySetup();
+    });
+    $('duel-category').addEventListener('change', notifySetup);
+    form.addEventListener('change', e => { if (e.target.name === 'duel-first') notifySetup(); });
+    $('duel-random').addEventListener('click', () => {
+      const id = L.randomChallenger(players, $('duel-opponent').value);
+      if (id) $('duel-challenger').value = id;
+      notifySetup();
+    });
+    $('duel-clear').addEventListener('click', () => {
+      resetDuelSetup();
+      notifySetup();
+    });
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      handlers.start();
+    });
+    $('live-correct').addEventListener('click', () => handlers.correct());
+    $('live-pass').addEventListener('click', () => handlers.pass());
+    $('live-pause').addEventListener('click', () => handlers.togglePause());
+    $('live-confirm').addEventListener('click', () => handlers.confirm());
+    $('live-cancel').addEventListener('click', () => {
+      if (liveState && confirm('Unieważnić pojedynek? Wynik nie zostanie zapisany.')) handlers.cancel();
+    });
+    document.addEventListener('keydown', handleKey);
+    document.addEventListener('keyup', handleKey);
+    window.addEventListener('blur', () => handlers.holdAnswer(false));
+  }
+
   // ---------- players window ----------
 
   const DISPLAY_STATUS = {
@@ -269,5 +496,10 @@
     renderSettings,
     bindSettings,
     showDisplayStatus,
+    bindDuel,
+    renderDuel,
+    resetDuelSetup,
+    showSetupProblem,
+    handleKey,
   };
 })();

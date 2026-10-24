@@ -128,3 +128,33 @@ button.danger { margin-top: 12px; color: var(--error); }
 .settings label { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .settings label input[type="number"] { width: 80px; }
 .settings label.check { justify-content: flex-start; }
+
+/* duel column */
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.duel-setup { display: flex; flex-direction: column; gap: 10px; }
+.duel-setup > label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.duel-setup select { width: 100%; }
+.inline { display: flex; gap: 8px; }
+.inline select { flex: 1; min-width: 0; }
+.starts { border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 13px; color: var(--muted); display: flex; gap: 16px; }
+.starts legend { padding: 0 4px; }
+.check { display: flex; align-items: center; gap: 6px; color: var(--text); }
+
+.duel-live { display: flex; flex-direction: column; gap: 10px; }
+.live-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.live-category { font-weight: 700; font-size: 18px; }
+.preview { background: #000; border-radius: 6px; height: 220px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.live-answer { font-size: 34px; font-weight: 800; text-align: center; line-height: 1.15; overflow-wrap: anywhere; min-height: 40px; transition: filter 0.1s; }
+.live-answer.hidden-answer { filter: blur(14px); user-select: none; }
+.clocks { display: flex; gap: 8px; }
+.clock-box { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; border-radius: 6px; border: 2px solid var(--border); opacity: 0.55; }
+.clock-box.active { opacity: 1; border-color: var(--player, var(--accent)); }
+.c-name { font-weight: 700; color: var(--player, var(--text)); overflow-wrap: anywhere; text-align: center; }
+.c-time { font-size: 40px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.c-time.low { color: var(--error); }
+.live-buttons button { flex: 1; padding: 10px 8px; }
+.live-winner { font-size: 22px; font-weight: 800; margin: 0; text-align: center; }
+.live-result { display: flex; flex-direction: column; gap: 8px; }
+.live-result .buttons button { flex: 1; padding: 10px; }

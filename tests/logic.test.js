@@ -399,6 +399,62 @@
     eq([d.current, d.nextImage(), d.nextImage()], ['only', 'only', 'only']);
   });
 
+  test('peekNext shows the upcoming image, null when a reshuffle is due', () => {
+    const d = makeDuel({ images: ['1', '2'] });
+    d.start(0);
+    const next = d.peekNext();
+    ok(next !== null && next !== d.current);
+    eq(d.nextImage(), next);
+    eq(d.peekNext(), null);
+  });
+
+  test('skipCurrent drops a broken image from the pool for good', () => {
+    const d = makeDuel({ images: ['1', '2', '3'], rng: seededRng(3) });
+    d.start(0);
+    const broken = d.current;
+    ok(d.skipCurrent() !== broken);
+    for (let i = 0; i < 30; i++) ok(d.nextImage() !== broken, 'broken image came back');
+    const single = makeDuel({ images: ['only'] });
+    single.start(0);
+    eq(single.skipCurrent(), 'only', 'last image is kept');
+  });
+
+  // ---------- duel setup ----------
+
+  const setupPlayers = [
+    { id: A, name: 'Ala', category: 'Owoce' },
+    { id: B, name: 'Bartek', category: 'Brak' },
+    { id: 'c', name: 'Celina', category: null },
+  ];
+  const setupCategories = [{ name: 'Owoce', count: 8 }, { name: 'Puste', count: 0 }];
+
+  test('duelSetupProblem covers SPEC §9 cases', () => {
+    const base = { players: setupPlayers, categories: setupCategories, challengerId: A, opponentId: B, category: 'Owoce' };
+    const problem = changes => L.duelSetupProblem(Object.assign({}, base, changes));
+    eq(problem({}), null);
+    ok(problem({ players: setupPlayers.slice(0, 1) }), 'one player');
+    ok(problem({ categories: null }), 'no folder');
+    ok(problem({ challengerId: null }), 'no challenger');
+    ok(problem({ opponentId: 'ghost' }), 'deleted opponent');
+    ok(problem({ opponentId: A }), 'same player');
+    ok(problem({ category: '' }), 'no category');
+    ok(problem({ category: 'Puste' }), 'empty category');
+    ok(problem({ category: 'Nieznana' }), 'missing category');
+  });
+
+  test('defaultCategory: opponent category only if it has images', () => {
+    eq(L.defaultCategory(setupPlayers[0], setupCategories), 'Owoce');
+    eq(L.defaultCategory(setupPlayers[1], setupCategories), '');
+    eq(L.defaultCategory(setupPlayers[2], setupCategories), '');
+    eq(L.defaultCategory(setupPlayers[0], null), '');
+    eq(L.defaultCategory({ category: 'Puste' }, setupCategories), '');
+  });
+
+  test('randomChallenger never picks the excluded player', () => {
+    for (let seed = 1; seed < 50; seed++) ok(L.randomChallenger(setupPlayers, B, seededRng(seed)) !== B);
+    eq(L.randomChallenger([{ id: A }], A), null);
+  });
+
   // ---------- players screen ----------
 
   const viewPlayers = [

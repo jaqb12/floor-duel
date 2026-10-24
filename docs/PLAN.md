@@ -70,13 +70,13 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 ---
 
 ## Faza 5 — Pełny przebieg pojedynku
-- [ ] Panel „Pojedynek”: wybór challengera/rywala, domyślna kategoria rywala, kto zaczyna, „🎲 Losuj wyzywającego”, START.
-- [ ] Skróty klawiszowe wg SPEC §7.2 w obu oknach (repeat, debounce, pola tekstowe).
-- [ ] Podgląd zdjęcia + duża odpowiedź dla operatora, ukrywanie odpowiedzi z H.
-- [ ] Preload + `decode()` następnego zdjęcia; pomijanie uszkodzonych plików.
-- [ ] Koniec: „Zatwierdź wynik” (wins/losses) / „Unieważnij”.
-- [ ] `sound.js` wg SPEC §8.
-- [ ] Blokady z SPEC §9.
+- [x] Panel „Pojedynek”: wybór challengera/rywala, domyślna kategoria rywala, kto zaczyna, „🎲 Losuj wyzywającego”, START.
+- [x] Skróty klawiszowe wg SPEC §7.2 w obu oknach (repeat, debounce, pola tekstowe).
+- [x] Podgląd zdjęcia + duża odpowiedź dla operatora, ukrywanie odpowiedzi z H.
+- [x] Preload + `decode()` następnego zdjęcia; pomijanie uszkodzonych plików.
+- [x] Koniec: „Zatwierdź wynik” (wins/losses) / „Unieważnij”.
+- [x] `sound.js` wg SPEC §8.
+- [x] Blokady z SPEC §9.
 
 **Odbiór (ręcznie):** pełny pojedynek na `samples/Kategorie`: kilka dobrych odpowiedzi, pas z odsłoną, timeout, zatwierdzenie wyniku — liczniki i ranking poprawne, zero błędów w konsoli.
 
@@ -132,3 +132,8 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-24 | Przy zamykaniu/odświeżaniu panelu (`pagehide`) panel sam zamyka okno graczy | Po F5 i tak jest bezużyteczne (białe); nie zostaje sierota na TV |
 | 2026-10-24 | Jeśli „Otwórz ekran graczy” trafi na stare, niedostępne okno i nie da się od razu otworzyć nowego — zamyka stare i prosi o drugie kliknięcie | Przeglądarka pozwala na jedno wyskakujące okno na kliknięcie |
 | 2026-10-24 | Ranking na planszy startowej w dwóch kolumnach przy > 8 graczach; zegar ≤ 10 s czerwony u obu graczy, pulsuje tylko u aktywnego | Czytelność z kanapy |
+| 2026-10-24 | Stan `ready` = szkic pojedynku tworzony automatycznie, gdy wybór graczy i kategorii jest poprawny; ekran graczy od razu pokazuje „Przygotujcie się!” | SPEC §5: setup → ready po wybraniu 2 graczy i kategorii |
+| 2026-10-24 | Zmiana rywala ustawia jego kategorię (jeśli ma zdjęcia); operator może ją potem zmienić | SPEC §2.3 |
+| 2026-10-24 | Przy „Ukrywaj odpowiedź” odpowiedź w panelu jest odsłonięta w trakcie pasa i po końcu pojedynku | W trybie jednego ekranu gracze mają ją zobaczyć jak na TV |
+| 2026-10-24 | Uszkodzone zdjęcie jest sprawdzane (`decode()`) w panelu, pomijane i usuwane z puli pojedynku; licznik w panelu | SPEC §9; nie wraca po przetasowaniu |
+| 2026-10-24 | „Unieważnij” zawsze z potwierdzeniem | Ochrona przed przypadkowym kliknięciem w trakcie gry |

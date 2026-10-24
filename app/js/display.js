@@ -145,9 +145,11 @@
     paused.textContent = 'PAUZA';
 
     doc.addEventListener('keydown', e => onKey(e));
+    doc.addEventListener('keyup', e => onKey(e));
     dom = {
       doc, root, ranking, category, photo, reveal, revealAnswer, message, messageTitle, messageName,
-      left, right, paused, rankingKey: null, image: { shown: null, loading: null, failed: null },
+      left, right, paused, rankingKey: null,
+      image: { shown: null, loading: null, failed: null, cache: new Map() },
     };
   }
 
@@ -198,20 +200,36 @@
     panel.clock.classList.toggle('low', side.low);
   }
 
+  const CACHE_SIZE = 3;
+
+  // key -> Promise of an <img> already decoded in the rendered document.
+  function decoded(key) {
+    const cache = dom.image.cache;
+    if (!cache.has(key)) {
+      const target = dom;
+      cache.set(key, resolveImage(key).then(url => {
+        const img = target.doc.createElement('img');
+        img.className = 'photo';
+        img.alt = '';
+        img.src = url;
+        return img.decode().then(() => img);
+      }));
+      while (cache.size > CACHE_SIZE) cache.delete(cache.keys().next().value);
+    }
+    return cache.get(key);
+  }
+
+  function preload(key) {
+    if (dom && key) decoded(key).catch(() => { /* reported when shown */ });
+  }
+
   // Swaps the photo only after the next one is decoded, so big phone photos don't flash.
   function showImage(key) {
     const image = dom.image;
     if (!key || key === image.shown || key === image.loading || key === image.failed) return;
     image.loading = key;
     const target = dom;
-    resolveImage(key)
-      .then(url => {
-        const next = target.doc.createElement('img');
-        next.className = 'photo';
-        next.alt = '';
-        next.src = url;
-        return next.decode().then(() => next);
-      })
+    decoded(key)
       .then(next => {
         if (dom !== target || image.loading !== key) return;
         target.photo.replaceWith(next);
@@ -265,6 +283,7 @@
     isOpen,
     checkWindow,
     render,
+    preload,
     attachDocument,
     getStatus: () => status,
     setStatusListener: fn => { onStatus = fn; },
