@@ -40,7 +40,7 @@ Działa też na jednym ekranie (patrz 7.4 — ukrywanie odpowiedzi).
 ## 4. Model danych
 ```js
 Player   = { id, name, color, category /* string|null */, wins, losses }
-Settings = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false }
+Settings = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false, volume: 80 }
 
 // Stan pojedynku (w logic.js, bez DOM):
 Duel = {
@@ -119,7 +119,9 @@ Ustawienie „Ukrywaj odpowiedź”: w panelu operatora odpowiedź jest zamazana
 - Krótkie „tyk” co sekundę w ostatnich 5 s aktywnego gracza.
 - Krótki „ding” przy dobrej odpowiedzi, niski ton przy pasie.
 - Długi buzzer przy końcu czasu.
-- `AudioContext` tworzony/wznawiany przy kliknięciu START (wymóg przeglądarek). Wyłącznik w ustawieniach.
+- `AudioContext` tworzony/wznawiany przy kliknięciu START albo dowolnego przycisku dźwięku (wymóg przeglądarek). Wyłącznik i suwak głośności (0–100, domyślnie 80) w ustawieniach; wyłączony dźwięk wycisza wszystko, także muzykę.
+- **Muzyka na przygotowanie** (dodane na prośbę użytkownika, 2026-10-24): przycisk „🎵 Muzyka” przy START i w sekcji efektów — zapętlony, syntezowany podkład; wycisza się sama po START, można ją też zatrzymać ręcznie.
+- **Efekty dla operatora** (sekcja „Efekty dźwiękowe”): werble, fanfara, brawa, napięcie, gong, „pudło”. Tylko przyciski, bez skrótów klawiszowych (żeby nie kolidowały z grą).
 
 ## 9. Przypadki brzegowe
 - Mniej niż 2 graczy → START nieaktywny. Challenger ≠ rywal.

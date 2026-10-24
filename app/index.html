@@ -104,6 +104,7 @@
         <div class="buttons">
           <button type="submit" id="duel-start" class="primary" disabled>START (Enter)</button>
           <button type="button" id="duel-clear">Wyczyść</button>
+          <button type="button" class="music-toggle" title="Muzyka na przygotowanie — wycisza się sama po START">🎵 Muzyka</button>
         </div>
         <p id="duel-problem" class="message"></p>
       </form>
@@ -152,11 +153,24 @@
       </div>
       <p id="display-status" class="message"></p>
 
+      <h2 class="section-gap">Efekty dźwiękowe</h2>
+      <div class="soundboard">
+        <button type="button" class="music-toggle wide">🎵 Muzyka</button>
+        <button type="button" data-sound="drumroll">🥁 Werble</button>
+        <button type="button" data-sound="fanfare">🎺 Fanfara</button>
+        <button type="button" data-sound="applause">👏 Brawa</button>
+        <button type="button" data-sound="suspense">💓 Napięcie</button>
+        <button type="button" data-sound="gong">🔔 Gong</button>
+        <button type="button" data-sound="wrong">😬 Pudło</button>
+      </div>
+      <p id="sound-note" class="message"></p>
+
       <h2 class="section-gap">Ustawienia</h2>
       <form id="settings-form" class="settings">
         <label>Czas pojedynku (s) <input type="number" id="set-duel" step="1"></label>
         <label>Kara za pas (s) <input type="number" id="set-pass" step="1"></label>
         <label class="check"><input type="checkbox" id="set-sound"> Dźwięk</label>
+        <label>Głośność <input type="range" id="set-volume" step="5"></label>
         <label class="check"><input type="checkbox" id="set-hide"> Ukrywaj odpowiedź (tryb jednego ekranu)</label>
       </form>
     </section>

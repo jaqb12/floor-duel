@@ -170,3 +170,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* readable focus for keyboard users */
 button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* sound effects */
+.soundboard { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.soundboard .wide { grid-column: 1 / -1; }
+.music-toggle.playing { border-color: var(--warn); color: var(--warn); }
+input[type="range"] { width: 140px; accent-color: var(--accent); }

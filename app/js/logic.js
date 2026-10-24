@@ -12,8 +12,8 @@
   // Bright colors that stay readable on the black players screen.
   const PLAYER_COLORS = ['#ff5a5a', '#4ade80', '#facc15', '#60a5fa', '#fb923c', '#c084fc',
     '#22d3ee', '#f472b6', '#a3e635', '#fda4af', '#2dd4bf', '#d4a373'];
-  const DEFAULT_SETTINGS = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false };
-  const SETTING_LIMITS = { duelSeconds: [10, 300], passPenaltySeconds: [1, 10] };
+  const DEFAULT_SETTINGS = { duelSeconds: 45, passPenaltySeconds: 3, sound: true, hideAnswer: false, volume: 80 };
+  const SETTING_LIMITS = { duelSeconds: [10, 300], passPenaltySeconds: [1, 10], volume: [0, 100] };
   const COLOR_RE = /^#[0-9a-f]{6}$/i;
 
   // ---------- file names ----------
@@ -165,6 +165,7 @@
       passPenaltySeconds: int('passPenaltySeconds'),
       sound: bool('sound'),
       hideAnswer: bool('hideAnswer'),
+      volume: int('volume'),
     };
   }
 

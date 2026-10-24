@@ -82,6 +82,12 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 
 5. Gdy czas gracza dojdzie do zera — przegrywa. Kliknij **Zatwierdź wynik** (zwycięzca +1 wygrana, przegrany +1 porażka) albo **Unieważnij** (nic się nie zmienia).
 
+### Muzyka i efekty
+
+- **🎵 Muzyka** (przy START i w sekcji *Efekty dźwiękowe*) — podkład na czas przygotowania. Wycisza się sama po START.
+- **Efekty dźwiękowe**: 🥁 Werble, 🎺 Fanfara, 👏 Brawa, 💓 Napięcie, 🔔 Gong, 😬 Pudło — do użycia w dowolnej chwili.
+- Głośność ustawisz suwakiem w **Ustawieniach**; wyłączenie opcji **Dźwięk** wycisza wszystko.
+
 ## 6. Zasady w skrócie
 
 - Czas biegnie tylko temu, kto odpowiada; każdy ma osobny zegar (domyślnie 45 s, zmiana w Ustawieniach).

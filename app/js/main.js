@@ -71,6 +71,7 @@
     persist();
     ui().renderSettings(state.settings);
     Floor.sound.setEnabled(state.settings.sound);
+    Floor.sound.setVolume(state.settings.volume);
     rebuildDraft();
   }
 
@@ -187,6 +188,7 @@
     start() {
       if (!duel || duel.state !== 'ready') return false;
       Floor.sound.unlock();
+      Floor.sound.stopMusic();
       skippedImages = 0;
       checkedKey = null;
       handleEvents(duel.start(performance.now()));
@@ -253,8 +255,14 @@
     state = { players: loaded.players, settings: loaded.settings };
     if (loaded.warning) ui().showAppMessage(loaded.warning, true);
     Floor.sound.setEnabled(state.settings.sound);
+    Floor.sound.setVolume(state.settings.volume);
+    Floor.sound.setMusicListener(playing => ui().renderMusic(playing));
 
     ui().bindPlayers(playerHandlers);
+    ui().bindSounds({
+      toggleMusic: () => (Floor.sound.isMusicPlaying() ? Floor.sound.stopMusic() : Floor.sound.startMusic()),
+      play: name => Floor.sound.play(name),
+    });
     ui().bindSettings(changeSettings);
     ui().bindDuel(duelHandlers);
     ui().renderPlayers(state.players, library);

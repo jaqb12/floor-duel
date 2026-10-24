@@ -467,6 +467,21 @@
     $('open-display').textContent = status === 'open' ? 'Pokaż ekran graczy' : 'Otwórz ekran graczy';
   }
 
+  // ---------- sound effects and music ----------
+
+  function renderMusic(playing) {
+    for (const b of document.querySelectorAll('.music-toggle')) {
+      b.textContent = playing ? '⏹ Zatrzymaj muzykę' : '🎵 Muzyka';
+      b.classList.toggle('playing', playing);
+    }
+  }
+
+  // handlers: toggleMusic(), play(name)
+  function bindSounds(handlers) {
+    for (const b of document.querySelectorAll('.music-toggle')) b.addEventListener('click', handlers.toggleMusic);
+    for (const b of document.querySelectorAll('[data-sound]')) b.addEventListener('click', () => handlers.play(b.dataset.sound));
+  }
+
   // ---------- big preview (SPEC §7.4) ----------
 
   // A fresh iframe each time, so key listeners never pile up. Returns its document.
@@ -493,6 +508,8 @@
     $('set-pass').value = settings.passPenaltySeconds;
     $('set-sound').checked = settings.sound;
     $('set-hide').checked = settings.hideAnswer;
+    $('set-volume').value = settings.volume;
+    showMessage('sound-note', settings.sound ? '' : 'Dźwięk jest wyłączony w ustawieniach.');
   }
 
   function bindSettings(onChange) {
@@ -500,13 +517,17 @@
     const [passMin, passMax] = L.SETTING_LIMITS.passPenaltySeconds;
     Object.assign($('set-duel'), { min: duelMin, max: duelMax });
     Object.assign($('set-pass'), { min: passMin, max: passMax });
+    Object.assign($('set-volume'), { min: L.SETTING_LIMITS.volume[0], max: L.SETTING_LIMITS.volume[1] });
     $('settings-form').addEventListener('submit', e => e.preventDefault());
     $('settings-form').addEventListener('change', () => onChange({
       duelSeconds: $('set-duel').value,
       passPenaltySeconds: $('set-pass').value,
       sound: $('set-sound').checked,
       hideAnswer: $('set-hide').checked,
+      volume: $('set-volume').value,
     }));
+    // Live volume while dragging; the final value is saved on 'change'.
+    $('set-volume').addEventListener('input', () => Floor.sound.setVolume(Number($('set-volume').value)));
   }
 
   Floor.operator = {
@@ -527,5 +548,7 @@
     handleKey,
     openBigPreview,
     closeBigPreview,
+    bindSounds,
+    renderMusic,
   };
 })();

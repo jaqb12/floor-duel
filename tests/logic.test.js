@@ -201,13 +201,13 @@
         null,
         { id: 'p3', name: 'Bartek', color: 'red', category: '', wins: '2', losses: 'x' },
       ],
-      settings: { duelSeconds: 9999, passPenaltySeconds: '0', sound: 'tak', hideAnswer: true },
+      settings: { duelSeconds: 9999, passPenaltySeconds: '0', sound: 'tak', hideAnswer: true, volume: 150 },
     });
     eq(s.players, [
       { id: 'p1', name: 'Ala', color: '#ff0000', category: 'Owoce', wins: 3, losses: 0 },
       { id: 'p3', name: 'Bartek', color: L.PLAYER_COLORS[0], category: null, wins: 2, losses: 0 },
     ]);
-    eq(s.settings, { duelSeconds: 300, passPenaltySeconds: 1, sound: true, hideAnswer: true });
+    eq(s.settings, { duelSeconds: 300, passPenaltySeconds: 1, sound: true, hideAnswer: true, volume: 100 });
   });
 
   // ---------- duel: setup ----------
