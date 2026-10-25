@@ -175,3 +175,7 @@ The shortcuts work in both windows (also if you accidentally click the players w
 **Adding a language:** copy the `en` block in `app/js/i18n.js`, translate the values, add the language to `LANGUAGE_NAMES` and run the tests (they check that all languages have the same keys and placeholders).
 
 **Adding a translated difficulty level:** add it to `LEVELS` in `app/js/logic.js` (id, name stems in every language, position in the order) and a `levels.<id>` label to every language in `app/js/i18n.js`. Without that, a new level folder still works, but its name is shown as it is.
+
+## License
+
+The code and the content made for this project (including the *Fruits and vegetables* sample category) are released under the [MIT License](LICENSE). The public-domain images in `samples/` (flags, road signs, paintings) stay in the public domain — see [`samples/CREDITS.md`](samples/CREDITS.md). *The Floor* is a trademark of its owner and is not covered by this license.

@@ -175,3 +175,7 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 **Nowy język:** skopiuj blok `en` w `app/js/i18n.js`, przetłumacz wartości, dopisz język do `LANGUAGE_NAMES` i uruchom testy (sprawdzają, że wszystkie języki mają te same klucze i placeholdery).
 
 **Nowy tłumaczony poziom trudności:** dopisz go do `LEVELS` w `app/js/logic.js` (id, początki nazw w każdym języku, miejsce w kolejności) i etykietę `levels.<id>` w każdym języku w `app/js/i18n.js`. Bez tego nowy folder poziomu też działa, ale jego nazwa jest pokazywana bez zmian.
+
+## Licencja
+
+Kod i treści wykonane na potrzeby projektu (w tym przykładowa kategoria *Owoce i warzywa*) są udostępnione na [licencji MIT](LICENSE). Obrazy z domeny publicznej w `samples/` (flagi, znaki drogowe, obrazy) pozostają w domenie publicznej — patrz [`samples/CREDITS.pl.md`](samples/CREDITS.pl.md). *The Floor* to znak towarowy jego właściciela i nie jest objęty tą licencją.

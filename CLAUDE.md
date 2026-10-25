@@ -18,6 +18,7 @@ Full specification: `docs/SPEC.md`. Work plan with phases and checkboxes: `docs/
 ```
 CLAUDE.md
 README.md / README.pl.md  # user guide (English / Polish)
+LICENSE                   # MIT
 .gitignore
 docs/
   SPEC.md                 # functional and technical specification (source of truth)
