@@ -3,7 +3,7 @@
 **Gra na domową imprezę, inspirowana teleturniejem *The Floor*: dwóch graczy, jedna kategoria zdjęć, każdy ma swój zegar szachowy.**
 Gracze rozpoznają zdjęcia, operator zatwierdza odpowiedzi klawiaturą, a kto pierwszy straci cały czas — przegrywa pojedynek.
 
-Floor Duel działa **w przeglądarce, bez instalacji, bez serwera i bez internetu** — wystarczy dwuklik w `app/index.html` w Microsoft Edge albo Google Chrome. Ekran graczy idzie na telewizor, a panel operatora (z odpowiedziami) zostaje na laptopie.
+Floor Duel działa **w przeglądarce, bez instalacji, bez serwera i bez internetu** — wystarczy dwuklik w `app/index.html` w Microsoft Edge albo Google Chrome. Ekran graczy idzie na telewizor, a panel operatora (z odpowiedziami) zostaje na laptopie. Możesz też [zagrać online](https://jaqb12.github.io/floor-duel/app/) — zob. [Szybki start](#szybki-start).
 
 🇬🇧 [English README](README.md)
 
@@ -37,6 +37,10 @@ Zrzuty pokazują przykładowe kategorie z `samples/` (zob. [źródła zdjęć](s
 - Opcjonalnie: telewizor albo drugi monitor.
 
 ## Szybki start
+
+**Graj online:** otwórz **https://jaqb12.github.io/floor-duel/app/** w Edge albo Chrome — bez instalacji. Zdjęcia nadal pochodzą z folderu na Twoim komputerze (przeglądarka czyta je lokalnie, nic nie jest wysyłane), więc potrzebujesz folderu z kategoriami: własnego albo przykładowego z pobranego repozytorium (krok 1 poniżej).
+
+**Albo uruchom offline:**
 
 1. Pobierz repozytorium (**Code → Download ZIP**) i rozpakuj.
 2. Kliknij dwukrotnie `app/index.html`.
