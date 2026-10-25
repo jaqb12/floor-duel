@@ -77,15 +77,15 @@ Categories\
 
 A folder with no photos but with subfolders is a level. Name level folders in English or Polish — **Easy / Łatwe, Normal / Normalne, Medium / Średnie, Hard / Trudne, Expert / Eksperckie** (only the start of the name counts, case doesn't matter). The panel orders them from easy to expert and shows them in the panel's language, whatever the folder is called. Other level names also work: they are shown as they are and go last. If the same category name appears in two levels, the panel adds the level folder in brackets, e.g. “Flags (Hard)”.
 
-**Starter categories** come with the app, already split into levels — 7 categories, about 250 photos:
+**Starter categories** come with the app, already split into levels — 5 categories, 256 photos, ready for a real game:
 
 | Level | `samples/categories-en` | `samples/categories-pl` |
 |---|---|---|
-| Easy | Colors, Fruits, Shapes | Kolory, Owoce, Kształty |
-| Normal | Flags of Europe (46), Road signs (73) | Flagi Europy, Znaki drogowe |
+| Easy | Fruits and vegetables (33), Flags of Europe (46) | Owoce i warzywa, Flagi Europy |
+| Normal | Road signs (73) | Znaki drogowe |
 | Hard | Flags of the world (60), Famous paintings (44) | Flagi świata, Słynne obrazy |
 
-The easy ones are tiny test categories; the others are ready for a real game. Everything in them is public domain or made for this project — see [`samples/CREDITS.md`](samples/CREDITS.md).
+Everything in them is public domain or made for this project — see [`samples/CREDITS.md`](samples/CREDITS.md).
 
 ## 2. Start
 
@@ -169,6 +169,7 @@ The shortcuts work in both windows (also if you accidentally click the players w
 - No build and no dependencies: classic `<script>` files sharing the `window.Floor` namespace, so everything works from `file://`.
 - Game logic (rules, clock, shuffling, file name parsing, ranking) is DOM-free in `app/js/logic.js`; translations live in `app/js/i18n.js`.
 - Tests: `node tests/run-node.js`, or open `tests/tests.html` in the browser.
+- `tests/fixtures/categories` — tiny categories for manual checks of file handling: Polish letters in names, the ` (2)` and `__2` suffixes, a skipped `.txt` file. Too small to play.
 - Specification: [`docs/SPEC.md`](docs/SPEC.md), plan and decision log: [`docs/PLAN.md`](docs/PLAN.md), browser spike results: [`docs/SPIKE.md`](docs/SPIKE.md). Polish versions: `*.pl.md`.
 
 **Adding a language:** copy the `en` block in `app/js/i18n.js`, translate the values, add the language to `LANGUAGE_NAMES` and run the tests (they check that all languages have the same keys and placeholders).

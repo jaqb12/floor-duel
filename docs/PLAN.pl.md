@@ -8,7 +8,7 @@ Pracuj fazami po kolei. Po każdej fazie: testy → odhaczone checkboxy → comm
 Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Edge i Chrome na Windows), zanim zbudujemy resztę.
 
 - [x] Struktura katalogów z `CLAUDE.md`, pusty `app/index.html` z kolejnością skryptów, `operator.css`, puste moduły JS na `window.Floor`.
-- [x] Przykładowe kategorie (dziś `samples/categories-pl` i `samples/categories-en`) — 3 kategorie po ~8 plików SVG (proste kształty/tekst, nazwy plików z polskimi znakami, jeden z `(2)`, jeden z `__2`, jeden plik `.txt` do pominięcia).
+- [x] Przykładowe kategorie (dziś `tests/fixtures/categories`) — 3 kategorie po ~8 plików SVG (proste kształty/tekst, nazwy plików z polskimi znakami, jeden z `(2)`, jeden z `__2`, jeden plik `.txt` do pominięcia).
 - [x] Strona spike (`app/spike.html`, usunąć po fazie) sprawdzająca i wypisująca na ekranie OK/FAIL:
   - [x] `showDirectoryPicker` dostępny i działa z `file://`,
   - [x] zapis/odczyt uchwytu folderu w IndexedDB i `requestPermission` po restarcie,
@@ -45,7 +45,7 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 - [x] Lista kategorii w panelu: nazwa, liczba zdjęć, ostrzeżenie < 30, info o pominiętych HEIC.
 - [x] Zarządzanie blob URL-ami (tworzenie na żądanie, zwalnianie przy zmianie folderu/kategorii).
 
-**Odbiór (ręcznie):** wskazanie przykładowych kategorii pokazuje 3 kategorie z poprawnymi liczbami; `.txt` pominięty; po restarcie przeglądarki „Wczytaj ostatni folder” działa.
+**Odbiór (ręcznie):** wskazanie `tests/fixtures/categories` pokazuje 3 kategorie z poprawnymi liczbami; `.txt` pominięty; po restarcie przeglądarki „Wczytaj ostatni folder” działa.
 
 ---
 
@@ -188,3 +188,5 @@ Cel: potwierdzić, że kluczowe API działają z dwukliku w `app/index.html` (Ed
 | 2026-10-25 | Kategorie startowe w `samples/`: Flagi Europy, Znaki drogowe, Flagi świata, Słynne obrazy (skopiowane z zestawu użytkownika, polskie i angielskie nazwy plików); `samples/CREDITS.pl.md` opisuje źródła i prawa | Tylko kategorie z treścią w domenie publicznej (symbole państwowe, urzędowe znaki, obrazy autorów zmarłych > 70 lat temu); kategorie ze zdjęciami wymagałyby podpisu każdego pliku, „Sławne osoby” także zgody na wizerunek |
 | 2026-10-25 | Te same obrazki dwa razy (`categories-en`, `categories-pl`, po ~17 MB) | Odpowiedź to nazwa pliku, więc każdy język potrzebuje własnej kopii; repozytorium pozostaje dość małe (~35 MB próbek) |
 | 2026-10-25 | Kształty przeniesione do łatwych; literówki w nazwach plików użytkownika poprawione w próbkach (`Polksa` → `Polska`, `finladnia` → `Finlandia`, `NIemcy` → `Niemcy`, nazwy krajów małą literą) | Poziom trudny ma teraz prawdziwe kategorie; odpowiedzi na ekranie powinny być poprawnie napisane |
+| 2026-10-25 | Pierwsze kategorie testowe (Kolory, Kształty, Owoce; po 8 różnych odpowiedzi) przeniesione z `samples/` do `tests/fixtures/categories` (tylko polskie nazwy) | Niegrywalne: pojedynek zużywa 30–40 zdjęć, więc powtarzają się 3–4 razy; Kolory są niejednoznaczne. Nadal przydatne do ręcznego sprawdzania polskich znaków, dopisków i pomijanych plików |
+| 2026-10-25 | Nowa kategoria startowa „Owoce i warzywa” (33 pliki SVG z emoji, ≥ 30, więc bez ostrzeżenia) zamiast Owoców; Flagi Europy przeniesione do łatwych | Użytkownik chciał zachować owoce; emoji nie potrzebują plików graficznych i wyświetlają się na Windowsie. Bez nich poziom łatwy byłby pusty |

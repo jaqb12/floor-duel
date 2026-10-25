@@ -77,15 +77,15 @@ Categories\
 
 Folder bez zdjęć, za to z podfolderami, to poziom. Foldery poziomów nazwij po polsku albo po angielsku — **Łatwe / Easy, Normalne / Normal, Średnie / Medium, Trudne / Hard, Eksperckie / Expert** (liczy się początek nazwy, wielkość liter bez znaczenia). Panel układa je od łatwych do eksperckich i pokazuje w języku panelu, niezależnie od nazwy folderu. Inne nazwy poziomów też działają: są pokazywane bez zmian i trafiają na koniec. Jeśli ta sama nazwa kategorii jest w dwóch poziomach, panel dopisze nazwę folderu poziomu w nawiasie, np. „Flagi (Trudne)”.
 
-**Kategorie startowe** są dołączone do aplikacji, już podzielone na poziomy — 7 kategorii, około 250 zdjęć:
+**Kategorie startowe** są dołączone do aplikacji, już podzielone na poziomy — 5 kategorii, 256 zdjęć, gotowe do prawdziwej gry:
 
 | Poziom | `samples/categories-pl` | `samples/categories-en` |
 |---|---|---|
-| Łatwe | Kolory, Owoce, Kształty | Colors, Fruits, Shapes |
-| Normalne | Flagi Europy (46), Znaki drogowe (73) | Flags of Europe, Road signs |
+| Łatwe | Owoce i warzywa (33), Flagi Europy (46) | Fruits and vegetables, Flags of Europe |
+| Normalne | Znaki drogowe (73) | Road signs |
 | Trudne | Flagi świata (60), Słynne obrazy (44) | Flags of the world, Famous paintings |
 
-Łatwe to małe kategorie testowe; pozostałe nadają się do prawdziwej gry. Wszystko w nich jest w domenie publicznej albo wykonane na potrzeby projektu — patrz [`samples/CREDITS.pl.md`](samples/CREDITS.pl.md).
+Wszystko w nich jest w domenie publicznej albo wykonane na potrzeby projektu — patrz [`samples/CREDITS.pl.md`](samples/CREDITS.pl.md).
 
 ## 2. Uruchom
 
@@ -169,6 +169,7 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 - Bez builda i bez zależności: klasyczne pliki `<script>` we wspólnej przestrzeni nazw `window.Floor`, dzięki czemu wszystko działa z `file://`.
 - Logika gry bez DOM w `app/js/logic.js`, tłumaczenia w `app/js/i18n.js`.
 - Testy: `node tests/run-node.js` albo `tests/tests.html` w przeglądarce.
+- `tests/fixtures/categories` — małe kategorie do ręcznego sprawdzania obsługi plików: polskie znaki w nazwach, dopiski ` (2)` i `__2`, pomijany plik `.txt`. Za małe do gry.
 - Specyfikacja: [`docs/SPEC.pl.md`](docs/SPEC.pl.md), plan i dziennik decyzji: [`docs/PLAN.pl.md`](docs/PLAN.pl.md), wyniki spike: [`docs/SPIKE.pl.md`](docs/SPIKE.pl.md). Wersje angielskie (wiodące): bez `.pl`.
 
 **Nowy język:** skopiuj blok `en` w `app/js/i18n.js`, przetłumacz wartości, dopisz język do `LANGUAGE_NAMES` i uruchom testy (sprawdzają, że wszystkie języki mają te same klucze i placeholdery).

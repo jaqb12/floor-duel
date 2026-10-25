@@ -8,7 +8,7 @@ Work through the phases in order. After each phase: tests → checked boxes → 
 Goal: confirm that the key APIs work when `app/index.html` is opened by double-click (Edge and Chrome on Windows) before building the rest.
 
 - [x] Directory structure from `CLAUDE.md`, an empty `app/index.html` with the script order, `operator.css`, empty JS modules on `window.Floor`.
-- [x] Sample categories — 3 categories with ~8 SVG files each (simple shapes/text, file names with Polish letters, one with `(2)`, one with `__2`, one `.txt` file to be skipped).
+- [x] Sample categories (now `tests/fixtures/categories`) — 3 categories with ~8 SVG files each (simple shapes/text, file names with Polish letters, one with `(2)`, one with `__2`, one `.txt` file to be skipped).
 - [x] Spike page (`app/spike.html`, removed after the phase) checking and printing OK/FAIL:
   - [x] `showDirectoryPicker` available and working from `file://`,
   - [x] saving/reading the folder handle in IndexedDB and `requestPermission` after a restart,
@@ -45,7 +45,7 @@ Goal: confirm that the key APIs work when `app/index.html` is opened by double-c
 - [x] Category list in the panel: name, photo count, warning < 30, info about skipped HEIC.
 - [x] Blob URL management (created on demand, released on a folder/category change).
 
-**Acceptance (manual):** choosing the sample categories shows 3 categories with correct counts; `.txt` skipped; after a browser restart “Load last folder” works.
+**Acceptance (manual):** choosing `tests/fixtures/categories` shows 3 categories with correct counts; `.txt` skipped; after a browser restart “Load last folder” works.
 
 ---
 
@@ -188,3 +188,5 @@ Goal: confirm that the key APIs work when `app/index.html` is opened by double-c
 | 2026-10-25 | Starter categories in `samples/`: Flags of Europe, Road signs, Flags of the world, Famous paintings (copied from the user's set, English and Polish file names); `samples/CREDITS.md` lists sources and rights | Only categories whose content is public domain (state symbols, official signs, paintings by authors dead > 70 years); photo categories would need per-file attribution, “Famous people” also image rights |
 | 2026-10-25 | The same images twice (`categories-en`, `categories-pl`, ~17 MB each) | The answer is the file name, so each language needs its own copy; the repository stays small enough (~35 MB of samples) |
 | 2026-10-25 | Shapes moved to the easy level; typos in the user's file names fixed in the samples (`Polksa` → `Polska`, `finladnia` → `Finlandia`, `NIemcy` → `Niemcy`, lowercase country names) | The hard level now has real categories; answers on screen should be spelled correctly |
+| 2026-10-25 | The first test categories (Colors, Shapes, Fruits; 8 different answers each) moved from `samples/` to `tests/fixtures/categories` (Polish names only) | Not playable: a duel uses 30–40 photos, so they repeat 3–4 times; Colors are ambiguous. Still useful for manual checks of Polish letters, suffixes and skipped files |
+| 2026-10-25 | New starter category “Fruits and vegetables” (33 emoji SVGs, ≥ 30 so no warning) instead of Fruits; Flags of Europe moved to the easy level | The user wanted to keep fruits; emoji need no image files and render on Windows. Without them the easy level would be empty |

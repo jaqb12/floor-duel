@@ -6,10 +6,8 @@ The sample categories exist in two copies with the same images: `categories-en` 
 
 | Level | Category (EN / PL) | Photos | Source and status |
 |---|---|---|---|
-| Easy | Colors / Kolory | 9 | Made for this project (plain SVG color fills). |
-| Easy | Fruits / Owoce | 8 | Made for this project (SVG files that display an emoji character with the system font). |
-| Easy | Shapes / Kształty | 9 | Made for this project (SVG shapes). Includes a `.txt` file that the app should skip. |
-| Normal | Flags of Europe / Flagi Europy | 46 | National flags — state symbols, not protected by copyright. Image files from Wikimedia Commons (public domain), resized. |
+| Easy | Fruits and vegetables / Owoce i warzywa | 33 | Made for this project: each SVG file only contains an emoji character, drawn by the system's emoji font (on Windows: Segoe UI Emoji). No font or glyph data is included. Both apples are “Apple” (`Apple__2`). |
+| Easy | Flags of Europe / Flagi Europy | 46 | National flags — state symbols, not protected by copyright. Image files from Wikimedia Commons (public domain), resized. |
 | Normal | Road signs / Znaki drogowe | 73 | Polish road signs as defined in the regulation on road signs and signals (*Rozporządzenie w sprawie znaków i sygnałów drogowych*, 2002) — official symbols from a legal act, not protected by copyright (Polish Copyright Act, art. 4). Image files from Wikimedia Commons (public domain), resized. |
 | Hard | Flags of the world / Flagi świata | 60 | As *Flags of Europe*. |
 | Hard | Famous paintings / Słynne obrazy | 44 | Works whose authors died more than 70 years ago (public domain). Faithful reproductions of public-domain visual art are not protected either (EU Directive 2019/790, art. 14). Image files from Wikimedia Commons, resized. |

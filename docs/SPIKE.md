@@ -2,7 +2,7 @@
 
 Polish translation: [`SPIKE.pl.md`](SPIKE.pl.md).
 
-Test page: `app/spike.html` — removed in phase 6, available in git history (`git show 0dca6ad:app/spike.html`). Samples: the sample categories (Colors 9, Shapes 9 + a `.txt` note, Fruits 8; at the time in `samples/Kategorie`).
+Test page: `app/spike.html` — removed in phase 6, available in git history (`git show 0dca6ad:app/spike.html`). Samples: the sample categories (Colors 9, Shapes 9 + a `.txt` note, Fruits 8; at the time in `samples/Kategorie`, now in `tests/fixtures/categories`).
 
 ## Results
 

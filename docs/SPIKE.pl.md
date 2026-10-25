@@ -2,7 +2,7 @@
 
 Wersja angielska: [`SPIKE.md`](SPIKE.md).
 
-Strona testowa: `app/spike.html` — usunięta w fazie 6, dostępna w historii git (`git show 0dca6ad:app/spike.html`). Próbki: przykładowe kategorie (Kolory 9, Kształty 9 + `notatka.txt`, Owoce 8; wtedy w `samples/Kategorie`, dziś `samples/categories-pl`).
+Strona testowa: `app/spike.html` — usunięta w fazie 6, dostępna w historii git (`git show 0dca6ad:app/spike.html`). Próbki: przykładowe kategorie (Kolory 9, Kształty 9 + `notatka.txt`, Owoce 8; wtedy w `samples/Kategorie`, dziś `tests/fixtures/categories`).
 
 ## Wyniki
 

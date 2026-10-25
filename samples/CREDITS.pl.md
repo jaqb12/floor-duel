@@ -6,10 +6,8 @@ Przykładowe kategorie są w dwóch kopiach z tymi samymi obrazkami: `categories
 
 | Poziom | Kategoria (PL / EN) | Zdjęcia | Źródło i status |
 |---|---|---|---|
-| Łatwe | Kolory / Colors | 9 | Wykonane na potrzeby projektu (proste wypełnienia kolorem w SVG). |
-| Łatwe | Owoce / Fruits | 8 | Wykonane na potrzeby projektu (pliki SVG wyświetlające emoji czcionką systemową). |
-| Łatwe | Kształty / Shapes | 9 | Wykonane na potrzeby projektu (kształty SVG). Zawiera plik `.txt`, który aplikacja ma pominąć. |
-| Normalne | Flagi Europy / Flags of Europe | 46 | Flagi państwowe — symbole państwowe, niechronione prawem autorskim. Pliki z Wikimedia Commons (domena publiczna), zmniejszone. |
+| Łatwe | Owoce i warzywa / Fruits and vegetables | 33 | Wykonane na potrzeby projektu: każdy plik SVG zawiera tylko znak emoji, rysowany systemową czcionką emoji (na Windowsie: Segoe UI Emoji). Pliki nie zawierają czcionki ani grafik znaków. Oba jabłka to „Jabłko” (`Jabłko__2`). |
+| Łatwe | Flagi Europy / Flags of Europe | 46 | Flagi państwowe — symbole państwowe, niechronione prawem autorskim. Pliki z Wikimedia Commons (domena publiczna), zmniejszone. |
 | Normalne | Znaki drogowe / Road signs | 73 | Polskie znaki drogowe według rozporządzenia w sprawie znaków i sygnałów drogowych (2002) — urzędowe symbole z aktu prawnego, niechronione prawem autorskim (art. 4 ustawy o prawie autorskim). Pliki z Wikimedia Commons (domena publiczna), zmniejszone. |
 | Trudne | Flagi świata / Flags of the world | 60 | Jak *Flagi Europy*. |
 | Trudne | Słynne obrazy / Famous paintings | 44 | Dzieła, których autorzy zmarli ponad 70 lat temu (domena publiczna). Wierne reprodukcje dzieł sztuki z domeny publicznej też nie są chronione (dyrektywa UE 2019/790, art. 14). Pliki z Wikimedia Commons, zmniejszone. |

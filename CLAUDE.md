@@ -40,6 +40,7 @@ tests/
   tests.html              # runs the logic tests in the browser
   logic.test.js           # tests (mini runner without libraries)
   run-node.js             # `node tests/run-node.js`
+  fixtures/categories/    # tiny categories for manual file-handling checks (Polish letters, suffixes, skipped .txt)
 samples/
   categories-en/          # starter categories with English names (Easy/Normal/Hard) — committed
   categories-pl/          # the same images with Polish names
