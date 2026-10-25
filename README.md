@@ -9,6 +9,18 @@ Floor Duel runs **in the browser, with no installation, no server and no interne
 
 > Floor Duel is a fan-made home game inspired by TV photo-quiz game shows such as *The Floor*. It is not affiliated with, endorsed by or connected to the show or its owners. All trademarks belong to their respective owners.
 
+![Players screen during a duel: a flag photo, the category name and both players' clocks](docs/screenshots/players-duel-en.png)
+
+## Screenshots
+
+| Host panel (laptop) | Pass — the answer is revealed |
+| --- | --- |
+| ![Host panel with players, the current photo, its answer, both clocks and the category list](docs/screenshots/host-panel-en.png) | ![Players screen after a pass: the answer is shown over the photo](docs/screenshots/players-pass-en.png) |
+| **Ranking on the TV between duels** | |
+| ![Players screen between duels: the Floor Duel logo and the player ranking](docs/screenshots/ranking-en.png) | |
+
+Screenshots use the sample categories from `samples/` (see [credits](samples/CREDITS.md)).
+
 ## Features
 
 - **Two windows:** a host panel with the correct answers and a full-screen players screen for the TV — or a single-screen mode with the answer hidden.

@@ -26,6 +26,7 @@ docs/
   SPIKE.md                # phase 0 results
   KICKOFF.md              # historical first prompts
   *.pl.md                 # Polish translations of the above
+  screenshots/            # README screenshots (en, pl), made with the sample categories
 app/
   index.html              # operator panel + <style id="display-css"> for the players window
   css/operator.css

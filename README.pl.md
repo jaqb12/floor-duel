@@ -9,6 +9,18 @@ Floor Duel działa **w przeglądarce, bez instalacji, bez serwera i bez internet
 
 > Floor Duel to amatorska gra domowa inspirowana teleturniejami ze zdjęciami, takimi jak *The Floor*. Nie jest związana z tym programem ani jego właścicielami, nie jest przez nich wspierana ani autoryzowana. Wszystkie znaki towarowe należą do ich właścicieli.
 
+![Ekran graczy w trakcie pojedynku: zdjęcie flagi, nazwa kategorii i zegary obu graczy](docs/screenshots/players-duel-pl.png)
+
+## Zrzuty ekranu
+
+| Panel operatora (laptop) | Pas — odpowiedź zostaje pokazana |
+| --- | --- |
+| ![Panel operatora z graczami, bieżącym zdjęciem, odpowiedzią, zegarami i listą kategorii](docs/screenshots/host-panel-pl.png) | ![Ekran graczy po pasie: odpowiedź wyświetlona na zdjęciu](docs/screenshots/players-pass-pl.png) |
+| **Ranking na TV między pojedynkami** | |
+| ![Ekran graczy między pojedynkami: logo Floor Duel i ranking graczy](docs/screenshots/ranking-pl.png) | |
+
+Zrzuty pokazują przykładowe kategorie z `samples/` (zob. [źródła zdjęć](samples/CREDITS.pl.md)).
+
 ## Funkcje
 
 - **Dwa okna:** panel operatora z poprawnymi odpowiedziami i pełnoekranowy ekran graczy na TV — albo tryb jednego ekranu z ukrytą odpowiedzią.
