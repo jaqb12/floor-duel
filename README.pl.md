@@ -1,15 +1,35 @@
 # Floor Duel
 
-**Gra na domową imprezę: dwóch graczy, jedna kategoria zdjęć, każdy ma swój zegar szachowy.**
+**Gra na domową imprezę, inspirowana teleturniejem *The Floor*: dwóch graczy, jedna kategoria zdjęć, każdy ma swój zegar szachowy.**
 Gracze rozpoznają zdjęcia, operator zatwierdza odpowiedzi klawiaturą, a kto pierwszy straci cały czas — przegrywa pojedynek.
 
-Działa **bez instalacji, bez serwera i bez internetu** — w Microsoft Edge albo Google Chrome na Windows 10/11. Interfejs po polsku i po angielsku.
+Floor Duel działa **w przeglądarce, bez instalacji, bez serwera i bez internetu** — wystarczy dwuklik w `app/index.html` w Microsoft Edge albo Google Chrome. Ekran graczy idzie na telewizor, a panel operatora (z odpowiedziami) zostaje na laptopie.
 
 🇬🇧 [English README](README.md)
 
 > Floor Duel to amatorska gra domowa inspirowana teleturniejami ze zdjęciami, takimi jak *The Floor*. Nie jest związana z tym programem ani jego właścicielami, nie jest przez nich wspierana ani autoryzowana. Wszystkie znaki towarowe należą do ich właścicieli.
 
----
+## Funkcje
+
+- **Dwa okna:** panel operatora z poprawnymi odpowiedziami i pełnoekranowy ekran graczy na TV — albo tryb jednego ekranu z ukrytą odpowiedzią.
+- **Zegar szachowy** dla każdego gracza (domyślnie 45 s), pas kosztuje 3 s i na chwilę pokazuje odpowiedź.
+- **Własne zdjęcia:** każdy folder to kategoria, każda nazwa pliku to odpowiedź. Opcjonalnie poziomy trudności jako foldery.
+- **Gracze i wyniki** zapisane w przeglądarce, ranking na TV między pojedynkami.
+- **Syntezowany dźwięk** (Web Audio, bez plików dźwiękowych): odliczanie 3-2-1, muzyka napięcia w ostatnich 12 s, tykanie, buzzer, brawa, fanfara, werble i inne.
+- **Interfejs po polsku i po angielsku** — według języka przeglądarki, do zmiany na górnym pasku.
+- Czysty HTML + CSS + JavaScript: bez builda, bez zależności, działa offline z `file://`.
+
+## Wymagania
+
+- Windows 10/11 z aktualnym **Microsoft Edge** albo **Google Chrome** (inne przeglądarki Chromium i systemy: bez gwarancji).
+- Opcjonalnie: telewizor albo drugi monitor.
+
+## Szybki start
+
+1. Pobierz repozytorium (**Code → Download ZIP**) i rozpakuj.
+2. Kliknij dwukrotnie `app/index.html`.
+3. Kliknij **Wybierz folder…** i wskaż `samples/categories-pl`, żeby wypróbować.
+4. Dodaj dwóch graczy, wybierz ich i kategorię w kolumnie **Pojedynek** i naciśnij **START** (albo Enter).
 
 ## 1. Przygotuj zdjęcia
 
@@ -136,8 +156,6 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 
 **Gdzie są zapisane wyniki?** W pamięci przeglądarki (localStorage) — osobno dla Edge i Chrome. Wyczyszczenie danych przeglądarki je usunie.
 
----
-
 ## Dla programistów
 
 - Bez builda i bez zależności: klasyczne pliki `<script>` we wspólnej przestrzeni nazw `window.Floor`, dzięki czemu wszystko działa z `file://`.
@@ -146,3 +164,5 @@ Skróty działają w obu oknach (także gdy przypadkiem klikniesz w okno graczy)
 - Specyfikacja: [`docs/SPEC.pl.md`](docs/SPEC.pl.md), plan i dziennik decyzji: [`docs/PLAN.pl.md`](docs/PLAN.pl.md), wyniki spike: [`docs/SPIKE.pl.md`](docs/SPIKE.pl.md). Wersje angielskie (wiodące): bez `.pl`.
 
 **Nowy język:** skopiuj blok `en` w `app/js/i18n.js`, przetłumacz wartości, dopisz język do `LANGUAGE_NAMES` i uruchom testy (sprawdzają, że wszystkie języki mają te same klucze i placeholdery).
+
+**Nowy tłumaczony poziom trudności:** dopisz go do `LEVELS` w `app/js/logic.js` (id, początki nazw w każdym języku, miejsce w kolejności) i etykietę `levels.<id>` w każdym języku w `app/js/i18n.js`. Bez tego nowy folder poziomu też działa, ale jego nazwa jest pokazywana bez zmian.

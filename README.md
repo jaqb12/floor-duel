@@ -1,6 +1,6 @@
 # Floor Duel
 
-**A party game for the living room: two players, one photo category, a chess clock each.**
+**A party game for the living room, inspired by the TV show *The Floor*: two players, one photo category, a chess clock each.**
 Players name what they see in the photos, the host judges the answers with the keyboard, and whoever runs out of time first loses the duel.
 
 Floor Duel runs **in the browser, with no installation, no server and no internet** — just double-click `app/index.html` in Microsoft Edge or Google Chrome. Put the players screen on the TV and keep the host panel (with the answers) on your laptop.
@@ -29,7 +29,7 @@ Floor Duel runs **in the browser, with no installation, no server and no interne
 1. Download the repository (**Code → Download ZIP**) and unzip it.
 2. Double-click `app/index.html`.
 3. Click **Choose folder…** and pick `samples/categories-en` to try it out.
-4. Add two players, choose them in the **Duel** column and press **START** (or Enter).
+4. Add two players, choose them and a category in the **Duel** column and press **START** (or Enter).
 
 ## 1. Prepare the photos
 
@@ -164,3 +164,5 @@ The shortcuts work in both windows (also if you accidentally click the players w
 - Specification: [`docs/SPEC.md`](docs/SPEC.md), plan and decision log: [`docs/PLAN.md`](docs/PLAN.md), browser spike results: [`docs/SPIKE.md`](docs/SPIKE.md). Polish versions: `*.pl.md`.
 
 **Adding a language:** copy the `en` block in `app/js/i18n.js`, translate the values, add the language to `LANGUAGE_NAMES` and run the tests (they check that all languages have the same keys and placeholders).
+
+**Adding a translated difficulty level:** add it to `LEVELS` in `app/js/logic.js` (id, name stems in every language, position in the order) and a `levels.<id>` label to every language in `app/js/i18n.js`. Without that, a new level folder still works, but its name is shown as it is.
