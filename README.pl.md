@@ -77,7 +77,15 @@ Categories\
 
 Folder bez zdjęć, za to z podfolderami, to poziom. Foldery poziomów nazwij po polsku albo po angielsku — **Łatwe / Easy, Normalne / Normal, Średnie / Medium, Trudne / Hard, Eksperckie / Expert** (liczy się początek nazwy, wielkość liter bez znaczenia). Panel układa je od łatwych do eksperckich i pokazuje w języku panelu, niezależnie od nazwy folderu. Inne nazwy poziomów też działają: są pokazywane bez zmian i trafiają na koniec. Jeśli ta sama nazwa kategorii jest w dwóch poziomach, panel dopisze nazwę folderu poziomu w nawiasie, np. „Flagi (Trudne)”.
 
-Do wypróbowania aplikacji są gotowe przykładowe kategorie, już podzielone na poziomy: `samples\categories-pl` (`Łatwe\Kolory`, `Łatwe\Owoce`, `Trudne\Kształty`) i `samples\categories-en` (to samo z angielskimi nazwami).
+**Kategorie startowe** są dołączone do aplikacji, już podzielone na poziomy — 7 kategorii, około 250 zdjęć:
+
+| Poziom | `samples/categories-pl` | `samples/categories-en` |
+|---|---|---|
+| Łatwe | Kolory, Owoce, Kształty | Colors, Fruits, Shapes |
+| Normalne | Flagi Europy (46), Znaki drogowe (73) | Flags of Europe, Road signs |
+| Trudne | Flagi świata (60), Słynne obrazy (44) | Flags of the world, Famous paintings |
+
+Łatwe to małe kategorie testowe; pozostałe nadają się do prawdziwej gry. Wszystko w nich jest w domenie publicznej albo wykonane na potrzeby projektu — patrz [`samples/CREDITS.pl.md`](samples/CREDITS.pl.md).
 
 ## 2. Uruchom
 

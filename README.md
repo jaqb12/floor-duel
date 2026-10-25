@@ -77,7 +77,15 @@ Categories\
 
 A folder with no photos but with subfolders is a level. Name level folders in English or Polish — **Easy / Łatwe, Normal / Normalne, Medium / Średnie, Hard / Trudne, Expert / Eksperckie** (only the start of the name counts, case doesn't matter). The panel orders them from easy to expert and shows them in the panel's language, whatever the folder is called. Other level names also work: they are shown as they are and go last. If the same category name appears in two levels, the panel adds the level folder in brackets, e.g. “Flags (Hard)”.
 
-Sample categories for trying the app, already split into levels: `samples/categories-en` (`Easy\Colors`, `Easy\Fruits`, `Hard\Shapes`) and `samples/categories-pl` (the same with Polish names).
+**Starter categories** come with the app, already split into levels — 7 categories, about 250 photos:
+
+| Level | `samples/categories-en` | `samples/categories-pl` |
+|---|---|---|
+| Easy | Colors, Fruits, Shapes | Kolory, Owoce, Kształty |
+| Normal | Flags of Europe (46), Road signs (73) | Flagi Europy, Znaki drogowe |
+| Hard | Flags of the world (60), Famous paintings (44) | Flagi świata, Słynne obrazy |
+
+The easy ones are tiny test categories; the others are ready for a real game. Everything in them is public domain or made for this project — see [`samples/CREDITS.md`](samples/CREDITS.md).
 
 ## 2. Start
 

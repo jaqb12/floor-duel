@@ -41,8 +41,9 @@ tests/
   logic.test.js           # tests (mini runner without libraries)
   run-node.js             # `node tests/run-node.js`
 samples/
-  categories-en/          # small test categories with English names (SVG) — committed
-  categories-pl/          # the same with Polish names
+  categories-en/          # starter categories with English names (Easy/Normal/Hard) — committed
+  categories-pl/          # the same images with Polish names
+  CREDITS.md / .pl.md     # sources and rights; add only public-domain or own content here
 ```
 The user's real photos live outside the repo or in `Categories/` (ignored by git, as are `categories/` and the old `Kategorie/`). The user's set uses Polish level folders (`Łatwe`, `Normalne`, `Trudne`, `Eksperckie`).
 
